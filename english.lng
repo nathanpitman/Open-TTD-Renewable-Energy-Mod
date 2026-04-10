@@ -1,0 +1,118 @@
+##grflangid 0x01
+
+STR_GRF_NAME                    :Energy Transition Industries
+STR_GRF_DESC                    :Full energy economy for OpenTTD. Workers power the generators, generators power the towns. Coal phases out as renewables rise. All dates and placement rules are configurable.
+
+STR_CARGO_POWER_UNIT            :MWh
+STR_CARGO_POWER_ITEM            :power
+STR_CARGO_URAN_UNIT             :tonnes
+STR_CARGO_URAN_ITEM             :uranium
+
+STR_IND_URANIUM_MINE            :Uranium Mine
+STR_IND_NUCLEAR_PLANT           :Nuclear Power Plant
+STR_IND_HYDRO_DAM               :Hydroelectric Dam
+STR_IND_TIDAL_STATION           :Tidal Power Station
+STR_IND_WIND_FARM               :Wind Farm
+STR_IND_SOLAR_FARM              :Solar Farm
+STR_IND_SUBSTATION              :Electrical Substation
+STR_IND_COAL_PLANT              :Coal Power Station
+
+STR_STAT_URANIUM_MINE           :{STRING} Uranium Mine
+STR_STAT_NUCLEAR_PLANT          :{STRING} Nuclear Plant
+STR_STAT_HYDRO_DAM              :{STRING} Hydro Dam
+STR_STAT_TIDAL_STATION          :{STRING} Tidal Station
+STR_STAT_WIND_FARM              :{STRING} Wind Farm
+STR_STAT_SOLAR_FARM             :{STRING} Solar Farm
+STR_STAT_SUBSTATION             :{STRING} Substation
+STR_STAT_COAL_PLANT             :{STRING} Power Station
+
+STR_NEWS_URANIUM_NEW            :A Uranium Mine has opened!
+STR_NEWS_URANIUM_UP             :Uranium Mine production up
+STR_NEWS_URANIUM_DOWN           :Uranium Mine production down
+STR_NEWS_URANIUM_CLOSE          :Uranium Mine has closed
+
+STR_NEWS_NUCLEAR_NEW            :A Nuclear Power Plant has been commissioned!
+STR_NEWS_NUCLEAR_UP             :Nuclear Power Plant output up
+STR_NEWS_NUCLEAR_DOWN           :Nuclear Power Plant output down
+STR_NEWS_NUCLEAR_CLOSE          :Nuclear Power Plant decommissioned
+
+STR_NEWS_HYDRO_NEW              :A Hydroelectric Dam has been constructed!
+STR_NEWS_HYDRO_UP               :Hydro Dam output increasing
+STR_NEWS_HYDRO_DOWN             :Hydro Dam output decreasing
+STR_NEWS_HYDRO_CLOSE            :Hydroelectric Dam decommissioned
+
+STR_NEWS_TIDAL_NEW              :A Tidal Power Station has been built!
+STR_NEWS_TIDAL_UP               :Tidal Station output up
+STR_NEWS_TIDAL_DOWN             :Tidal Station output down
+STR_NEWS_TIDAL_CLOSE            :Tidal Power Station closed
+
+STR_NEWS_WIND_NEW               :A Wind Farm has been constructed!
+STR_NEWS_WIND_UP                :Wind Farm output increasing
+STR_NEWS_WIND_DOWN              :Wind Farm output decreasing
+STR_NEWS_WIND_CLOSE             :Wind Farm decommissioned
+
+STR_NEWS_SOLAR_NEW              :A Solar Farm has been established!
+STR_NEWS_SOLAR_UP               :Solar Farm output increasing
+STR_NEWS_SOLAR_DOWN             :Solar Farm output decreasing
+STR_NEWS_SOLAR_CLOSE            :Solar Farm has shut down
+
+STR_NEWS_SUBSTATION_NEW         :An Electrical Substation has been built!
+STR_NEWS_SUBSTATION_UP          :Substation demand increasing
+STR_NEWS_SUBSTATION_DOWN        :Substation demand decreasing
+STR_NEWS_SUBSTATION_CLOSE       :Electrical Substation closed
+
+STR_NEWS_COAL_NEW               :A Coal Power Station has been built!
+STR_NEWS_COAL_UP                :Coal Power Station output increasing
+STR_NEWS_COAL_DOWN              :Coal Power Station is declining
+STR_NEWS_COAL_CLOSE             :Coal Power Station has been decommissioned
+
+STR_PARAM_HYDRO_YEAR_NAME       :Hydro Dam: available from year
+STR_PARAM_HYDRO_YEAR_DESC       :Earliest year hydroelectric dams can appear on the map (default: 1950)
+
+STR_PARAM_NUCLEAR_YEAR_NAME     :Nuclear Plant: available from year
+STR_PARAM_NUCLEAR_YEAR_DESC     :Earliest year nuclear power plants can be built (default: 1956, Calder Hall UK)
+
+STR_PARAM_TIDAL_YEAR_NAME       :Tidal Station: available from year
+STR_PARAM_TIDAL_YEAR_DESC       :Earliest year tidal power stations can appear (default: 1966, La Rance France)
+
+STR_PARAM_WIND_YEAR_NAME        :Wind Farm: available from year
+STR_PARAM_WIND_YEAR_DESC        :Earliest year wind farms can be built (default: 1980)
+
+STR_PARAM_SOLAR_YEAR_NAME       :Solar Farm: available from year
+STR_PARAM_SOLAR_YEAR_DESC       :Earliest year solar farms can appear (default: 1990)
+
+STR_PARAM_COAL_STOP_NAME        :Coal: last year for new plants
+STR_PARAM_COAL_STOP_DESC        :After this year, no new coal power stations are built randomly (default: 1970)
+
+STR_PARAM_COAL_CLOSE_NAME       :Coal: phaseout start year
+STR_PARAM_COAL_CLOSE_DESC       :From this year, existing coal plants begin closing stochastically. Accelerates 20 years later. (default: 1990)
+
+STR_PARAM_HYDRO_DIST_NAME       :Hydro Dam: max water distance
+STR_PARAM_HYDRO_DIST_DESC       :How many tiles from water a hydroelectric dam may be placed. Lower = must be closer to rivers/lakes. (default: 5)
+
+STR_PARAM_WIND_HEIGHT_NAME      :Wind Farm: minimum terrain height
+STR_PARAM_WIND_HEIGHT_DESC      :Minimum ground height for wind farm placement. 0 = anywhere, 4 = hills only, 8 = mountaintops only. (default: 4)
+
+STR_PARAM_SUBSTATION_PROB_NAME  :Substation: spawn rate
+STR_PARAM_SUBSTATION_PROB_DESC  :How frequently electrical substations appear near towns. 1 = rare, 10 = very common. (default: 5)
+
+STR_PARAM_WORKERS_NAME          :Workers required for generators
+STR_PARAM_WORKERS_DESC          :When enabled, energy generators need regular passenger deliveries to maintain full output. Disable for a simpler game. (default: on)
+
+STR_PARAM_PROB_HYDRO_NAME       :Hydro Dam: spawn rate
+STR_PARAM_PROB_HYDRO_DESC       :How frequently hydroelectric dams appear. 0=never, 1=rare, 8=very common. (default: 1)
+
+STR_PARAM_PROB_TIDAL_NAME       :Tidal Station: spawn rate
+STR_PARAM_PROB_TIDAL_DESC       :How frequently tidal power stations appear. 0=never, 1=rare, 8=very common. (default: 2)
+
+STR_PARAM_PROB_WIND_NAME        :Wind Farm: spawn rate
+STR_PARAM_PROB_WIND_DESC        :How frequently wind farms appear. 0=never, 1=rare, 8=very common. (default: 3)
+
+STR_PARAM_PROB_SOLAR_NAME       :Solar Farm: spawn rate
+STR_PARAM_PROB_SOLAR_DESC       :How frequently solar farms appear. 0=never, 1=rare, 8=very common. (default: 2)
+
+STR_PARAM_PROB_NUCLEAR_NAME     :Nuclear Plant: spawn rate
+STR_PARAM_PROB_NUCLEAR_DESC     :How frequently nuclear power plants appear. 0=never, 1=rare, 4=uncommon. (default: 1)
+
+STR_PARAM_PROB_URANIUM_NAME     :Uranium Mine: spawn rate
+STR_PARAM_PROB_URANIUM_DESC     :How frequently uranium mines appear. Must have mines for nuclear plants to function. (default: 2)

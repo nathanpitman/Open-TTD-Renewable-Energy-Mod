@@ -1,0 +1,59 @@
+ENERGY TRANSITION — INSTALLATION
+=================================
+
+STEP 1: NewGRF (the industries)
+--------------------------------
+Copy  energy_transition.grf  into your OpenTTD newgrf folder:
+
+  Windows:  Documents\OpenTTD\newgrf\
+  Mac:      ~/Documents/OpenTTD/newgrf/
+  Linux:    ~/.local/share/openttd/newgrf/
+
+Then enable it: Main Menu > NewGRF Settings > Add > find "Energy Transition"
+
+
+STEP 2: Game Script (the power grid)
+--------------------------------------
+You have two options — use whichever works for you:
+
+OPTION A — Folder (most reliable):
+  Copy the folder  energy_transition_gs/  into your OpenTTD game folder:
+
+  Windows:  Documents\OpenTTD\game\energy_transition_gs\
+  Mac:      ~/Documents/OpenTTD/game/energy_transition_gs\
+  Linux:    ~/.local/share/openttd/game/energy_transition_gs/
+
+  The folder must contain info.nut and main.nut directly inside it.
+
+OPTION B — Tar file:
+  Copy  energy_transition_gs.tar  into your OpenTTD game folder:
+
+  Windows:  Documents\OpenTTD\game\
+  Mac:      ~/Documents/OpenTTD/game/
+  Linux:    ~/.local/share/openttd/game/
+
+Then enable it: Main Menu > AI/Game Script Settings > Game Script > select
+"Energy Transition Power Grid" from the list.
+
+DO NOT put files in content_download/ — that folder is managed by OpenTTD.
+
+
+STEP 3: Start a new game
+--------------------------
+Both the NewGRF and Game Script must be active before generating a new map.
+They will NOT work correctly if added mid-game.
+
+
+TROUBLESHOOTING
+---------------
+Script not appearing in the list?
+  - Make sure the game/ folder exists (create it if needed)
+  - Restart OpenTTD completely after copying files
+  - The folder must contain info.nut directly, not in a sub-subfolder
+  - Check: game/energy_transition_gs/info.nut  (correct)
+           game/energy_transition_gs/energy_transition_gs/info.nut  (wrong)
+
+Script crashes on start?
+  - Open the AI/GS Debug window (question mark toolbar icon)
+  - Ensure the Energy Transition NewGRF is also active
+  - Make sure you started a NEW game, not loaded an old save

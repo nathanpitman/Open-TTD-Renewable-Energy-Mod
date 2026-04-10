@@ -1,0 +1,110 @@
+# Energy Transition Industries — OpenTTD Mod
+
+Two components work together:
+- `energy_transition.grf` — NewGRF adding 7 new industries and 2 custom cargos
+- `energy_transition_gs/` (or `.tar`) — Game Script simulating an invisible power grid
+
+---
+
+## Installation
+
+### NewGRF
+Copy `energy_transition.grf` to your OpenTTD `newgrf/` folder:
+- **Windows**: `Documents\OpenTTD\newgrf\`
+- **Mac**: `~/Documents/OpenTTD/newgrf/`
+- **Linux**: `~/.local/share/openttd/newgrf/`
+
+Enable in: **Main Menu → NewGRF Settings → Add**
+
+### Game Script — choose one option
+
+**Option A (recommended): folder**
+Copy the `energy_transition_gs/` folder into your OpenTTD `game/` folder so the path is:
+`game/energy_transition_gs/info.nut`
+
+**Option B: tar file**
+Copy `energy_transition_gs.tar` into your OpenTTD `game/` folder.
+
+`game/` locations:
+- **Windows**: `Documents\OpenTTD\game\`
+- **Mac**: `~/Documents/OpenTTD/game\`
+- **Linux**: `~/.local/share/openttd/game/`
+
+Enable in: **Main Menu → AI/Game Script Settings → Game Script → select "Energy Transition Power Grid"**
+
+> ⚠️ Do NOT place files in `content_download/` — that folder is managed by OpenTTD.
+> Both the NewGRF and Game Script must be active **before starting a new game**.
+
+---
+
+## How it works
+
+### Cargo chain
+```
+Towns → Passengers (workers) → Energy Generators → [invisible grid] → Town growth
+                                                  → Electrical Substation → (amplifies growth)
+Uranium Mine → Uranium → Nuclear Power Plant → [invisible grid] → Town growth
+```
+
+### Invisible power grid (Game Script)
+Every 30 days the script scans every town and finds all energy generators within `generator_radius` tiles. It sums their POWR production and sets the town's growth rate directly — no cargo transport needed.
+
+| Power situation | Growth rate |
+|---|---|
+| No nearby power | Growth halted (configurable) |
+| Low power | Very slow — 150 days/growth |
+| Medium power | Moderate — 60 days/growth |
+| Full power, no substation | Good — 30 days/growth |
+| Full power + nearby substation | Fast — 12 days/growth |
+
+### Worker mechanic
+All generators accept Passengers (workers). Without regular worker deliveries, production slowly declines. Generators start at minimum output and ramp up as workers arrive.
+
+### Energy timeline (all dates configurable)
+| Industry | Default era | Placement rule |
+|---|---|---|
+| Hydroelectric Dam | 1950 | Within water distance parameter of water |
+| Uranium Mine | 1953 | Remote |
+| Nuclear Power Plant | 1956 | Requires Uranium delivery |
+| Tidal Power Station | 1966 | Coast only |
+| Wind Farm | 1980 | High ground only |
+| Solar Farm | 1990 | Flat land only |
+| Electrical Substation | 1950 | Near towns, amplifies growth |
+
+### Coal phaseout
+The vanilla Coal Power Station is overridden to also require workers. No new coal plants spawn after `param_coal_stop_year` (default 1970). Existing plants begin closing stochastically after `param_coal_close_year` (default 1990), accelerating 20 years later.
+
+---
+
+## NewGRF Parameters
+Configure in **NewGRF Settings → select mod → Parameters** before starting a game.
+
+**Era dates:** Hydro (1930–1960), Nuclear (1950–1975), Tidal (1960–1985), Wind (1970–1995), Solar (1980–2005), Coal stop (1960–1990), Coal close (1980–2020)
+
+**Placement:** Hydro water distance (2–15), Wind min height (0–8), Substation spawn rate (1–10)
+
+**Spawn rates:** Individual sliders for each generator type (0 = disabled)
+
+**Gameplay:** Workers required toggle (on/off)
+
+## Game Script Parameters
+Configure in **AI/Game Script Settings → select script → Configure**.
+
+| Setting | Default | Description |
+|---|---|---|
+| Generator radius | 30 tiles | How far a generator powers nearby towns |
+| Substation radius | 15 tiles | How far a substation amplifies growth |
+| Min power threshold | 6 | POWR units/month needed for any growth |
+| Full power threshold | 25 | POWR units/month for maximum growth |
+| No power blocks growth | On | Towns with zero power cannot grow |
+| Update interval | 30 days | How often the grid recalculates |
+
+---
+
+## Rebuilding from source
+```bash
+pip install nml pillow
+nmlc --grf=energy_transition.grf energy_transition.nml
+```
+
+Sprites are in `sprites/` as 8bpp PNG files using the OpenTTD DOS palette.
