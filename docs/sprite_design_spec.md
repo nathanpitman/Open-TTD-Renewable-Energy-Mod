@@ -49,7 +49,7 @@ Review every sprite at 1x zoom, and check it at 2x zoom too, where it should loo
 - 8bpp, OpenTTD DOS palette, taken verbatim from `nml`. Index 0 is transparent.
 - Don't use palette-animated indices (227–254), except the sea-water cycle (245–249) on water surfaces. The sprite then needs the `ANIM` flag, which the generator sets.
 - Don't use index 255 (pure white). Use 15 (almost white) instead. PalettesAndCoordinates reserves pure white for the background of a sprite sheet, and `nmlc` warns when a sprite contains it. The `WHITE` ramp stops at 15.
-- Colours come from the named ramps at the top of `tools/make_sprites.py` (`GREY`, `WHITE`, `STEEL`, `CONCRETE`, `BEIGE`, `SAND`, `BRICK`, `RED`, `YELLOW`, `GRASS`, `DIRT`, `TAILINGS`, `COAL`, `PANEL`, `GLASS`, `WATER`, `GREEN_ROOF`, `BLUE_ROOF`). Add a new ramp there rather than using raw indices in a draw function.
+- Colours come from the named ramps at the top of `tools/make_sprites.py` (`GREY`, `WHITE`, `STEEL`, `CONCRETE`, `BEIGE`, `SAND`, `BRICK`, `RED`, `YELLOW`, `GRASS`, `DIRT`, `TAILINGS`, `COAL`, `TOWER`, `PANEL`, `GLASS`, `WATER`, `GREEN_ROOF`, `BLUE_ROOF`). Add a new ramp there rather than using raw indices in a draw function.
 
 **Decided: company colours stay, and sprites are never recoloured.** Two of our ramps sit on OpenTTD's company-colour ranges (RecolorSprites):
 

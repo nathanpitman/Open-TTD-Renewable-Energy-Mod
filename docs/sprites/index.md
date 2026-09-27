@@ -100,6 +100,8 @@ Shown facing north-east. The turned copies (hydro_power_s_nw, _sw, _se) have the
 
 Used on two tiles of the plant.
 
+- cooling tower rim
+- cooling tower inside
 - cooling tower
 - ground (concrete)
 
