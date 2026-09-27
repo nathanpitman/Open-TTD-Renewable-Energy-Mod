@@ -49,14 +49,16 @@ Review every sprite at 1x zoom, and check it at 2x zoom too, where it should loo
 - 8bpp, OpenTTD DOS palette, taken verbatim from `nml`. Index 0 is transparent.
 - Don't use palette-animated indices (227–254), except the sea-water cycle (245–249) on water surfaces. The sprite then needs the `ANIM` flag, which the generator sets.
 - Don't use index 255 (pure white). Use 15 (almost white) instead. PalettesAndCoordinates reserves pure white for the background of a sprite sheet, and `nmlc` warns when a sprite contains it. The `WHITE` ramp stops at 15.
-- Two of our ramps sit on OpenTTD's company-colour ranges (RecolorSprites):
-  - `GLASS` (198–205) is exactly the first company-colour range, 0xC6–0xCD.
-  - `GRASS` (80–87) is exactly the second company-colour range, 0x50–0x57.
-
-  Nothing recolours them today: no sprite in the NML asks for recolouring, so they keep their own blue and green. But if a sprite is ever drawn with recolouring on, OpenTTD uses the industry's random colour for industry tiles (NML: List of default colour translation palettes), and every window or patch of grass on that sprite would change colour. Don't turn recolouring on for any sprite without first deciding what happens to these ramps.
 - Colours come from the named ramps at the top of `tools/make_sprites.py` (`GREY`, `WHITE`, `STEEL`, `CONCRETE`, `BEIGE`, `SAND`, `BRICK`, `RED`, `YELLOW`, `GRASS`, `DIRT`, `TAILINGS`, `COAL`, `PANEL`, `GLASS`, `WATER`, `GREEN_ROOF`, `BLUE_ROOF`). Add a new ramp there rather than using raw indices in a draw function.
 
-**Open question:** whether to move `GLASS` and `GRASS` off the company-colour ranges, so recolouring could be used later without touching them.
+**Decided: company colours stay, and sprites are never recoloured.** Two of our ramps sit on OpenTTD's company-colour ranges (RecolorSprites):
+
+- `GLASS` (198–205) is exactly the first company-colour range, 0xC6–0xCD.
+- `GRASS` (80–87) is exactly the second company-colour range, 0x50–0x57.
+
+The base game does the same. In OpenGFX, 50–60% of the grass ground's pixels are 80–87, and 198–205 make up about 13% of the vanilla buildings in `tools/compare_vanilla.py`, mostly as windows. There is no close green outside 80–87, so moving `GRASS` would make our ground clash with the base-game grass next to it (section 9). The nearest blues outside 198–205 are more saturated than base-game windows.
+
+So both ramps stay, and no sprite is ever drawn with recolouring on. If one were, OpenTTD would use the industry's random colour for industry tiles (NML: List of default colour translation palettes), and every window and patch of grass on that sprite would change colour. `tools/make_sprites.py` stops with an error if `energy_transition.nml` has a `recolour_mode:` or `palette:` line. If we ever want recoloured parts, decide here first what happens to `GLASS` and `GRASS`.
 
 **Open question:** accent colours. Base-game industries use rust, orange, brick, hazard yellow and red widely. Ours are mostly `GREY`, `WHITE` and `CONCRETE`. A rule on how much of a sprite should be accent colour is still to be decided.
 
@@ -220,3 +222,4 @@ Read at least "Recommended Standards" (light and style) and "PalettesAndCoordina
 | 2026-09-27 | Annotated references built (`tools/sprite_refs.py`, `docs/sprites/`); part names come from `cv.part()` tags in the drawing code | 12 | #34 |
 | 2026-09-27 | Light source is in the lower right of the screen (about 4:30), high in the sky, per the OpenTTD wiki Recommended Standards. The generator was changed to match in #76 | 4 | #34, #76 |
 | 2026-09-27 | Ship 1x sprites only; the 2x sheets and `alternative_sprites` blocks are removed and OpenTTD enlarges the 1x art when zoomed in | 2 | #34 |
+| 2026-09-27 | `GLASS` and `GRASS` stay on the company-colour ranges, as the base game's windows and grass do; sprites are never recoloured, and the generator fails if the NML turns recolouring on | 3 | #34 |
