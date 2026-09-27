@@ -1,12 +1,19 @@
 ##grflangid 0x01
+##plural 0
 
 STR_GRF_NAME                    :Energy Transition Industries
-STR_GRF_DESC                    :Full energy economy for OpenTTD. Workers power the generators, generators power the towns. Coal phases out as renewables rise. All dates and placement rules are configurable.
+STR_GRF_DESC                    :Full energy economy for OpenTTD. Generators power the towns. Coal phases out as renewables rise. All dates and placement rules are configurable.
 
-STR_CARGO_POWER_UNIT            :MWh
-STR_CARGO_POWER_ITEM            :power
-STR_CARGO_URAN_UNIT             :tonnes
-STR_CARGO_URAN_ITEM             :uranium
+STR_CARGO_POWER_NAME            :Power
+STR_CARGO_POWER_SINGLE          :Power
+STR_CARGO_POWER_ABBREV          :PW
+STR_CARGO_POWER_UNIT            :{COMMA}{NBSP}MWh
+STR_CARGO_POWER_ITEM            :{COMMA}{NBSP}MWh of power
+STR_CARGO_URAN_NAME             :Uranium
+STR_CARGO_URAN_SINGLE           :Uranium
+STR_CARGO_URAN_ABBREV           :UR
+STR_CARGO_URAN_UNIT             :{COMMA}{NBSP}tonne{P "" s}
+STR_CARGO_URAN_ITEM             :{COMMA}{NBSP}tonne{P "" s} of uranium
 
 STR_IND_URANIUM_MINE            :Uranium Mine
 STR_IND_NUCLEAR_PLANT           :Nuclear Power Plant
@@ -87,15 +94,11 @@ STR_PARAM_COAL_STOP_DESC        :After this year, no new coal power stations are
 STR_PARAM_COAL_CLOSE_NAME       :Coal: phaseout start year
 STR_PARAM_COAL_CLOSE_DESC       :From this year, existing coal plants begin closing stochastically. Accelerates 20 years later. (default: 1990)
 
-
 STR_PARAM_WIND_HEIGHT_NAME      :Wind Farm: minimum terrain height
 STR_PARAM_WIND_HEIGHT_DESC      :Minimum ground height for wind farm placement. 0 = anywhere, 4 = hills only, 8 = mountaintops only. (default: 4)
 
 STR_PARAM_SUBSTATION_PROB_NAME  :Substation: spawn rate
 STR_PARAM_SUBSTATION_PROB_DESC  :How frequently electrical substations appear near towns. 1 = rare, 10 = very common. (default: 5)
-
-STR_PARAM_WORKERS_NAME          :Workers required for generators
-STR_PARAM_WORKERS_DESC          :When enabled, energy generators need regular passenger deliveries to maintain full output. Disable for a simpler game. (default: on)
 
 STR_PARAM_PROB_HYDRO_NAME       :Hydro Dam: spawn rate
 STR_PARAM_PROB_HYDRO_DESC       :How frequently hydroelectric dams appear. 0=never, 1=rare, 8=very common. (default: 1)
