@@ -14,23 +14,13 @@ Then enable it: Main Menu > NewGRF Settings > Add > find "Energy Transition"
 
 STEP 2: Game Script (the power grid)
 --------------------------------------
-You have two options — use whichever works for you:
-
-OPTION A — Folder (most reliable):
-  Copy the folder  energy_transition_gs/  into your OpenTTD game folder:
+Copy the folder  energy_transition_gs/  into your OpenTTD game folder:
 
   Windows:  Documents\OpenTTD\game\energy_transition_gs\
-  Mac:      ~/Documents/OpenTTD/game/energy_transition_gs\
+  Mac:      ~/Documents/OpenTTD/game/energy_transition_gs/
   Linux:    ~/.local/share/openttd/game/energy_transition_gs/
 
   The folder must contain info.nut and main.nut directly inside it.
-
-OPTION B — Tar file:
-  Copy  energy_transition_gs.tar  into your OpenTTD game folder:
-
-  Windows:  Documents\OpenTTD\game\
-  Mac:      ~/Documents/OpenTTD/game/
-  Linux:    ~/.local/share/openttd/game/
 
 Then enable it: Main Menu > AI/Game Script Settings > Game Script > select
 "Energy Transition Power Grid" from the list.
