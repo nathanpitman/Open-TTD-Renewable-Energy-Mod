@@ -97,7 +97,7 @@ Brightness = `0.25 + 0.75 × max(0, N·L)`, mapped onto the material's ramp. Win
 
 ## 7. Detail density
 
-**Current:** detail comes from window grids (`windowed`) and a few props (`transformer`, `gantry`, `fence`, `lattice_tower`, ladders on the tanks).
+**Current:** detail comes from window grids (`windowed`) and a few props (`transformer`, `gantry`, `fence`, `bushing`, ladders on the tanks).
 
 **Open question:** a minimum level of small detail per tile. Candidates: pipes, ladders, railings, rooftop plant and vents, hazard stripes, small vehicles, crates and drums on the ground pad. Build these as reusable helpers so every sprite can use them.
 
@@ -153,7 +153,7 @@ The references are in [`docs/sprites/`](sprites/), and [`docs/sprites/index.md`]
 
 - Plain words that a player would use, such as "solar panels", "turbine blades", "nacelle", "intake tower" or "parked cars". Don't use code names like `beam` or `box`.
 - Unique within a sprite. If there are several of the same part, number them from back to front ("tank 1", "tank 2"), or label the group once ("yellowcake drums").
-- The same name everywhere for parts drawn by a shared helper: "transformer", "gantry", "insulators", "fence", "lattice pylon", "cooling tower", "service track", "solar panels".
+- The same name everywhere for parts drawn by a shared helper: "transformer", "gantry", "insulators", "fence", "bushings", "cooling tower", "service track", "solar panels".
 - Special names:
   - A pitched roof drawn with `gable()` is named after its building plus "roof" ("powerhouse roof").
   - The ground under an industry tile is labelled "ground (<kind>)".

@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **New Electrical Substation art.** The substation no longer has a transmission pylon, since the game has no overhead power lines; its power is taken to be carried by buried cables. It is now a fenced yard with a large grid transformer (tall brown bushings, cooling radiators and a conservator tank), switchgear cabinets, a switch rack, two smaller transformers and a control building. Substations already on the map in existing games show the new art.
 - **Industry art matches the base game when zoomed in.** The mod used to ship separate, finer-drawn art for 2x zoom, so its buildings looked sharper and smoother than the base-game map around them. It now ships normal-size art only, like almost all NewGRFs, and OpenTTD enlarges it when you zoom in, just as it does the base graphics. At normal zoom nothing changes. The Power and Uranium cargo icons work the same way.
 - **Coal Power Station looks like the base game's power station again.** The mod drew its own two-tile coal plant in place of the default one. It now keeps the base game's power station layout and art (or your base graphics set's), and only changes when coal plants stop appearing and start closing. Coal plants already built with the mod's art in an existing game show the default power station buildings instead.
 

@@ -237,7 +237,7 @@ spriteset(ss_tidal_station, "sprites/tidal_station.png") { [0,0,64,52,-31,-20, A
 spriteset(ss_wind_farm, "sprites/wind_farm.png") { [0,0,64,80,-31,-48] [64,0,64,80,-31,-48] [128,0,64,80,-31,-48] [192,0,64,80,-31,-48] [256,0,64,80,-31,-48] [320,0,64,80,-31,-48] [384,0,64,80,-31,-48] [448,0,64,80,-31,-48] [512,0,64,80,-31,-48] [576,0,64,80,-31,-48] [640,0,64,80,-31,-48] [704,0,64,80,-31,-48] [768,0,64,80,-31,-48] [832,0,64,80,-31,-48] [896,0,64,80,-31,-48] [960,0,64,80,-31,-48] [1024,0,64,80,-31,-48] [1088,0,64,80,-31,-48] [1152,0,64,80,-31,-48] [1216,0,64,80,-31,-48] [1280,0,64,80,-31,-48] [1344,0,64,80,-31,-48] [1408,0,64,80,-31,-48] [1472,0,64,80,-31,-48] [1536,0,64,80,-31,-48] [1600,0,64,80,-31,-48] [1664,0,64,80,-31,-48] [1728,0,64,80,-31,-48] [1792,0,64,80,-31,-48] [1856,0,64,80,-31,-48] [1920,0,64,80,-31,-48] [1984,0,64,80,-31,-48] [2048,0,64,80,-31,-48] [2112,0,64,80,-31,-48] [2176,0,64,80,-31,-48] }
 /* solar_farm: 0=solar_panels, 1=solar_inverter, 2=solar_control */
 spriteset(ss_solar_farm, "sprites/solar_farm.png") { [0,0,64,44,-31,-12] [64,0,64,44,-31,-12] [128,0,64,44,-31,-12] }
-/* substation: 0=sub_transformers, 1=sub_pylon */
+/* substation: 0=sub_transformers, 1=sub_switchgear */
 spriteset(ss_substation, "sprites/substation.png") { [0,0,64,72,-31,-40] [64,0,64,72,-31,-40] }
 spriteset(ss_cargo_powr, "sprites/cargo_icons.png") { [0,0,10,10,0,0] }
 spriteset(ss_cargo_uran, "sprites/cargo_icons.png") { [10,0,10,10,0,0] }
@@ -353,7 +353,7 @@ item(FEAT_INDUSTRYTILES, tile_solar_panels,      22) { property { substitute:0; 
 item(FEAT_INDUSTRYTILES, tile_solar_inverter,    23) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_solar_farm(1); } }
 item(FEAT_INDUSTRYTILES, tile_solar_control,     24) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_solar_farm(2); } }
 item(FEAT_INDUSTRYTILES, tile_sub_transformers,  25) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_substation(0); } }
-item(FEAT_INDUSTRYTILES, tile_sub_pylon,         26) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_substation(1); } }
+item(FEAT_INDUSTRYTILES, tile_sub_switchgear,    26) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_substation(1); } }
 /* Tiles 27 and 28 were the Coal Power Station's own art before it went back
    to the default power station. Keep the IDs so plants built in older saves
    still draw as a power station: base tiles 7 and 8 are its buildings. */
@@ -424,7 +424,7 @@ tilelayout layout_wind_farm_2x2 { 0,0: tile_wind_grass;   1,0: tile_wind_b;
                                   0,1: tile_wind_c;       1,1: tile_wind_kiosk; }
 tilelayout layout_solar_farm    { 0,0: tile_solar_panels;   1,0: tile_solar_panels; 2,0: tile_solar_inverter;
                                   0,1: tile_solar_control;  1,1: tile_solar_panels; 2,1: tile_solar_panels; }
-tilelayout layout_substation    { 0,0: tile_sub_transformers; 1,0: tile_sub_pylon; }
+tilelayout layout_substation    { 0,0: tile_sub_transformers; 1,0: tile_sub_switchgear; }
 
 
 /* ── PRODUCTION ────────────────────────────────────────────────── */

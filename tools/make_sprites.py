@@ -75,6 +75,7 @@ GLASS = [198, 199, 200, 201, 202, 203, 204, 205]
 WATER = [245, 246, 247, 248, 249]
 GREEN_ROOF = [96, 97, 98, 99, 100, 101]
 BLUE_ROOF = [154, 155, 156, 157, 158, 159]
+PORCELAIN = [112, 113, 114, 115, 116, 117]  # brown glazed insulators
 
 
 def hash01(*v):
@@ -382,6 +383,7 @@ M = {
     "blue_roof": Material(BLUE_ROOF),
     "dark": Material([1, 2, 3, 4]),
     "gravel": Material([33, 34, 35, 36, 37], 0.5, grain=0.4),
+    "porcelain": Material(PORCELAIN),
 }
 
 
@@ -407,46 +409,21 @@ def striped(a, b, period):
 
 
 # ── Reusable structures ────────────────────────────────────────────────
-def lattice_tower(cv, cx, cy, z1, base=3.0, top=1.0, mat=None):
-    with cv.part("lattice pylon"):
-        _lattice_tower(cv, cx, cy, z1, base, top, mat)
-
-
-def _lattice_tower(cv, cx, cy, z1, base, top, mat):
-    mat = mat or M["steel"]
-    w = 0.5
-    legs = [(-1, -1), (1, -1), (1, 1), (-1, 1)]
-    for lx, ly in legs:
-        cv.beam((cx + lx * base, cy + ly * base, 0), (cx + lx * top, cy + ly * top, z1), w, mat)
-    levels = 6
-    for k in range(1, levels + 1):
-        t = k / levels
-        z = z1 * t
-        r = base + (top - base) * t
-        rp = base + (top - base) * (k - 1) / levels
-        zp = z1 * (k - 1) / levels
-        for (ax, ay), (bx, by) in zip(legs, legs[1:] + legs[:1]):
-            cv.beam((cx + ax * r, cy + ay * r, z), (cx + bx * r, cy + by * r, z), w, mat)
-            cv.beam((cx + ax * rp, cy + ay * rp, zp), (cx + bx * r, cy + by * r, z), w * 0.8, mat)
-    # cross arms
-    for zz, arm in ((z1 * 0.8, 6.0), (z1 * 0.62, 5.0)):
-        cv.beam((cx - arm, cy, zz), (cx + arm, cy, zz), w, mat)
-        for sgn in (-1, 1):
-            with cv.part("insulators"):
-                cv.beam((cx + sgn * arm, cy, zz), (cx + sgn * arm, cy, zz - 2.5), 0.4, M["dark"])
-
-
-def transformer(cv, x, y, sx=4, sy=5, h=5):
+def transformer(cv, x, y, sx=4, sy=5, h=5, bushings=None):
+    """`bushings`: None for plain white ones, or a function drawing one at (x, y, z)."""
     with cv.part("transformer"):
-        _transformer(cv, x, y, sx, sy, h)
+        _transformer(cv, x, y, sx, sy, h, bushings)
 
 
-def _transformer(cv, x, y, sx, sy, h):
+def _transformer(cv, x, y, sx, sy, h, bushings):
     cv.box(x, y, 0, x + sx, y + sy, h, M["steel"])
     for k in range(4):  # radiator fins
         cv.box(x + sx, y + 0.6 + k * (sy - 1) / 4, 0.8, x + sx + 1.0, y + 0.9 + k * (sy - 1) / 4, h - 1, M["steel_dark"])
     for k in range(3):  # bushings
-        cv.column(x + sx / 2, y + 1 + k * (sy - 2) / 2, h, h + 2.5, 0.35, M["white"])
+        if bushings:
+            bushings(x + sx / 2, y + 1 + k * (sy - 2) / 2, h)
+        else:
+            cv.column(x + sx / 2, y + 1 + k * (sy - 2) / 2, h, h + 2.5, 0.35, M["white"])
 
 
 def gantry(cv, x0, y0, y1, h):
@@ -464,22 +441,23 @@ def _gantry(cv, x0, y0, y1, h):
             cv.beam((x0, yy, h), (x0, yy, h - 1.5), 0.35, M["white"])
 
 
-def pylon_wire(cv, x0, y0, x1, y1, z):
-    cv.beam((x0, y0, z), (x1, y1, z - 1), 0.2, M["dark"])
-
-
-def fence(cv, x0, y0, x1, y1):
+def fence(cv, x0, y0, x1, y1, mat=None, h=1.4):
     with cv.part("fence"):
-        _fence(cv, x0, y0, x1, y1)
+        _fence(cv, x0, y0, x1, y1, mat or M["steel_dark"], h)
 
 
-def _fence(cv, x0, y0, x1, y1):
-    cv.beam((x0, y0, 1.2), (x1, y1, 1.2), 0.2, M["steel_dark"])
+def _fence(cv, x0, y0, x1, y1, mat, h):
+    # A tall fence gets a mid rail, but at 1x that and close posts fill in
+    # to a solid band, so there it keeps only the top rail and sparser posts.
+    tall = h > 1.6
+    thin = tall and cv.s == 1
+    for z in sorted({h - 0.2, h / 2}) if tall and not thin else (h - 0.2,):
+        cv.beam((x0, y0, z), (x1, y1, z), 0.2, mat)
     L = max(abs(x1 - x0), abs(y1 - y0))
-    for k in range(int(L / 2) + 1):
-        t = k * 2 / L if L else 0
-        cv.beam((x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, 0), (x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, 1.4), 0.2,
-                M["steel_dark"])
+    gap = 4 if thin else 2
+    for k in range(int(L / gap) + 1):
+        t = k * gap / L if L else 0
+        cv.beam((x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, 0), (x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, h), 0.2, mat)
 
 
 def cooling_tower(cv, cx, cy, h=52, rb=7.4):
@@ -940,19 +918,97 @@ def t_solar_control(cv):
                  along_x=False)
 
 
+def bushing(cv, x, y, z0, h, r=0.45, name="bushings"):
+    """Ribbed brown insulator: stacked sheds, wider and narrower in turn.
+    At 1x the ribs can't show, so it is a 1px-wide post in light and dark
+    bands instead, which keeps neighbouring bushings apart."""
+    with cv.part(name):
+        if cv.s == 1:
+            cv.column(x, y, z0, z0 + h, 0.12, striped(M["porcelain"], Material(PORCELAIN, bias=-0.3), 1.0),
+                      cap=M["steel_dark"])
+            return
+        sheds = max(2, int(h / 0.7))
+        cv.column(x, y, z0, z0 + h, lambda t: r if int(t * sheds * 2) % 2 == 0 else r * 0.65,
+                  M["porcelain"], cap=M["steel_dark"])
+
+
+def tank_along_y(cv, cx, y0, y1, cz, r, mat):
+    """Horizontal cylinder lying along y (a conservator tank)."""
+    na = max(12, int(2 * math.pi * r * 2 / cv.step))
+    for k in range(cv._n((y1 - y0) * 2) + 1):
+        y = y0 + (y1 - y0) * k / cv._n((y1 - y0) * 2)
+        for a in range(na):
+            th = 2 * math.pi * a / na
+            c, sn = math.cos(th), math.sin(th)
+            if c + 2 * sn < -0.5:  # back side, never visible
+                continue
+            cv.splat((cx + r * c, y, cz + r * sn), (c, 0, sn), mat)
+    for j in range(cv._n(r * 2) + 1):  # end cap facing +y
+        for i in range(-cv._n(r * 2), cv._n(r * 2) + 1):
+            dx, dz = r * i / cv._n(r * 2), r * j / cv._n(r * 2)
+            for sz in (1, -1):
+                if dx * dx + dz * dz <= r * r:
+                    cv.splat((cx + dx, y1, cz + sz * dz), (0, 1, 0), mat)
+
+
+def radiator_bank(cv, x0, y0, x1, y1, z0, z1, along_x):
+    """Row of thin cooling fins standing off a transformer tank."""
+    with cv.part("radiators"):
+        n = int((x1 - x0 if along_x else y1 - y0) / 0.8)
+        for k in range(n):
+            if along_x:
+                a = x0 + k * (x1 - x0) / n
+                cv.box(a, y0, z0, a + 0.4, y1, z1, M["steel_dark"])
+            else:
+                a = y0 + k * (y1 - y0) / n
+                cv.box(x0, a, z0, x1, a + 0.4, z1, M["steel_dark"])
+
+
 def t_sub_transformers(cv):
-    gantry(cv, 2, 1, 15, 10)
-    transformer(cv, 6, 2)
-    transformer(cv, 6, 9)
-    fence(cv, 15.5, 0, 15.5, 16)
-    fence(cv, 0, 15.5, 16, 15.5)
+    # main grid transformer, fed and taken away by buried cables
+    with cv.part("transformer plinth"):
+        cv.box(3, 2, 0, 12.5, 11.5, 0.6, M["concrete"])
+    with cv.part("transformer tank"):
+        cv.box(4.5, 3, 0.6, 10.5, 9, 8, M["steel"], top=M["grey"])
+    radiator_bank(cv, 4.8, 9, 10.2, 11, 1.2, 7.2, along_x=True)
+    radiator_bank(cv, 10.5, 3.3, 12.2, 8.7, 1.2, 7.2, along_x=False)
+    for yy in (4.2, 6, 7.8):
+        bushing(cv, 8.8, yy, 8, 7, r=0.42)
+    for yy in (4.5, 6, 7.5):
+        bushing(cv, 6.2, yy, 8, 3, r=0.35)
+    with cv.part("conservator tank"):
+        for yy in (4, 8):
+            cv.beam((4.2, yy, 8), (4.2, yy, 10.4), 0.4, M["steel_dark"])
+        tank_along_y(cv, 4.2, 3, 9, 11.4, 1.2, M["steel"])
+    with cv.part("control box"):
+        cv.box(11.2, 1, 0, 12.8, 2.4, 3.2, M["grey"])
+    with cv.part("switchgear cabinets"):
+        for k in range(3):
+            cv.box(1, 11.5 + k * 1.4, 0, 3, 12.8 + k * 1.4, 5, M["white"], top=M["grey"])
+    for a, b in (((0.5, 0.5), (0.5, 15.5)), ((0.5, 0.5), (16, 0.5)), ((0.5, 15.5), (16, 15.5))):
+        fence(cv, *a, *b, mat=M["yellow"], h=2.2)
 
 
-def t_sub_pylon(cv):
-    lattice_tower(cv, 5, 8, 34)
+def t_sub_switchgear(cv):
     with cv.part("control building"):
-        cv.box(9, 3, 0, 15, 13, 6, windowed(M["brick"], every=2.5, z_every=6, z_band=(0.35, 0.7)), top=M["grey"])
-    fence(cv, 0, 15.5, 16, 15.5)
+        cv.box(1.5, 1.5, 0, 7.5, 8.5, 5.5, windowed(M["concrete"], every=3.5, z_every=5.5, z_band=(0.4, 0.7)),
+               top=M["grey"])
+    with cv.part("building door"):
+        cv.box(7.5, 3, 0, 7.7, 5, 3.5, M["steel_dark"])
+    for yy in (2, 8):
+        transformer(cv, 10, yy, 3, 3.6, 4.5, bushings=lambda bx, by, bz: bushing(cv, bx, by, bz, 2.2, r=0.3))
+    with cv.part("switch rack"):
+        for xx in (2.5, 7):
+            for yy in (10.5, 14):
+                cv.beam((xx, yy, 0), (xx, yy, 3), 0.4, M["steel"])
+            cv.beam((xx, 10.5, 3), (xx, 14, 3), 0.4, M["steel"])
+    for xx in (2.5, 7):
+        for yy in (11.3, 12.3, 13.3):
+            bushing(cv, xx, yy, 3.2, 2.2, r=0.28, name="insulators")
+    with cv.part("switchgear cabinets"):
+        cv.box(3.5, 10.5, 0, 6, 14, 3.5, M["white"], top=M["grey"])
+    for a, b in (((0, 0.5), (15.5, 0.5)), ((15.5, 0.5), (15.5, 15.5)), ((0, 15.5), (15.5, 15.5))):
+        fence(cv, *a, *b, mat=M["yellow"], h=2.2)
 
 
 # name → (ground, H, [(tile_key, draw), ...]) – order defines sheet order
@@ -990,7 +1046,7 @@ INDUSTRIES = {
     ]),
     "substation": ("concrete", 40, [
         ("sub_transformers", t_sub_transformers),
-        ("sub_pylon", t_sub_pylon),
+        ("sub_switchgear", t_sub_switchgear),
     ]),
 }
 
