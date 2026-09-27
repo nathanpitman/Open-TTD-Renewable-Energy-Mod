@@ -7,6 +7,7 @@ launching the game.
 
 Usage:
     python3 tools/preview.py [out.png] [--scale 1|2] [--zoom N]
+    python3 tools/preview.py --each docs/industries [--scale 1|2] [--zoom N]
 """
 
 import argparse
@@ -49,7 +50,7 @@ def rgb(im):
     return out
 
 
-def compose(variant, s):
+def compose(variant, s, bg=(60, 110, 60, 255)):
     name = variant.split("/")[0]
     _, H, tiles = ms.INDUSTRIES[name]
     keys = [k for k, _ in tiles]
@@ -61,7 +62,7 @@ def compose(variant, s):
     span = max(x + y for x, y, _ in layout) + 1
     w = (64 * span + 64) * s
     h = (H + 16 * span + 40) * s
-    canvas = Image.new("RGBA", (w, h), (60, 110, 60, 255))
+    canvas = Image.new("RGBA", (w, h), bg)
     ox = (32 + 32 * max(x for x, _, _ in layout)) * s + 32 * s
     oy = (H + 8) * s
     gname = ms.TILE_GROUND
@@ -87,7 +88,21 @@ def main():
     ap.add_argument("out", nargs="?", default="preview.png")
     ap.add_argument("--scale", type=int, default=1)
     ap.add_argument("--zoom", type=int, default=2)
+    ap.add_argument("--each", metavar="DIR",
+                    help="write one transparent, cropped image per industry into DIR")
     a = ap.parse_args()
+    if a.each:
+        os.makedirs(a.each, exist_ok=True)
+        for n in LAYOUTS:
+            if "/" in n:
+                continue
+            im = compose(n, a.scale, bg=(0, 0, 0, 0))
+            im = im.crop(im.getbbox())
+            im = im.resize((im.size[0] * a.zoom, im.size[1] * a.zoom), Image.NEAREST)
+            path = os.path.join(a.each, n + ".png")
+            im.save(path)
+            print("wrote", path, im.size)
+        return
     parts = [compose(n, a.scale) for n in LAYOUTS]
     per_row = 5
     rows = [parts[i:i + per_row] for i in range(0, len(parts), per_row)]
