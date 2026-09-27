@@ -4,14 +4,17 @@
 
 - **Hydroelectric dams span rivers.** A dam is now built straight across a river 1, 2 or 3 tiles wide, in either direction. The wall stands on the river tiles, with an abutment on one bank and the power house on the other. The wall tiles must be flat river water with river upstream and downstream, and both ends must be dry land, so the dam always crosses the river. Dams are no longer built beside lakes, canals or the sea coast. Boats can't pass a dam, and the river comes back when a dam closes. ([#16](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/16))
 - **New setting: Hydro Dam minimum river size.** The number of river or lake tiles needed within 7 tiles of a new dam's spillway (default 12), which keeps dams off small ponds and short stubs of river.
-- **News messages name the town.** When a generator, substation, uranium mine or coal power station opens, closes or changes output, the news now says where, for example "New Wind Farm constructed near Smallbridge!" or "Smallbridge Coal Power Station has been decommissioned". Before, the messages didn't say which town. ([#50](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/50))
-- **New Electrical Substation art.** The substation no longer has a transmission pylon, since the game has no overhead power lines; its power is taken to be carried by buried cables. It is now a fenced yard with a large grid transformer (tall brown bushings, cooling radiators and a conservator tank), switchgear cabinets, a switch rack, two smaller transformers and a control building. Substations already on the map in existing games show the new art.
-- **Industry art matches the base game when zoomed in.** The mod used to ship separate, finer-drawn art for 2x zoom, so its buildings looked sharper and smoother than the base-game map around them. It now ships normal-size art only, like almost all NewGRFs, and OpenTTD enlarges it when you zoom in, just as it does the base graphics. At normal zoom nothing changes. The Power and Uranium cargo icons work the same way.
-- **Coal Power Station looks like the base game's power station again.** The mod drew its own two-tile coal plant in place of the default one. It now keeps the base game's power station layout and art (or your base graphics set's), and only changes when coal plants stop appearing and start closing. Coal plants already built with the mod's art in an existing game show the default power station buildings instead.
 
 ### Compatibility
 
 - Dams already on the map in existing games keep their old look and keep working. Only new dams use the new layout.
+
+## v14
+
+- **News messages name the town.** When a generator, substation, uranium mine or coal power station opens, closes or changes output, the news now says where, for example "New Wind Farm constructed near Smallbridge!" or "Smallbridge Coal Power Station has been decommissioned". Before, the messages didn't say which town. ([#50](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/50))
+- **New Electrical Substation art.** The substation no longer has a transmission pylon, since the game has no overhead power lines; its power is taken to be carried by buried cables. It is now a fenced yard with a large grid transformer (tall brown bushings, cooling radiators and a conservator tank), switchgear cabinets, a switch rack, two smaller transformers and a control building. Substations already on the map in existing games show the new art.
+- **Industry art matches the base game when zoomed in.** The mod used to ship separate, finer-drawn art for 2x zoom, so its buildings looked sharper and smoother than the base-game map around them. It now ships normal-size art only, like almost all NewGRFs, and OpenTTD enlarges it when you zoom in, just as it does the base graphics. At normal zoom nothing changes. The Power and Uranium cargo icons work the same way.
+- **Coal Power Station looks like the base game's power station again.** The mod drew its own two-tile coal plant in place of the default one. It now keeps the base game's power station layout and art (or your base graphics set's), and only changes when coal plants stop appearing and start closing. Coal plants already built with the mod's art in an existing game show the default power station buildings instead.
 
 ## v13
 
