@@ -6,9 +6,9 @@ The technical side is in README.md → "Sprites": file layout, palette format, o
 
 ## How this document is used
 
-Sprites are reviewed one at a time, with one GitHub issue per sprite, all under issue #34. When you ask for a change, refer to parts by the names in that sprite's annotated reference (section 12). Refining a sprite gives one of two kinds of change:
+Sprites are reviewed with one GitHub issue per industry (plus one for ground tiles and one for cargo icons), all under issue #34. Each issue has a section for every sprite in that industry. When you ask for a change, refer to parts by the names in that sprite's annotated reference (section 12). Refining a sprite gives one of two kinds of change:
 
-- **Specific to that sprite** (for example, "add a ladder to the intake tower"): make the change in that sprite's issue and draw function only.
+- **Specific to that sprite** (for example, "add a ladder to the intake tower"): track it in that sprite's section of its industry issue, and change only that sprite's draw function.
 - **Global** (for example, "every building gets a dark outline", "walls use at least 4 shades"): it must apply to every sprite. In the same change:
   1. Record it in the right section below, and change the status to **Decided**.
   2. Add a row to the [decision log](#decision-log).
