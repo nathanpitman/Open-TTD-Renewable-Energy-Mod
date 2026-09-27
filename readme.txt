@@ -36,8 +36,7 @@ HOW IT WORKS
 ------------
 
 Cargo chain:
-  Towns -> Passengers (workers) -> Energy Generators -> [invisible grid]
-    -> Town growth
+  Energy Generators -> [invisible grid] -> Town growth
   Energy Generators -> Electrical Substation -> (amplifies growth)
   Uranium Mine -> Uranium -> Nuclear Power Plant -> [invisible grid]
     -> Town growth
@@ -55,21 +54,19 @@ Invisible power grid (Game Script):
     Full power, no substation        Good       — 30 days/growth
     Full power + nearby substation   Fast       — 12 days/growth
 
-Worker mechanic:
-  Power stations and the Uranium Mine accept Passengers (workers). No
-  other industry needs workers. Without regular worker deliveries,
-  production slowly declines until it reaches the minimum level. A lack of
-  workers never closes an industry. Generators start at minimum output and
-  ramp up as workers arrive. The Nuclear Power Plant is the exception for
-  now: it makes exactly as much power as the uranium delivered to it, and
-  workers don't change that yet.
+No deliveries needed:
+  Hydro, tidal, wind and solar generators need nothing delivered: they make
+  power as soon as they're built. Only the Nuclear Power Plant needs a
+  supply chain. It makes exactly as much power as the uranium delivered
+  to it.
 
 Energy timeline (all dates configurable):
 
     Industry                  Default era   Placement rule
     --------------------------------------------------------------------
-    Hydroelectric Dam         1950          Within water distance
-                                             parameter of water
+    Hydroelectric Dam         1950          Dam wall directly against water
+                                             (river, lake or canal), facing
+                                             whichever way the water is
     Uranium Mine              1953          Remote
     Nuclear Power Plant       1956          Requires Uranium delivery
     Tidal Power Station       1966          Coast only
@@ -78,10 +75,10 @@ Energy timeline (all dates configurable):
     Electrical Substation     1950          Near towns, amplifies growth
 
 Coal phaseout:
-  The vanilla Coal Power Station is overridden to also require workers. No
-  new coal plants spawn after param_coal_stop_year (default 1970). Existing
-  plants begin closing stochastically after param_coal_close_year (default
-  1990), accelerating 20 years later.
+  The vanilla Coal Power Station still needs coal deliveries. No new coal
+  plants spawn after param_coal_stop_year (default 1970). Existing plants
+  begin closing stochastically after param_coal_close_year (default 1990),
+  accelerating 20 years later.
 
 
 NEWGRF PARAMETERS
@@ -92,10 +89,8 @@ game.
   Era dates:    Hydro (1930-1960), Nuclear (1950-1975), Tidal (1960-1985),
                 Wind (1970-1995), Solar (1980-2005), Coal stop (1960-1990),
                 Coal close (1980-2020)
-  Placement:    Hydro water distance (2-15), Wind min height (0-8),
-                Substation spawn rate (1-10)
+  Placement:    Wind min height (0-8), Substation spawn rate (1-10)
   Spawn rates:  Individual sliders for each generator type (0 = disabled)
-  Gameplay:     Workers required toggle (on/off)
 
 
 GAME SCRIPT PARAMETERS

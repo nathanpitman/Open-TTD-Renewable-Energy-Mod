@@ -54,8 +54,8 @@ Enable in: **Main Menu → AI/Game Script Settings → Game Script → select "E
 
 ### Cargo chain
 ```
-Towns → Passengers (workers) → Energy Generators → [invisible grid] → Town growth
-                                                  → Electrical Substation → (amplifies growth)
+Energy Generators → [invisible grid] → Town growth
+                  → Electrical Substation → (amplifies growth)
 Uranium Mine → Uranium → Nuclear Power Plant → [invisible grid] → Town growth
 ```
 
@@ -70,8 +70,8 @@ Every 30 days the script scans every town and finds all energy generators within
 | Full power, no substation | Good — 30 days/growth |
 | Full power + nearby substation | Fast — 12 days/growth |
 
-### Worker mechanic
-Power stations and the Uranium Mine accept Passengers (workers). No other industry needs workers. Without regular worker deliveries, production slowly declines until it reaches the minimum level. A lack of workers never closes an industry. Generators start at minimum output and ramp up as workers arrive. The Nuclear Power Plant is the exception for now: it makes exactly as much power as the uranium delivered to it, and workers don't change that yet.
+### No deliveries needed
+Hydro, tidal, wind and solar generators need nothing delivered: they make power as soon as they're built. Only the Nuclear Power Plant needs a supply chain. It makes exactly as much power as the uranium delivered to it.
 
 ### Energy timeline (all dates configurable)
 | | Industry | Default era | Placement rule |
@@ -87,7 +87,7 @@ Power stations and the Uranium Mine accept Passengers (workers). No other indust
 ### Coal phaseout
 <img src="docs/industries/coal_power_plant.png" alt="Coal Power Station" width="160">
 
-The vanilla Coal Power Station is overridden to also require workers. No new coal plants spawn after `param_coal_stop_year` (default 1970). Existing plants begin closing stochastically after `param_coal_close_year` (default 1990), accelerating 20 years later.
+The vanilla Coal Power Station still needs coal deliveries. No new coal plants spawn after `param_coal_stop_year` (default 1970). Existing plants begin closing stochastically after `param_coal_close_year` (default 1990), accelerating 20 years later.
 
 ---
 
@@ -99,8 +99,6 @@ Configure in **NewGRF Settings → select mod → Parameters** before starting a
 **Placement:** Wind min height (0–8), Substation spawn rate (1–10)
 
 **Spawn rates:** Individual sliders for each generator type (0 = disabled)
-
-**Gameplay:** Workers required toggle (on/off)
 
 ## Game Script Parameters
 Configure in **AI/Game Script Settings → select script → Configure**.
