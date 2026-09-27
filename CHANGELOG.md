@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v13
 
 - **Fixed: the Game Script never changed town growth.** It looked for the Power cargo by comparing its label to a number, but OpenTTD gives the label as text, so it never found Power and did nothing. It also looked for generators by an exact name, but each industry's name starts with its town ("Smallbridge Wind Farm"), so it never found any. It now finds generators as the industries that produce Power, and substations as the ones that accept it, which also works in any language.
 - **Fixed: the power grid updated far too often.** The "update interval" setting is in game days, but the script treated it as ticks, so it recalculated about every half day instead of every 30 days. It now uses days.
@@ -13,6 +13,11 @@
 - **Fixed: generators and the Uranium Mine produced twice.** Each one produced from two separate sources that were added together. They now produce from one source: Hydro 12, Tidal 10, Wind 8, Solar 6 MWh and Uranium Mine 6 tonnes per production cycle.
 - **Removed workers.** Generators and the Coal Power Station no longer accept Passengers, and the "Workers required" setting is gone. Hydro, tidal, wind and solar make power without any deliveries. The Nuclear Power Plant still needs uranium, and the Coal Power Station still needs coal. The other settings keep their numbers, so values saved in existing games still apply to the right setting.
 - **Removed the "max water distance" setting.** It no longer did anything. The other settings keep their numbers, so values saved in existing games still apply to the right setting.
+
+### Compatibility
+
+- Games saved with v12 still load, but power stations built before the upgrade don't produce Power or take part in the power grid. They were created when the Power cargo didn't exist, and OpenTTD keeps an industry's cargos from when it was built. Power stations built after the upgrade work normally. For the full power grid, start a new game.
+- Probably doesn't work with FIRS. See the README.
 
 ## v12
 
