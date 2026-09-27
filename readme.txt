@@ -91,6 +91,9 @@ game.
                 Coal close (1980-2020)
   Placement:    Wind min height (0-8), Substation spawn rate (1-10)
   Spawn rates:  Individual sliders for each generator type (0 = disabled)
+  Debug:        Ignore all start-year limits (off by default; testing only -
+                makes every generator and the uranium mine available from
+                the start of the game)
 
 
 GAME SCRIPT PARAMETERS

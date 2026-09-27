@@ -100,6 +100,8 @@ Configure in **NewGRF Settings → select mod → Parameters** before starting a
 
 **Spawn rates:** Individual sliders for each generator type (0 = disabled)
 
+**Debug:** Ignore all start-year limits (off by default; testing only — makes every generator and the uranium mine available from the start of the game)
+
 ## Game Script Parameters
 Configure in **AI/Game Script Settings → select script → Configure**.
 
