@@ -252,9 +252,18 @@ alternative_sprites(ss_coal_power_plant, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "spri
 
 /* ── SPRITELAYOUTS ─────────────────────────────────────────────── */
 /* Parameters: tile = sprite index in the industry sheet,
-               gnd  = ss_ground index (0 grass, 1 dirt, 2 concrete, 3 water, 4 shore) */
+               gnd  = ss_ground index (0 grass, 1 dirt, 2 concrete, 3 water, 4 shore)
+   Grass-ground tiles don't use ss_ground(0). They draw the base set's own
+   ground sprite so they match the land around them: snow above the
+   sub-arctic snowline, sand in sub-tropical desert, grass everywhere else.
+   GROUNDSPRITE_SNOW and GROUNDSPRITE_DESERT are the same sprite number; the
+   base set draws it as snow or sand to suit the climate. */
 spritelayout sl_hydro_dam(tile, gnd) {
     ground { sprite: ss_ground(gnd); }
+    building { sprite: ss_hydro_dam(tile); xoffset:0; yoffset:0; zoffset:0; xextent:16; yextent:16; zextent:32; }
+}
+spritelayout sl_hydro_power(tile) {
+    ground { sprite: (terrain_type == TILETYPE_SNOW || terrain_type == TILETYPE_DESERT) ? GROUNDSPRITE_SNOW : GROUNDSPRITE_NORMAL; }
     building { sprite: ss_hydro_dam(tile); xoffset:0; yoffset:0; zoffset:0; xextent:16; yextent:16; zextent:32; }
 }
 spritelayout sl_uranium_mine(tile) {
@@ -270,14 +279,14 @@ spritelayout sl_tidal_station(tile) {
     building { sprite: ss_tidal_station(tile); xoffset:0; yoffset:0; zoffset:0; xextent:16; yextent:16; zextent:13; }
 }
 spritelayout sl_wind_farm(tile) {
-    ground { sprite: ss_ground(0); }
+    ground { sprite: (terrain_type == TILETYPE_SNOW || terrain_type == TILETYPE_DESERT) ? GROUNDSPRITE_SNOW : GROUNDSPRITE_NORMAL; }
     building { sprite: ss_wind_farm(tile); xoffset:0; yoffset:0; zoffset:0; xextent:16; yextent:16; zextent:45; }
 }
 spritelayout sl_wind_farm_grass {
-    ground { sprite: ss_ground(0); }
+    ground { sprite: (terrain_type == TILETYPE_SNOW || terrain_type == TILETYPE_DESERT) ? GROUNDSPRITE_SNOW : GROUNDSPRITE_NORMAL; }
 }
 spritelayout sl_solar_farm(tile) {
-    ground { sprite: ss_ground(0); }
+    ground { sprite: (terrain_type == TILETYPE_SNOW || terrain_type == TILETYPE_DESERT) ? GROUNDSPRITE_SNOW : GROUNDSPRITE_NORMAL; }
     building { sprite: ss_solar_farm(tile); xoffset:0; yoffset:0; zoffset:0; xextent:16; yextent:16; zextent:7; }
 }
 spritelayout sl_substation(tile) {
@@ -316,20 +325,20 @@ switch(FEAT_INDUSTRYTILES, SELF, sw_tile_check_hydro_se, nearby_tile_is_water(0,
 }
 item(FEAT_INDUSTRYTILES, tile_hydro_dam_n,         0) { property { substitute:0; land_shape_flags:0; } graphics { tile_check: sw_tile_check_hydro_ne; default: sl_hydro_dam(0, 3); } }
 item(FEAT_INDUSTRYTILES, tile_hydro_dam_s,         1) { property { substitute:0; land_shape_flags:0; } graphics { tile_check: sw_tile_check_hydro_ne; default: sl_hydro_dam(1, 3); } }
-item(FEAT_INDUSTRYTILES, tile_hydro_power_n,       2) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_dam(2, 0); } }
-item(FEAT_INDUSTRYTILES, tile_hydro_power_s,       3) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_dam(3, 0); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_power_n,       2) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_power(2); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_power_s,       3) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_power(3); } }
 item(FEAT_INDUSTRYTILES, tile_hydro_dam_n_nw,     33) { property { substitute:0; land_shape_flags:0; } graphics { tile_check: sw_tile_check_hydro_nw; default: sl_hydro_dam(4, 3); } }
 item(FEAT_INDUSTRYTILES, tile_hydro_dam_s_nw,     34) { property { substitute:0; land_shape_flags:0; } graphics { tile_check: sw_tile_check_hydro_nw; default: sl_hydro_dam(5, 3); } }
-item(FEAT_INDUSTRYTILES, tile_hydro_power_n_nw,   35) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_dam(6, 0); } }
-item(FEAT_INDUSTRYTILES, tile_hydro_power_s_nw,   36) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_dam(7, 0); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_power_n_nw,   35) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_power(6); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_power_s_nw,   36) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_power(7); } }
 item(FEAT_INDUSTRYTILES, tile_hydro_dam_n_sw,     37) { property { substitute:0; land_shape_flags:0; } graphics { tile_check: sw_tile_check_hydro_sw; default: sl_hydro_dam(8, 3); } }
 item(FEAT_INDUSTRYTILES, tile_hydro_dam_s_sw,     38) { property { substitute:0; land_shape_flags:0; } graphics { tile_check: sw_tile_check_hydro_sw; default: sl_hydro_dam(9, 3); } }
-item(FEAT_INDUSTRYTILES, tile_hydro_power_n_sw,   39) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_dam(10, 0); } }
-item(FEAT_INDUSTRYTILES, tile_hydro_power_s_sw,   40) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_dam(11, 0); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_power_n_sw,   39) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_power(10); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_power_s_sw,   40) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_power(11); } }
 item(FEAT_INDUSTRYTILES, tile_hydro_dam_n_se,     41) { property { substitute:0; land_shape_flags:0; } graphics { tile_check: sw_tile_check_hydro_se; default: sl_hydro_dam(12, 3); } }
 item(FEAT_INDUSTRYTILES, tile_hydro_dam_s_se,     42) { property { substitute:0; land_shape_flags:0; } graphics { tile_check: sw_tile_check_hydro_se; default: sl_hydro_dam(13, 3); } }
-item(FEAT_INDUSTRYTILES, tile_hydro_power_n_se,   43) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_dam(14, 0); } }
-item(FEAT_INDUSTRYTILES, tile_hydro_power_s_se,   44) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_dam(15, 0); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_power_n_se,   43) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_power(14); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_power_s_se,   44) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_power(15); } }
 item(FEAT_INDUSTRYTILES, tile_uranium_headframe,  4) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_uranium_mine(0); } }
 item(FEAT_INDUSTRYTILES, tile_uranium_tailings,   5) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_uranium_mine(1); } }
 item(FEAT_INDUSTRYTILES, tile_uranium_mill,       6) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_uranium_mine(2); } }

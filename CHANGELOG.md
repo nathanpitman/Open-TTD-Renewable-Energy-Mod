@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Fixed: grass under wind farms, solar farms and hydro power stations didn't match the land around them.** These tiles drew their own brighter green grass, so the farm showed up as a lighter square. They now use the game's own ground, so they match whatever base graphics you use, and they show snow above the sub-arctic snowline and sand in sub-tropical desert. ([#29](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/29))
+
 ## v13
 
 - **Fixed: the Game Script never changed town growth.** It looked for the Power cargo by comparing its label to a number, but OpenTTD gives the label as text, so it never found Power and did nothing. It also looked for generators by an exact name, but each industry's name starts with its town ("Smallbridge Wind Farm"), so it never found any. It now finds generators as the industries that produce Power, and substations as the ones that accept it, which also works in any language.
