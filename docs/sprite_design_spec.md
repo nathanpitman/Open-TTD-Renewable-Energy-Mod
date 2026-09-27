@@ -33,11 +33,14 @@ Known gaps today (#34): the sprites look too high-res, surfaces are too smooth a
 
 ## 2. Resolution and zoom levels
 
-**Current:** every spriteset has a 1x sheet (`sprites/<name>.png`) and a true 2x sheet (`sprites/<name>_2x.png`), both rendered from the same geometry.
+**Decided** (#34): ship **1x sprites only**, like almost all NewGRFs. OpenTTD enlarges them when zoomed in, just as it does the base graphics (OpenGFX and the original TTD set), so the mod's art is exactly as chunky as the map around it at every zoom level.
 
-**Proposed** (#34): ship **1x only**, like almost all NewGRFs, and let OpenTTD enlarge the sprites when zoomed in, just as it does for OpenGFX. Pixel-doubling the 1x art into new 2x files gains nothing. Only bring back 2x/4x if we deliberately target high-res base sets (zBase, OpenGFX2), and then draw to their standard.
+- `tools/make_sprites.py` writes only `sprites/<name>.png`. The NML has no `alternative_sprites` blocks.
+- Don't add pixel-doubled 2x files: OpenTTD already does that, so they would gain nothing.
+- Only bring back 2x/4x sprites if we deliberately target high-res base sets (zBase, OpenGFX2), and then draw them to those sets' standard, probably in 32bpp.
+- Players who zoom in see the 1x art enlarged. `tools/preview.py --scale 2` and the "in game at 2x zoom" panel of each annotated reference (section 12) show exactly that.
 
-Until this is decided, review every sprite at both 1x and 2x zoom in game.
+Review every sprite at 1x zoom, and check it at 2x zoom too, where it should look like base-game art at the same zoom.
 
 ## 3. Palette
 
@@ -126,7 +129,7 @@ Every animation frame must follow the same rules as the still frame.
 
 ## 11. Cargo icons
 
-**Current:** 10 × 10 flat pixel art with a near-black outline, like the base game's cargo icons.
+**Current:** 10 × 10 flat pixel art with a near-black outline, like the base game's cargo icons. 1x only, like every other sprite (section 2).
 
 ## 12. Annotated references
 
@@ -144,7 +147,7 @@ The references are in [`docs/sprites/`](sprites/), and [`docs/sprites/index.md`]
 - A label for every visible part, with a leader line and a dot on a pixel of that part. The labels sit outside the sprite so they don't cover the art.
 - Below that:
   - a **part map**: the sprite with each part filled in its label colour, showing exactly which pixels belong to which part;
-  - the 1x and 2x sprites at actual size.
+  - the 1x sprite at actual size, and as the game shows it at 2x zoom (the 1x sprite enlarged, since only 1x ships; section 2).
 
 **Part names:**
 
@@ -155,7 +158,7 @@ The references are in [`docs/sprites/`](sprites/), and [`docs/sprites/index.md`]
   - A pitched roof drawn with `gable()` is named after its building plus "roof" ("powerhouse roof").
   - The ground under an industry tile is labelled "ground (<kind>)".
 - Stable. Renaming a part changes the vocabulary we use in requests, so record the rename in the decision log.
-- Only parts visible in the 1x sprite get a label. A part that is hidden, or too small to show at 1x (for example the rims on the Uranium icon), isn't listed.
+- Only parts visible in the sprite get a label. A part that is hidden, or too small to show at 1x (for example the rims on the Uranium icon), isn't listed.
 
 **How they're made:**
 
@@ -184,7 +187,7 @@ Read at least "Recommended Standards" (light and style) and "PalettesAndCoordina
 
 ## Review checklist (for each sprite issue)
 
-- [ ] Viewed in game next to base-game industries, at 1x and 2x zoom (or 1x only, if section 2 is decided that way).
+- [ ] Viewed in game next to base-game industries, at 1x zoom and at 2x zoom (where the game enlarges the 1x sprite).
 - [ ] Viewed as part of the whole industry, not just on its own.
 - [ ] Follows every **Decided** rule above.
 - [ ] Annotated reference in `docs/sprites/` is regenerated, and every visible part has a name (section 12).
@@ -199,3 +202,4 @@ Read at least "Recommended Standards" (light and style) and "PalettesAndCoordina
 | 2026-09-27 | Every sprite gets an annotated reference image, made by the build, naming its parts for use in change requests | 12 | #34 |
 | 2026-09-27 | Annotated references built (`tools/sprite_refs.py`, `docs/sprites/`); part names come from `cv.part()` tags in the drawing code | 12 | #34 |
 | 2026-09-27 | Light source is in the lower right of the screen (about 4:30), high in the sky, per the OpenTTD wiki Recommended Standards. The generator was changed to match in #76 | 4 | #34, #76 |
+| 2026-09-27 | Ship 1x sprites only; the 2x sheets and `alternative_sprites` blocks are removed and OpenTTD enlarges the 1x art when zoomed in | 2 | #34 |
