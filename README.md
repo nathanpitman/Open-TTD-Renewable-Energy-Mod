@@ -85,7 +85,6 @@ Hydro, tidal, wind and solar generators need nothing delivered: they make power 
 | <img src="docs/industries/substation.png" alt="Electrical Substation" width="160"> | Electrical Substation | 1950 | Near towns, amplifies growth |
 
 ### Coal phaseout
-<img src="docs/industries/coal_power_plant.png" alt="Coal Power Station" width="160">
 
 The vanilla Coal Power Station still needs coal deliveries. No new coal plants spawn after `param_coal_stop_year` (default 1970). Existing plants begin closing stochastically after `param_coal_close_year` (default 1990), accelerating 20 years later.
 

@@ -39,7 +39,6 @@ from preview import rgb  # noqa: E402
 V_GRASS, V_PAVED, V_DIRT = 3981, 1420, 2022
 PAIRS = [
     ("cooling tower", [(2047, 0, 4)], V_PAVED, "nuc_cooling"),
-    ("power station", [(2050, 0, 0)], V_PAVED, "coal_boiler"),
     ("mine headframe", [(2028, 0, 0)], V_DIRT, "uranium_headframe"),
     ("office block", [(1423, 0, 0)], V_PAVED, "nuc_admin"),
     ("factory shed", [(2190, 0, 0)], V_PAVED, "tidal_hall"),
