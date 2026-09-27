@@ -238,9 +238,9 @@ alternative_sprites(ss_nuclear_plant, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites
 /* tidal_station: 0=tidal_barrage, 1=tidal_hall */
 spriteset(ss_tidal_station, "sprites/tidal_station.png") { [0,0,64,52,-31,-20, ANIM] [64,0,64,52,-31,-20] }
 alternative_sprites(ss_tidal_station, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/tidal_station_2x.png") { [0,0,128,104,-62,-40, ANIM] [128,0,128,104,-62,-40] }
-/* wind_farm: 0=wind_a, 1=wind_b, 2=wind_c, 3=wind_d, 4=wind_track_x, 5=wind_track_y, 6=wind_kiosk */
-spriteset(ss_wind_farm, "sprites/wind_farm.png") { [0,0,64,80,-31,-48] [64,0,64,80,-31,-48] [128,0,64,80,-31,-48] [192,0,64,80,-31,-48] [256,0,64,80,-31,-48] [320,0,64,80,-31,-48] [384,0,64,80,-31,-48] }
-alternative_sprites(ss_wind_farm, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/wind_farm_2x.png") { [0,0,128,160,-62,-96] [128,0,128,160,-62,-96] [256,0,128,160,-62,-96] [384,0,128,160,-62,-96] [512,0,128,160,-62,-96] [640,0,128,160,-62,-96] [768,0,128,160,-62,-96] }
+/* wind_farm: 0=wind_a, 1=wind_a_f1, 2=wind_a_f2, 3=wind_a_f3, 4=wind_a_f4, 5=wind_a_f5, 6=wind_a_f6, 7=wind_a_f7, 8=wind_b, 9=wind_b_f1, 10=wind_b_f2, 11=wind_b_f3, 12=wind_b_f4, 13=wind_b_f5, 14=wind_b_f6, 15=wind_b_f7, 16=wind_c, 17=wind_c_f1, 18=wind_c_f2, 19=wind_c_f3, 20=wind_c_f4, 21=wind_c_f5, 22=wind_c_f6, 23=wind_c_f7, 24=wind_d, 25=wind_d_f1, 26=wind_d_f2, 27=wind_d_f3, 28=wind_d_f4, 29=wind_d_f5, 30=wind_d_f6, 31=wind_d_f7, 32=wind_track_x, 33=wind_track_y, 34=wind_kiosk */
+spriteset(ss_wind_farm, "sprites/wind_farm.png") { [0,0,64,80,-31,-48] [64,0,64,80,-31,-48] [128,0,64,80,-31,-48] [192,0,64,80,-31,-48] [256,0,64,80,-31,-48] [320,0,64,80,-31,-48] [384,0,64,80,-31,-48] [448,0,64,80,-31,-48] [512,0,64,80,-31,-48] [576,0,64,80,-31,-48] [640,0,64,80,-31,-48] [704,0,64,80,-31,-48] [768,0,64,80,-31,-48] [832,0,64,80,-31,-48] [896,0,64,80,-31,-48] [960,0,64,80,-31,-48] [1024,0,64,80,-31,-48] [1088,0,64,80,-31,-48] [1152,0,64,80,-31,-48] [1216,0,64,80,-31,-48] [1280,0,64,80,-31,-48] [1344,0,64,80,-31,-48] [1408,0,64,80,-31,-48] [1472,0,64,80,-31,-48] [1536,0,64,80,-31,-48] [1600,0,64,80,-31,-48] [1664,0,64,80,-31,-48] [1728,0,64,80,-31,-48] [1792,0,64,80,-31,-48] [1856,0,64,80,-31,-48] [1920,0,64,80,-31,-48] [1984,0,64,80,-31,-48] [2048,0,64,80,-31,-48] [2112,0,64,80,-31,-48] [2176,0,64,80,-31,-48] }
+alternative_sprites(ss_wind_farm, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/wind_farm_2x.png") { [0,0,128,160,-62,-96] [128,0,128,160,-62,-96] [256,0,128,160,-62,-96] [384,0,128,160,-62,-96] [512,0,128,160,-62,-96] [640,0,128,160,-62,-96] [768,0,128,160,-62,-96] [896,0,128,160,-62,-96] [1024,0,128,160,-62,-96] [1152,0,128,160,-62,-96] [1280,0,128,160,-62,-96] [1408,0,128,160,-62,-96] [1536,0,128,160,-62,-96] [1664,0,128,160,-62,-96] [1792,0,128,160,-62,-96] [1920,0,128,160,-62,-96] [2048,0,128,160,-62,-96] [2176,0,128,160,-62,-96] [2304,0,128,160,-62,-96] [2432,0,128,160,-62,-96] [2560,0,128,160,-62,-96] [2688,0,128,160,-62,-96] [2816,0,128,160,-62,-96] [2944,0,128,160,-62,-96] [3072,0,128,160,-62,-96] [3200,0,128,160,-62,-96] [3328,0,128,160,-62,-96] [3456,0,128,160,-62,-96] [3584,0,128,160,-62,-96] [3712,0,128,160,-62,-96] [3840,0,128,160,-62,-96] [3968,0,128,160,-62,-96] [4096,0,128,160,-62,-96] [4224,0,128,160,-62,-96] [4352,0,128,160,-62,-96] }
 /* solar_farm: 0=solar_panels, 1=solar_inverter, 2=solar_control */
 spriteset(ss_solar_farm, "sprites/solar_farm.png") { [0,0,64,44,-31,-12] [64,0,64,44,-31,-12] [128,0,64,44,-31,-12] }
 alternative_sprites(ss_solar_farm, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/solar_farm_2x.png") { [0,0,128,88,-62,-24] [128,0,128,88,-62,-24] [256,0,128,88,-62,-24] }
@@ -357,10 +357,6 @@ item(FEAT_INDUSTRYTILES, tile_nuc_switchyard,    14) { property { substitute:0; 
 item(FEAT_INDUSTRYTILES, tile_nuc_tanks,         15) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_nuclear_plant(7); } }
 item(FEAT_INDUSTRYTILES, tile_tidal_barrage,     16) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_tidal_station(0); } }
 item(FEAT_INDUSTRYTILES, tile_tidal_hall,        17) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_tidal_station(1); } }
-item(FEAT_INDUSTRYTILES, tile_wind_a,            18) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(0); } }
-item(FEAT_INDUSTRYTILES, tile_wind_b,            19) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(1); } }
-item(FEAT_INDUSTRYTILES, tile_wind_c,            20) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(2); } }
-item(FEAT_INDUSTRYTILES, tile_wind_d,            21) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(3); } }
 item(FEAT_INDUSTRYTILES, tile_solar_panels,      22) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_solar_farm(0); } }
 item(FEAT_INDUSTRYTILES, tile_solar_inverter,    23) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_solar_farm(1); } }
 item(FEAT_INDUSTRYTILES, tile_solar_control,     24) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_solar_farm(2); } }
@@ -369,9 +365,41 @@ item(FEAT_INDUSTRYTILES, tile_sub_pylon,         26) { property { substitute:0; 
 item(FEAT_INDUSTRYTILES, tile_coal_boiler,       27) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_coal_power_plant(0); } }
 item(FEAT_INDUSTRYTILES, tile_coal_yard,         28) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_coal_power_plant(1); } }
 /* Wind farm spacing tiles: turbines never sit on adjacent tiles, so rotors don't overlap. */
-item(FEAT_INDUSTRYTILES, tile_wind_track_x,      29) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(4); } }
-item(FEAT_INDUSTRYTILES, tile_wind_track_y,      30) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(5); } }
-item(FEAT_INDUSTRYTILES, tile_wind_kiosk,        31) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(6); } }
+item(FEAT_INDUSTRYTILES, tile_wind_track_x,      29) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(32); } }
+item(FEAT_INDUSTRYTILES, tile_wind_track_y,      30) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(33); } }
+item(FEAT_INDUSTRYTILES, tile_wind_kiosk,        31) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(34); } }
+
+/* ── WIND TURBINES: rotor animation ──
+   The wind_farm sheet holds 8 rotor frames per turbine (WIND_FRAMES in
+   tools/make_sprites.py): turbine k's frame f is sprite k * 8 + f, and the
+   track and kiosk tiles follow at 32-34.
+   animation_frame loops 0-7 at the same moment on every turbine, so each
+   tile adds its own random bits to start at a different point in the turn.
+   Animation starts when the tile is built, and the tile-loop trigger
+   restarts it on turbines built before animation existed (older saves).
+   Speed 3 moves one frame every 8 ticks: about 1.7 s per third of a turn,
+   close to a real turbine's 12 rpm. */
+
+item(FEAT_INDUSTRYTILES, tile_wind_a, 18) {
+    property { substitute:0; land_shape_flags:0; animation_info: [ANIMATION_LOOPING, 8]; animation_speed: 3;
+               animation_triggers: bitmask(ANIM_TRIGGER_INDTILE_CONSTRUCTION_STATE, ANIM_TRIGGER_INDTILE_TILE_LOOP); }
+    graphics { anim_control: return CB_RESULT_START_ANIMATION; default: sl_wind_farm(0 * 8 + (animation_frame + random_bits) % 8); }
+}
+item(FEAT_INDUSTRYTILES, tile_wind_b, 19) {
+    property { substitute:0; land_shape_flags:0; animation_info: [ANIMATION_LOOPING, 8]; animation_speed: 3;
+               animation_triggers: bitmask(ANIM_TRIGGER_INDTILE_CONSTRUCTION_STATE, ANIM_TRIGGER_INDTILE_TILE_LOOP); }
+    graphics { anim_control: return CB_RESULT_START_ANIMATION; default: sl_wind_farm(1 * 8 + (animation_frame + random_bits) % 8); }
+}
+item(FEAT_INDUSTRYTILES, tile_wind_c, 20) {
+    property { substitute:0; land_shape_flags:0; animation_info: [ANIMATION_LOOPING, 8]; animation_speed: 3;
+               animation_triggers: bitmask(ANIM_TRIGGER_INDTILE_CONSTRUCTION_STATE, ANIM_TRIGGER_INDTILE_TILE_LOOP); }
+    graphics { anim_control: return CB_RESULT_START_ANIMATION; default: sl_wind_farm(2 * 8 + (animation_frame + random_bits) % 8); }
+}
+item(FEAT_INDUSTRYTILES, tile_wind_d, 21) {
+    property { substitute:0; land_shape_flags:0; animation_info: [ANIMATION_LOOPING, 8]; animation_speed: 3;
+               animation_triggers: bitmask(ANIM_TRIGGER_INDTILE_CONSTRUCTION_STATE, ANIM_TRIGGER_INDTILE_TILE_LOOP); }
+    graphics { anim_control: return CB_RESULT_START_ANIMATION; default: sl_wind_farm(3 * 8 + (animation_frame + random_bits) % 8); }
+}
 item(FEAT_INDUSTRYTILES, tile_wind_grass,        32) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm_grass; } }
 
 /* ── TILE LAYOUTS ──────────────────────────────────────────────── */

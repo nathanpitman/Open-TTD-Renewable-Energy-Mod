@@ -445,9 +445,10 @@ def wind_turbine(cv, cx, cy, angle, h=34, rotor=20.0):
 
     The rotor plane is perpendicular to the view (normal +x+y), and blade
     lengths are set in screen pixels so the rotor reads as a circle of
-    radius `rotor` px rather than a squashed ellipse.  `angle` (degrees)
-    is the first blade's angle; keep every blade at least ~25 degrees
-    away from straight down (270) so none hides against the tower.
+    radius `rotor` px rather than a squashed ellipse.  `angle` (degrees,
+    anticlockwise) is the first blade's angle.  The base angles in
+    WIND_TURBINES keep every blade well away from straight down (270), so
+    the still frame 0 shows no blade hidden against the tower.
     """
     cv.heightfield(cx - 4.5, cy - 4.5, cx + 4.5, cy + 4.5, lambda x, y: 0.05, M["gravel"])  # crane pad
     # track stubs to every tile edge so the access tracks on neighbouring tiles join up
@@ -750,6 +751,24 @@ def t_wind(angle, dx=0.0, dy=0.0):
     return lambda cv: wind_turbine(cv, 8 + dx, 8 + dy, angle)
 
 
+# Rotor animation: the three blades repeat every 120 degrees, so WIND_FRAMES
+# frames step the rotor clockwise through 120 degrees and loop.  Frame 0 is
+# the base angle.  Each turbine's frames sit together in the sheet, so its
+# sprite is  turbine * WIND_FRAMES + frame  (see sw_wind_rotor in the NML).
+WIND_FRAMES = 8
+WIND_TURBINES = [("wind_a", 90, 0.0, 0.0), ("wind_b", 70, 0.5, -0.5),
+                 ("wind_c", 110, -0.5, 0.5), ("wind_d", 60, 0.5, 0.5)]
+
+
+def wind_tiles():
+    tiles = []
+    for key, angle, dx, dy in WIND_TURBINES:
+        for f in range(WIND_FRAMES):
+            tiles.append((key if f == 0 else "%s_f%d" % (key, f),
+                          t_wind(angle - f * 120.0 / WIND_FRAMES, dx, dy)))
+    return tiles
+
+
 def t_wind_track_x(cv):
     service_track(cv, along_x=True)
 
@@ -834,11 +853,7 @@ INDUSTRIES = {
         ("tidal_barrage", t_tidal_barrage),
         ("tidal_hall", t_tidal_hall),
     ]),
-    "wind_farm": ("grass", 48, [
-        ("wind_a", t_wind(90)),
-        ("wind_b", t_wind(70, 0.5, -0.5)),
-        ("wind_c", t_wind(110, -0.5, 0.5)),
-        ("wind_d", t_wind(60, 0.5, 0.5)),
+    "wind_farm": ("grass", 48, wind_tiles() + [
         ("wind_track_x", t_wind_track_x),
         ("wind_track_y", t_wind_track_y),
         ("wind_kiosk", t_wind_kiosk),

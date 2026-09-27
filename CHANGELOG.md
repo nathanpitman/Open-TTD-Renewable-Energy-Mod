@@ -3,6 +3,7 @@
 ## Unreleased
 
 - **Cargo icons for Power and Uranium.** Both cargos now have their own icon in station and industry windows, the cargo payment graph and anywhere else OpenTTD shows cargo icons: a yellow lightning bolt for Power and a green drum with a radiation mark for Uranium. Previously they showed no icon.
+- **Wind turbines turn.** Each turbine's blades now rotate clockwise, about 12 turns a minute like a real turbine. Neighbouring turbines don't turn in step. Wind farms already on the map in existing games start turning too.
 
 ## v13
 
