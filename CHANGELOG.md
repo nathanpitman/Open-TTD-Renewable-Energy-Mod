@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **Fixed: coal mines drawn as hydro dams.** Every industry tile in the NewGRF replaced base-game industry tile 0, which belongs to the coal mine, so coal mines showed dam art. The tiles no longer replace any base-game tile.
+- **Hydroelectric dams sit on water.** A dam used to be allowed anywhere within a few tiles of water, so it could appear in the middle of a field. Each tile of the dam wall now needs a water tile directly next to it, so the dam always meets a real river, lake or canal.
+- **Hydroelectric dams face any direction.** The dam comes in four orientations, so it can be built with the water on any side. The raised reservoir behind the wall is gone: the wall now stands in the river itself, which looks right from every side.
+- **Removed the "max water distance" setting.** It no longer did anything. The other settings keep their numbers, so values saved in existing games still apply to the right setting.
+
 ## v12
 
 From this release on, each release is numbered with a single whole number: the NewGRF and the Game Script both report it as their version. v12 comes after the v0.1 and v0.2 pre-releases, which already shipped a NewGRF with version 11. Numbering carries on from there so OpenTTD always treats a new release as newer.

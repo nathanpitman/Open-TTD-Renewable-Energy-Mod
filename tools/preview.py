@@ -22,8 +22,14 @@ import make_sprites as ms  # noqa: E402
 # industry[/variant] → list of (x, y, tile_key) in tilelayout coordinates;
 # tile_key None is a ground-only tile.  Must mirror the tilelayouts in
 # energy_transition.nml.
+_HYDRO = [(0, 0, "hydro_dam_n"), (0, 1, "hydro_dam_s"), (1, 0, "hydro_power_n"), (1, 1, "hydro_power_s")]
+# the hydro dam in its other three facings: the 2x2 site turned about its centre
+_HYDRO_TURN = {"nw": lambda x, y: (1 - y, x), "sw": lambda x, y: (1 - x, 1 - y), "se": lambda x, y: (y, 1 - x)}
+
 LAYOUTS = {
-    "hydro_dam": [(0, 0, "hydro_dam_n"), (0, 1, "hydro_dam_s"), (1, 0, "hydro_power_n"), (1, 1, "hydro_power_s")],
+    "hydro_dam": _HYDRO,
+    **{"hydro_dam/" + f: [turn(x, y) + ("%s_%s" % (k, f),) for x, y, k in _HYDRO]
+       for f, turn in _HYDRO_TURN.items()},
     "uranium_mine": [(0, 0, "uranium_headframe"), (1, 0, "uranium_mill"), (0, 1, "uranium_tailings"),
                      (1, 1, "uranium_ore")],
     "nuclear_plant": [(0, 0, "nuc_cooling"), (0, 1, "nuc_cooling"), (0, 2, "nuc_switchyard"),

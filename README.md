@@ -76,7 +76,7 @@ All generators accept Passengers (workers). Without regular worker deliveries, p
 ### Energy timeline (all dates configurable)
 | | Industry | Default era | Placement rule |
 |---|---|---|---|
-| <img src="docs/industries/hydro_dam.png" alt="Hydroelectric Dam" width="160"> | Hydroelectric Dam | 1950 | Within water distance parameter of water |
+| <img src="docs/industries/hydro_dam.png" alt="Hydroelectric Dam" width="160"> | Hydroelectric Dam | 1950 | Dam wall directly against water (river, lake or canal), facing whichever way the water is |
 | <img src="docs/industries/uranium_mine.png" alt="Uranium Mine" width="160"> | Uranium Mine | 1953 | Remote |
 | <img src="docs/industries/nuclear_plant.png" alt="Nuclear Power Plant" width="160"> | Nuclear Power Plant | 1956 | Requires Uranium delivery |
 | <img src="docs/industries/tidal_station.png" alt="Tidal Power Station" width="160"> | Tidal Power Station | 1966 | Coast only |
@@ -96,7 +96,7 @@ Configure in **NewGRF Settings → select mod → Parameters** before starting a
 
 **Era dates:** Hydro (1930–1960), Nuclear (1950–1975), Tidal (1960–1985), Wind (1970–1995), Solar (1980–2005), Coal stop (1960–1990), Coal close (1980–2020)
 
-**Placement:** Hydro water distance (2–15), Wind min height (0–8), Substation spawn rate (1–10)
+**Placement:** Wind min height (0–8), Substation spawn rate (1–10)
 
 **Spawn rates:** Individual sliders for each generator type (0 = disabled)
 
