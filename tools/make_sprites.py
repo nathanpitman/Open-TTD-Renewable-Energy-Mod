@@ -898,9 +898,15 @@ def t_solar_control(cv):
 
 
 def bushing(cv, x, y, z0, h, r=0.45, name="bushings"):
-    """Ribbed brown insulator: stacked sheds, wider and narrower in turn."""
-    sheds = max(2, int(h / 0.7))
+    """Ribbed brown insulator: stacked sheds, wider and narrower in turn.
+    At 1x the ribs can't show, so it is a 1px-wide post in light and dark
+    bands instead, which keeps neighbouring bushings apart."""
     with cv.part(name):
+        if cv.s == 1:
+            cv.column(x, y, z0, z0 + h, 0.12, striped(M["porcelain"], Material(PORCELAIN, bias=-0.3), 1.0),
+                      cap=M["steel_dark"])
+            return
+        sheds = max(2, int(h / 0.7))
         cv.column(x, y, z0, z0 + h, lambda t: r if int(t * sheds * 2) % 2 == 0 else r * 0.65,
                   M["porcelain"], cap=M["steel_dark"])
 

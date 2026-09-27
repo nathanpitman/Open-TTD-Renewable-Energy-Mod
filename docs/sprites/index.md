@@ -279,11 +279,11 @@ wind_track_y is the same track running the other way.
 
 - control building
 - building door
-- switchgear cabinets
 - bushings
-- insulators
-- transformer
 - switch rack
+- insulators
+- switchgear cabinets
+- transformer
 - ground (concrete)
 - fence
 
