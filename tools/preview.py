@@ -46,7 +46,6 @@ LAYOUTS = {
     "solar_farm": [(0, 0, "solar_panels"), (1, 0, "solar_panels"), (2, 0, "solar_inverter"),
                    (0, 1, "solar_control"), (1, 1, "solar_panels"), (2, 1, "solar_panels")],
     "substation": [(0, 0, "sub_transformers"), (1, 0, "sub_pylon")],
-    "coal_power_plant": [(0, 0, "coal_boiler"), (1, 0, "coal_yard")],
 }
 
 
