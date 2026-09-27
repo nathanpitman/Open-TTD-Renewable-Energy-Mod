@@ -33,45 +33,45 @@ STR_STAT_SOLAR_FARM             :{STRING} Solar Farm
 STR_STAT_SUBSTATION             :{STRING} Substation
 STR_STAT_COAL_PLANT             :{STRING} Power Station
 
-STR_NEWS_URANIUM_NEW            :A Uranium Mine has opened!
-STR_NEWS_URANIUM_UP             :Uranium Mine production up
-STR_NEWS_URANIUM_DOWN           :Uranium Mine production down
-STR_NEWS_URANIUM_CLOSE          :Uranium Mine has closed
+STR_NEWS_URANIUM_NEW            :New {STRING} opens near {STRING}!
+STR_NEWS_URANIUM_UP             :{STRING} Uranium Mine production up
+STR_NEWS_URANIUM_DOWN           :{STRING} Uranium Mine production down
+STR_NEWS_URANIUM_CLOSE          :{STRING} Uranium Mine has closed
 
-STR_NEWS_NUCLEAR_NEW            :A Nuclear Power Plant has been commissioned!
-STR_NEWS_NUCLEAR_UP             :Nuclear Power Plant output up
-STR_NEWS_NUCLEAR_DOWN           :Nuclear Power Plant output down
-STR_NEWS_NUCLEAR_CLOSE          :Nuclear Power Plant decommissioned
+STR_NEWS_NUCLEAR_NEW            :New {STRING} commissioned near {STRING}!
+STR_NEWS_NUCLEAR_UP             :{STRING} Nuclear Power Plant output up
+STR_NEWS_NUCLEAR_DOWN           :{STRING} Nuclear Power Plant output down
+STR_NEWS_NUCLEAR_CLOSE          :{STRING} Nuclear Power Plant decommissioned
 
-STR_NEWS_HYDRO_NEW              :A Hydroelectric Dam has been constructed!
-STR_NEWS_HYDRO_UP               :Hydro Dam output increasing
-STR_NEWS_HYDRO_DOWN             :Hydro Dam output decreasing
-STR_NEWS_HYDRO_CLOSE            :Hydroelectric Dam decommissioned
+STR_NEWS_HYDRO_NEW              :New {STRING} constructed near {STRING}!
+STR_NEWS_HYDRO_UP               :{STRING} Hydroelectric Dam output increasing
+STR_NEWS_HYDRO_DOWN             :{STRING} Hydroelectric Dam output decreasing
+STR_NEWS_HYDRO_CLOSE            :{STRING} Hydroelectric Dam decommissioned
 
-STR_NEWS_TIDAL_NEW              :A Tidal Power Station has been built!
-STR_NEWS_TIDAL_UP               :Tidal Station output up
-STR_NEWS_TIDAL_DOWN             :Tidal Station output down
-STR_NEWS_TIDAL_CLOSE            :Tidal Power Station closed
+STR_NEWS_TIDAL_NEW              :New {STRING} built near {STRING}!
+STR_NEWS_TIDAL_UP               :{STRING} Tidal Power Station output up
+STR_NEWS_TIDAL_DOWN             :{STRING} Tidal Power Station output down
+STR_NEWS_TIDAL_CLOSE            :{STRING} Tidal Power Station closed
 
-STR_NEWS_WIND_NEW               :A Wind Farm has been constructed!
-STR_NEWS_WIND_UP                :Wind Farm output increasing
-STR_NEWS_WIND_DOWN              :Wind Farm output decreasing
-STR_NEWS_WIND_CLOSE             :Wind Farm decommissioned
+STR_NEWS_WIND_NEW               :New {STRING} constructed near {STRING}!
+STR_NEWS_WIND_UP                :{STRING} Wind Farm output increasing
+STR_NEWS_WIND_DOWN              :{STRING} Wind Farm output decreasing
+STR_NEWS_WIND_CLOSE             :{STRING} Wind Farm decommissioned
 
-STR_NEWS_SOLAR_NEW              :A Solar Farm has been established!
-STR_NEWS_SOLAR_UP               :Solar Farm output increasing
-STR_NEWS_SOLAR_DOWN             :Solar Farm output decreasing
-STR_NEWS_SOLAR_CLOSE            :Solar Farm has shut down
+STR_NEWS_SOLAR_NEW              :New {STRING} established near {STRING}!
+STR_NEWS_SOLAR_UP               :{STRING} Solar Farm output increasing
+STR_NEWS_SOLAR_DOWN             :{STRING} Solar Farm output decreasing
+STR_NEWS_SOLAR_CLOSE            :{STRING} Solar Farm has shut down
 
-STR_NEWS_SUBSTATION_NEW         :An Electrical Substation has been built!
-STR_NEWS_SUBSTATION_UP          :Substation demand increasing
-STR_NEWS_SUBSTATION_DOWN        :Substation demand decreasing
-STR_NEWS_SUBSTATION_CLOSE       :Electrical Substation closed
+STR_NEWS_SUBSTATION_NEW         :New {STRING} built near {STRING}!
+STR_NEWS_SUBSTATION_UP          :{STRING} Electrical Substation demand increasing
+STR_NEWS_SUBSTATION_DOWN        :{STRING} Electrical Substation demand decreasing
+STR_NEWS_SUBSTATION_CLOSE       :{STRING} Electrical Substation closed
 
-STR_NEWS_COAL_NEW               :A Coal Power Station has been built!
-STR_NEWS_COAL_UP                :Coal Power Station output increasing
-STR_NEWS_COAL_DOWN              :Coal Power Station is declining
-STR_NEWS_COAL_CLOSE             :Coal Power Station has been decommissioned
+STR_NEWS_COAL_NEW               :New {STRING} built near {STRING}!
+STR_NEWS_COAL_UP                :{STRING} Coal Power Station output increasing
+STR_NEWS_COAL_DOWN              :{STRING} Coal Power Station is declining
+STR_NEWS_COAL_CLOSE             :{STRING} Coal Power Station has been decommissioned
 
 STR_PARAM_HYDRO_YEAR_NAME       :Hydro Dam: available from year
 STR_PARAM_HYDRO_YEAR_DESC       :Earliest year hydroelectric dams can appear on the map (default: 1950)
