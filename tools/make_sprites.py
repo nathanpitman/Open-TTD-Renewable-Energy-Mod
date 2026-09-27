@@ -441,31 +441,46 @@ def reactor(cv, cx, cy, r=6.5, h=18):
     cv.dome(cx, cy, h, r, M["white"], squash=0.9)
 
 
-def wind_turbine(cv, cx, cy, angle, h=34):
-    """Rotor is ~1.3 tiles across, so turbines need a free tile between them."""
+def wind_turbine(cv, cx, cy, angle, h=34, rotor=20.0):
+    """Three-bladed turbine whose rotor faces the viewer.
+
+    The rotor plane is perpendicular to the view (normal +x+y), and blade
+    lengths are set in screen pixels so the rotor reads as a circle of
+    radius `rotor` px rather than a squashed ellipse.  `angle` (degrees)
+    is the first blade's angle; keep every blade at least ~25 degrees
+    away from straight down (270) so none hides against the tower.
+    """
     cv.heightfield(cx - 4.5, cy - 4.5, cx + 4.5, cy + 4.5, lambda x, y: 0.05, M["gravel"])  # crane pad
     # track stubs to every tile edge so the access tracks on neighbouring tiles join up
     service_track(cv, along_x=True)
     service_track(cv, along_x=False)
     cv.box(cx - 2.5, cy - 2.5, 0, cx + 2.5, cy + 2.5, 0.6, M["concrete"])  # foundation
     cv.column(cx, cy, 0.6, h, lambda t: 1.1 - 0.5 * t, M["white"])
-    # nacelle points along -x (rotor faces the viewer's lower-left)
-    cv.box(cx - 1.6, cy - 0.7, h - 0.6, cx + 2.2, cy + 0.7, h + 1.1, M["white"])
-    hub = (cx + 2.5, cy, h + 0.25)
-    cv.column(hub[0] - 0.2, hub[1], hub[2] - 0.6, hub[2] + 0.6, 0.5, M["grey"])
-    blade_len = 10.5
-    for k in range(3):
-        th = angle + k * 2 * math.pi / 3
-        dy, dz = math.cos(th), math.sin(th)
-        # tapered blade in the rotor plane (constant x)
-        n = cv._n(blade_len * 2)
+    # nacelle on top of the tower, hub in front of it (towards the viewer)
+    cv.box(cx - 1.4, cy - 1.4, h - 0.6, cx + 1.0, cy + 1.0, h + 1.2, M["white"])
+    hub = (cx + 1.5, cy + 1.5, h + 0.3)
+    cv.dome(hub[0], hub[1], hub[2] - 0.4, 0.7, M["grey"])
+    # unit vectors: screen-right in the rotor plane, and up
+    k = 2 * math.sqrt(2)  # screen px per world unit along (-1, 1, 0)/sqrt(2)
+    ux, uy = -1 / math.sqrt(2) / k, 1 / math.sqrt(2) / k  # one screen px to the right
+    blade = Material([10, 11, 12, 13, 14], pattern=None)
+    edge = Material([7, 8, 9])
+    for b in range(3):
+        th = math.radians(angle + b * 120)
+        c, sn = math.cos(th), math.sin(th)
+        n = cv._n(rotor)
         for i in range(n + 1):
             t = i / n
-            w = 0.8 * (1 - t) + 0.25
-            for j in range(-2, 3):
-                off = w * j / 2 * 0.5
-                p = (hub[0] + 0.1, hub[1] + dy * blade_len * t - dz * off, hub[2] + dz * blade_len * t + dy * off)
-                cv.splat(p, (1, 0.1, 0.1), M["white"])
+            r = rotor * t
+            half = 1.3 * (1 - t) + 0.4  # half-width in screen px, tapering to the tip
+            m = max(1, int(math.ceil(half * 2 * cv.s)))
+            for j in range(-m, m + 1):
+                w = half * j / m
+                # position in screen px relative to the hub: along the blade + across it
+                px = r * c - w * sn
+                pz = r * sn + w * c
+                p = (hub[0] + px * ux + 0.3, hub[1] + px * uy + 0.3, hub[2] + pz)
+                cv.splat(p, (1, 1, 0.3), edge if abs(j) == m and t < 0.9 else blade)
 
 
 def service_track(cv, along_x=True, x0=0.0, x1=16.0):
@@ -745,10 +760,10 @@ INDUSTRIES = {
         ("tidal_hall", t_tidal_hall),
     ]),
     "wind_farm": ("grass", 48, [
-        ("wind_a", t_wind(0.3)),
-        ("wind_b", t_wind(1.2, 0.5, -0.5)),
-        ("wind_c", t_wind(0.7, -0.5, 0.5)),
-        ("wind_d", t_wind(1.6, 0.5, 0.5)),
+        ("wind_a", t_wind(90)),
+        ("wind_b", t_wind(70, 0.5, -0.5)),
+        ("wind_c", t_wind(110, -0.5, 0.5)),
+        ("wind_d", t_wind(60, 0.5, 0.5)),
         ("wind_track_x", t_wind_track_x),
         ("wind_track_y", t_wind_track_y),
         ("wind_kiosk", t_wind_kiosk),
