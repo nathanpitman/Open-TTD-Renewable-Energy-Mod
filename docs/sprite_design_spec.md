@@ -62,21 +62,21 @@ For our sprites, that means:
 - Walls facing the lower left (south-west, the +x faces) are turned away from the light, so they are darker.
 - Shadows fall towards the upper left.
 
-**Current (does not follow this yet):** the generator's light is `LIGHT = (0.55, -0.15, 0.82)`. That lights the lower-left walls and puts the lower-right walls in full shade, which is the opposite of the standard:
+**Current:** the generator follows this since #76. `LIGHT = (-0.15, 0.55, 0.82)` in `tools/make_sprites.py` gives:
 
-| Face | Brightness now |
+| Face | Brightness |
 |---|---|
 | Roof | 0.87 |
-| Walls facing lower-left (+x) | 0.66 |
-| Walls facing lower-right (+y) | 0.25 |
+| Walls facing lower-right (+y) | 0.66 |
+| Walls facing lower-left (+x) | 0.25 |
 
-Brightness = `0.25 + 0.75 × max(0, N·L)`, mapped onto the material's ramp. The comments in `tools/make_sprites.py` describe this light as coming from the "upper left", which is also inaccurate.
+Brightness = `0.25 + 0.75 × max(0, N·L)`, mapped onto the material's ramp. Windowed walls use the lighter glass colour on the lit, lower-right walls. `tools/compare_vanilla.py` draws our tiles next to OpenGFX buildings so the lighting can be checked against the base game.
 
-Fixing it is a global change, tracked under #34:
+**Still to check after the light change:**
 
-- Turn `LIGHT` so its horizontal direction points to the lower right of the screen. The 4:30 direction on screen is about `x : y = 1 : 3` in world units. Keep it high in the sky.
-- Update those comments.
-- Recheck every sprite. This includes hand-set shading that assumes the old light: the solar panels tilted "towards the light", the blade edge colours, and the lit side of the Power cargo icon.
+- **Solar panels:** they are still tilted to face the lower left (south-west). The `solar_rows` docstring says that is "the light", which is no longer true. Decide whether they should face the new light (issues #61–#63).
+- **Turbine blades:** they use fixed colours (`blade` and `edge` in `wind_turbine`), not the light. Check that they sit well next to the newly lit tower (#58).
+- **Cargo icons:** these are flat menu icons and keep their own shading. The Power icon's docstring still says "lit from the upper left" (#73).
 
 **Open question:** contrast. The base game has a bigger jump between the lit and shaded walls than our smooth shading gives. We still need to decide the minimum number of ramp steps between lit and shaded faces.
 
@@ -198,4 +198,4 @@ Read at least "Recommended Standards" (light and style) and "PalettesAndCoordina
 | 2026-09-27 | Sprites must look at home next to base-game industries | 1 | #34 |
 | 2026-09-27 | Every sprite gets an annotated reference image, made by the build, naming its parts for use in change requests | 12 | #34 |
 | 2026-09-27 | Annotated references built (`tools/sprite_refs.py`, `docs/sprites/`); part names come from `cv.part()` tags in the drawing code | 12 | #34 |
-| 2026-09-27 | Light source is in the lower right of the screen (about 4:30), high in the sky, per the OpenTTD wiki Recommended Standards. The generator currently lights the opposite walls and needs fixing | 4 | #34 |
+| 2026-09-27 | Light source is in the lower right of the screen (about 4:30), high in the sky, per the OpenTTD wiki Recommended Standards. The generator was changed to match in #76 | 4 | #34, #76 |

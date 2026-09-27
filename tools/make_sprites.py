@@ -21,8 +21,10 @@ Conventions (see README "Sprites" section):
   * World units: one tile is 16x16, one height level is 8 units.
     +x points to the lower-left of the screen (SW), +y to the lower-right
     (SE), +z is up.  Projection matches OpenTTD: X = 2(y-x), Y = x+y-z.
-  * Light comes from the upper-left of the screen: roofs are brightest,
-    SW-facing (left) walls are lit, SE-facing (right) walls are in shade.
+  * Light comes from high up at the lower right of the screen ("4:30"),
+    as in original TTD art (OpenTTD wiki, NewGRF "Recommended Standards"):
+    roofs are brightest, SE-facing (right) walls are lit, SW-facing (left)
+    walls are in shade, and shadows would fall towards the top-left.
   * Index 0 is transparent.  Only non-animated palette entries are used,
     except the sea-water cycle (245-249) on water surfaces, which makes
     water animate like the base game's.
@@ -48,7 +50,7 @@ OUT = os.path.join(ROOT, "sprites")
 PALETTE = list(nml_palette.raw_palette_data[0])  # DEFAULT (DOS) palette
 
 CELL_W = 64
-LIGHT = (0.55, -0.15, 0.82)
+LIGHT = (-0.15, 0.55, 0.82)  # world (x, y, z): from +y (screen lower right), high up
 _l = math.sqrt(sum(c * c for c in LIGHT))
 LIGHT = tuple(c / _l for c in LIGHT)
 
@@ -390,7 +392,7 @@ def windowed(base, glass_idx=201, every=3.0, band=(0.35, 0.7), z_every=5.0, z_ba
         fu = (u / every) % 1.0
         fz = (p[2] / z_every) % 1.0
         if band[0] < fu < band[1] and z_band[0] < fz < z_band[1]:
-            return glass_idx if n[0] > 0.5 else glass_idx - 2
+            return glass_idx if n[1] > 0.5 else glass_idx - 2  # lit (SE) walls get the lighter glass
         return None
     return Material(base.ramp, base.noise, base.grain, base.bias, pat)
 
