@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v14
 
 - **News messages name the town.** When a generator, substation, uranium mine or coal power station opens, closes or changes output, the news now says where, for example "New Wind Farm constructed near Smallbridge!" or "Smallbridge Coal Power Station has been decommissioned". Before, the messages didn't say which town. ([#50](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/50))
 - **New Electrical Substation art.** The substation no longer has a transmission pylon, since the game has no overhead power lines; its power is taken to be carried by buried cables. It is now a fenced yard with a large grid transformer (tall brown bushings, cooling radiators and a conservator tank), switchgear cabinets, a switch rack, two smaller transformers and a control building. Substations already on the map in existing games show the new art.
