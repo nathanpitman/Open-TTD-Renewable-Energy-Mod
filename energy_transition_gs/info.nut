@@ -2,7 +2,7 @@ class EnergyTransitionInfo extends GSInfo {
     function GetAuthor()      { return "Energy Transition"; }
     function GetName()        { return "Energy Transition Power Grid"; }
     function GetDescription() { return "Invisible power grid. Generators power nearby towns based on proximity. Substations amplify growth. No power = no growth. Use with Energy Transition Industries NewGRF."; }
-    function GetVersion()     { return 12; }
+    function GetVersion()     { return 13; }
     function GetDate()        { return "2026-09-27"; }
     function GetShortName()   { return "ETPG"; }
     function GetAPIVersion()  { return "13"; }

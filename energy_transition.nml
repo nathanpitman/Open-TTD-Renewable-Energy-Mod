@@ -1,5 +1,5 @@
 /*
- * Energy Transition Industries — OpenTTD NewGRF v12
+ * Energy Transition Industries — OpenTTD NewGRF v13
  * ==================================================
  * Full energy economy with configurable parameters.
  *
@@ -16,7 +16,7 @@ grf {
     grfid: "RE01";
     name: string(STR_GRF_NAME);
     desc: string(STR_GRF_DESC);
-    version: 12;
+    version: 13;
     min_compatible_version: 1;
 
     /* ── ERA DATES ─────────────────────────────────────────────── */
