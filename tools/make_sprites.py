@@ -1019,13 +1019,15 @@ def _in_poly(x, y, pts):
 
 
 def icon_power(u, v):
-    """Yellow lightning bolt, lit from the upper left.  Returns (index, part)."""
+    """Yellow lightning bolt, shaded lighter towards its upper left.  Returns
+    (index, part).  Cargo icons are flat menu art, not world sprites, so this
+    shading is part of the drawing and doesn't follow LIGHT."""
     if not _in_poly(u, v, _BOLT):
         return 0, None
     return YELLOW[min(6, max(3, int(7.5 - (u + v) * 0.3)))], "lightning bolt"
 
 
-_DRUM = [83, 85, 87, 209, 87, 86, 85, 84, 83, 82]  # left to right, lit from the left
+_DRUM = [83, 85, 87, 209, 87, 86, 85, 84, 83, 82]  # left to right, highlight left of centre (not LIGHT)
 
 
 def icon_uranium(u, v):
