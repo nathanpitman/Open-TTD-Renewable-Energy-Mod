@@ -97,3 +97,23 @@ in-game" in the PR, don't close an issue as fixed, and don't describe
 the change as working. If the headless check can't run (for example
 OpenTTD can't be installed), say that too, rather than skipping it
 silently.
+
+## Sprite design spec
+
+`docs/sprite_design_spec.md` sets out how every sprite should look.
+Follow its **Decided** rules for any new or changed sprite.
+
+Sprites are refined one at a time, with one issue per sprite under
+issue #34. When a refinement should apply to every sprite (an outline
+rule, a texture level, a palette choice, a zoom-level decision),
+update the spec and its decision log in the same change. Put the rule
+in `tools/make_sprites.py` as shared code, not in one draw function.
+If a change only affects one sprite, leave the spec alone.
+
+Each sprite has an annotated reference in `docs/sprites/`, and
+`docs/sprites/index.md` lists every sprite's part names (spec section
+12). Use those names to work out what a change request refers to. They
+come from `with cv.part("name"):` blocks in `tools/make_sprites.py`, so
+wrap any new drawing call in one. `python3 tools/make_sprites.py`
+regenerates the references with the sheets. Commit them in the same
+change.

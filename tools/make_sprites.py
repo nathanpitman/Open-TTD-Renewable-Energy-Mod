@@ -13,6 +13,10 @@ Usage:
     python3 tools/make_sprites.py          # writes sprites/*.png
     python3 tools/make_sprites.py cargo_icons   # just one sheet (or an industry name)
 
+It also writes the annotated references in docs/sprites/ (see
+tools/sprite_refs.py).  Wrap every drawing call in `with cv.part("name"):`
+so each visible part is named there.
+
 Conventions (see README "Sprites" section):
   * World units: one tile is 16x16, one height level is 8 units.
     +x points to the lower-left of the screen (SW), +y to the lower-right
@@ -27,6 +31,7 @@ Conventions (see README "Sprites" section):
     with offsets (-31*scale, -H*scale).  nmlc crops the empty borders.
 """
 
+import contextlib
 import math
 import os
 import sys
@@ -119,6 +124,19 @@ class Canvas:
         self.px = [0] * (self.w * self.h)
         self.depth = [-1e9] * (self.w * self.h)
         self.step = 0.2 / scale
+        # name of the part that drew each pixel, for the annotated references
+        self.parts = [None] * (self.w * self.h)
+        self._part = [None]
+
+    @contextlib.contextmanager
+    def part(self, name):
+        """Tag everything drawn inside the block with a part name.  The
+        innermost name wins, so shared helpers keep their own name."""
+        self._part.append(name)
+        try:
+            yield
+        finally:
+            self._part.pop()
 
     # -- low level --------------------------------------------------------
     def splat(self, p, n, mat):
@@ -133,6 +151,7 @@ class Canvas:
             if d >= self.depth[i]:
                 self.depth[i] = d
                 self.px[i] = mat.colour(p, n)
+                self.parts[i] = self._part[-1]
 
     def _n(self, length):
         return max(1, int(math.ceil(abs(length) / self.step)))
@@ -165,15 +184,20 @@ class Canvas:
     def gable(self, x0, y0, z0, x1, y1, z1, ridge, wall, roof, along_x=True):
         """Box with a pitched roof rising to z1+ridge."""
         self.box(x0, y0, z0, x1, y1, z1, wall)
+        roof_part = self.part("%s roof" % self._part[-1]) if self._part[-1] else contextlib.nullcontext()
         if along_x:
             ym = (y0 + y1) / 2
-            self.parallelogram((x0, y0, z1), (x1 - x0, 0, 0), (0, ym - y0, ridge), roof, (0, -ridge, ym - y0))
-            self.parallelogram((x0, ym, z1 + ridge), (x1 - x0, 0, 0), (0, y1 - ym, -ridge), roof, (0, ridge, y1 - ym))
+            with roof_part:
+                self.parallelogram((x0, y0, z1), (x1 - x0, 0, 0), (0, ym - y0, ridge), roof, (0, -ridge, ym - y0))
+                self.parallelogram((x0, ym, z1 + ridge), (x1 - x0, 0, 0), (0, y1 - ym, -ridge), roof,
+                                   (0, ridge, y1 - ym))
             self._tri_gable_x(x1, y0, y1, z1, ridge, wall)
         else:
             xm = (x0 + x1) / 2
-            self.parallelogram((x0, y0, z1), (0, y1 - y0, 0), (xm - x0, 0, ridge), roof, (-ridge, 0, xm - x0))
-            self.parallelogram((xm, y0, z1 + ridge), (0, y1 - y0, 0), (x1 - xm, 0, -ridge), roof, (ridge, 0, x1 - xm))
+            with roof_part:
+                self.parallelogram((x0, y0, z1), (0, y1 - y0, 0), (xm - x0, 0, ridge), roof, (-ridge, 0, xm - x0))
+                self.parallelogram((xm, y0, z1 + ridge), (0, y1 - y0, 0), (x1 - xm, 0, -ridge), roof,
+                                   (ridge, 0, x1 - xm))
             self._tri_gable_y(y1, x0, x1, z1, ridge, wall)
 
     def _tri_gable_x(self, x, y0, y1, z, ridge, mat):
@@ -284,29 +308,32 @@ GROUND_ORDER = ["grass", "dirt", "concrete", "water", "shore"]
 
 
 def ground_colour(kind, x, y):
+    """(palette index, part name) of the ground at world point (x, y)."""
     n = hash01(x * 2, y * 2, 7)
     n2 = hash01(x / 3, y / 3, 11)
     if kind == "grass":
-        return GRASS[[2, 3, 3, 4, 4, 4, 5, 5, 6][int((n * 0.6 + n2 * 0.4) * 9)]]
+        return GRASS[[2, 3, 3, 4, 4, 4, 5, 5, 6][int((n * 0.6 + n2 * 0.4) * 9)]], "grass"
     if kind == "dirt":
-        return DIRT[[2, 3, 3, 4, 4, 5, 5, 6][int((n * 0.7 + n2 * 0.3) * 8)]]
+        return DIRT[[2, 3, 3, 4, 4, 5, 5, 6][int((n * 0.7 + n2 * 0.3) * 8)]], "dirt"
     if kind == "concrete":
-        seam = (x % 8 < 0.5) or (y % 8 < 0.5)
-        return 7 if seam else [9, 10, 10, 10, 11][int(n * 5)]
+        if (x % 8 < 0.5) or (y % 8 < 0.5):
+            return 7, "slab seams"
+        return [9, 10, 10, 10, 11][int(n * 5)], "concrete slabs"
     if kind == "water":
-        return WATER[int((n * 0.5 + n2 * 0.5) * len(WATER))]
+        return WATER[int((n * 0.5 + n2 * 0.5) * len(WATER))], "water"
     if kind == "shore":
         edge = 12 + (hash01(x, 3) - 0.5) * 1.5
         if y < edge - 1.2:
-            return WATER[int((n * 0.5 + n2 * 0.5) * len(WATER))]
+            return WATER[int((n * 0.5 + n2 * 0.5) * len(WATER))], "sea"
         if y < edge:
-            return 252 if n > 0.6 else 251  # surf
-        return SAND[[1, 2, 2, 3, 3, 4][int(n * 6)]]
+            return (252 if n > 0.6 else 251), "surf"
+        return SAND[[1, 2, 2, 3, 3, 4][int(n * 6)]], "sand"
     raise ValueError(kind)
 
 
-def ground_tile(kind, s):
-    """64x31 flat ground diamond in the standard TTD pixel shape (scaled)."""
+def ground_tile(kind, s, parts=None):
+    """64x31 flat ground diamond in the standard TTD pixel shape (scaled).
+    If `parts` is a dict, it is filled with (col, row) -> part name."""
     w, h = CELL_W * s, 31 * s + (s - 1)
     im = Image.new("P", (w, h), 0)
     im.putpalette(PALETTE)
@@ -323,7 +350,9 @@ def ground_tile(kind, s):
             Y = (r + 0.5) / s
             x = (Y - X / 2) / 2
             y = (Y + X / 2) / 2
-            px[c, r] = ground_colour(kind, min(max(x, 0), 15.99), min(max(y, 0), 15.99))
+            px[c, r], name = ground_colour(kind, min(max(x, 0), 15.99), min(max(y, 0), 15.99))
+            if parts is not None:
+                parts[c, r] = name
     return im
 
 
@@ -375,6 +404,11 @@ def striped(a, b, period):
 
 # ── Reusable structures ────────────────────────────────────────────────
 def lattice_tower(cv, cx, cy, z1, base=3.0, top=1.0, mat=None):
+    with cv.part("lattice pylon"):
+        _lattice_tower(cv, cx, cy, z1, base, top, mat)
+
+
+def _lattice_tower(cv, cx, cy, z1, base, top, mat):
     mat = mat or M["steel"]
     w = 0.5
     legs = [(-1, -1), (1, -1), (1, 1), (-1, 1)]
@@ -394,10 +428,16 @@ def lattice_tower(cv, cx, cy, z1, base=3.0, top=1.0, mat=None):
     for zz, arm in ((z1 * 0.8, 6.0), (z1 * 0.62, 5.0)):
         cv.beam((cx - arm, cy, zz), (cx + arm, cy, zz), w, mat)
         for sgn in (-1, 1):
-            cv.beam((cx + sgn * arm, cy, zz), (cx + sgn * arm, cy, zz - 2.5), 0.4, M["dark"])
+            with cv.part("insulators"):
+                cv.beam((cx + sgn * arm, cy, zz), (cx + sgn * arm, cy, zz - 2.5), 0.4, M["dark"])
 
 
 def transformer(cv, x, y, sx=4, sy=5, h=5):
+    with cv.part("transformer"):
+        _transformer(cv, x, y, sx, sy, h)
+
+
+def _transformer(cv, x, y, sx, sy, h):
     cv.box(x, y, 0, x + sx, y + sy, h, M["steel"])
     for k in range(4):  # radiator fins
         cv.box(x + sx, y + 0.6 + k * (sy - 1) / 4, 0.8, x + sx + 1.0, y + 0.9 + k * (sy - 1) / 4, h - 1, M["steel_dark"])
@@ -406,12 +446,18 @@ def transformer(cv, x, y, sx=4, sy=5, h=5):
 
 
 def gantry(cv, x0, y0, y1, h):
+    with cv.part("gantry"):
+        _gantry(cv, x0, y0, y1, h)
+
+
+def _gantry(cv, x0, y0, y1, h):
     for yy in (y0, y1):
         cv.beam((x0, yy, 0), (x0, yy, h), 0.6, M["steel"])
     cv.beam((x0, y0, h), (x0, y1, h), 0.6, M["steel"])
     for k in range(3):
         yy = y0 + (k + 1) * (y1 - y0) / 4
-        cv.beam((x0, yy, h), (x0, yy, h - 1.5), 0.35, M["white"])
+        with cv.part("insulators"):
+            cv.beam((x0, yy, h), (x0, yy, h - 1.5), 0.35, M["white"])
 
 
 def pylon_wire(cv, x0, y0, x1, y1, z):
@@ -419,6 +465,11 @@ def pylon_wire(cv, x0, y0, x1, y1, z):
 
 
 def fence(cv, x0, y0, x1, y1):
+    with cv.part("fence"):
+        _fence(cv, x0, y0, x1, y1)
+
+
+def _fence(cv, x0, y0, x1, y1):
     cv.beam((x0, y0, 1.2), (x1, y1, 1.2), 0.2, M["steel_dark"])
     L = max(abs(x1 - x0), abs(y1 - y0))
     for k in range(int(L / 2) + 1):
@@ -431,13 +482,16 @@ def cooling_tower(cv, cx, cy, h=52, rb=7.4):
     def r(t):
         # hyperboloid: wide base, waist at 70% height, slight flare at top
         return rb * (0.64 + 0.36 * ((t - 0.72) / 0.72) ** 2) if t < 0.72 else rb * (0.64 + 0.35 * ((t - 0.72) / 0.28) ** 2 * 0.4)
-    cv.column(cx, cy, 0, h, r, M["concrete"], cap=M["dark"])
-    cv.disc(cx, cy, h - 0.1, r(1.0) - 0.8, M["dark"])
+    with cv.part("cooling tower"):
+        cv.column(cx, cy, 0, h, r, M["concrete"], cap=M["dark"])
+        cv.disc(cx, cy, h - 0.1, r(1.0) - 0.8, M["dark"])
 
 
 def reactor(cv, cx, cy, r=6.5, h=18):
-    cv.column(cx, cy, 0, h, r, M["concrete"], cap=False)
-    cv.dome(cx, cy, h, r, M["white"], squash=0.9)
+    with cv.part("reactor building"):
+        cv.column(cx, cy, 0, h, r, M["concrete"], cap=False)
+    with cv.part("reactor dome"):
+        cv.dome(cx, cy, h, r, M["white"], squash=0.9)
 
 
 def wind_turbine(cv, cx, cy, angle, h=34, rotor=20.0):
@@ -450,21 +504,31 @@ def wind_turbine(cv, cx, cy, angle, h=34, rotor=20.0):
     WIND_TURBINES keep every blade well away from straight down (270), so
     the still frame 0 shows no blade hidden against the tower.
     """
-    cv.heightfield(cx - 4.5, cy - 4.5, cx + 4.5, cy + 4.5, lambda x, y: 0.05, M["gravel"])  # crane pad
+    with cv.part("crane pad"):
+        cv.heightfield(cx - 4.5, cy - 4.5, cx + 4.5, cy + 4.5, lambda x, y: 0.05, M["gravel"])
     # track stubs to every tile edge so the access tracks on neighbouring tiles join up
     service_track(cv, along_x=True)
     service_track(cv, along_x=False)
-    cv.box(cx - 2.5, cy - 2.5, 0, cx + 2.5, cy + 2.5, 0.6, M["concrete"])  # foundation
-    cv.column(cx, cy, 0.6, h, lambda t: 1.1 - 0.5 * t, M["white"])
+    with cv.part("foundation"):
+        cv.box(cx - 2.5, cy - 2.5, 0, cx + 2.5, cy + 2.5, 0.6, M["concrete"])
+    with cv.part("tower"):
+        cv.column(cx, cy, 0.6, h, lambda t: 1.1 - 0.5 * t, M["white"])
     # nacelle on top of the tower, hub in front of it (towards the viewer)
-    cv.box(cx - 1.4, cy - 1.4, h - 0.6, cx + 1.0, cy + 1.0, h + 1.2, M["white"])
+    with cv.part("nacelle"):
+        cv.box(cx - 1.4, cy - 1.4, h - 0.6, cx + 1.0, cy + 1.0, h + 1.2, M["white"])
     hub = (cx + 1.5, cy + 1.5, h + 0.3)
-    cv.dome(hub[0], hub[1], hub[2] - 0.4, 0.7, M["grey"])
+    with cv.part("hub"):
+        cv.dome(hub[0], hub[1], hub[2] - 0.4, 0.7, M["grey"])
     # unit vectors: screen-right in the rotor plane, and up
     k = 2 * math.sqrt(2)  # screen px per world unit along (-1, 1, 0)/sqrt(2)
     ux, uy = -1 / math.sqrt(2) / k, 1 / math.sqrt(2) / k  # one screen px to the right
     blade = Material([10, 11, 12, 13, 14], pattern=None)
     edge = Material([7, 8, 9])
+    with cv.part("turbine blades"):
+        _blades(cv, hub, angle, rotor, ux, uy, blade, edge)
+
+
+def _blades(cv, hub, angle, rotor, ux, uy, blade, edge):
     for b in range(3):
         th = math.radians(angle + b * 120)
         c, sn = math.cos(th), math.sin(th)
@@ -485,10 +549,11 @@ def wind_turbine(cv, cx, cy, angle, h=34, rotor=20.0):
 
 def service_track(cv, along_x=True, x0=0.0, x1=16.0):
     """Gravel access track between turbines, flat on the ground."""
-    if along_x:
-        cv.heightfield(x0, 6.5, x1, 9.5, lambda x, y: 0.05, M["gravel"])
-    else:
-        cv.heightfield(6.5, x0, 9.5, x1, lambda x, y: 0.05, M["gravel"])
+    with cv.part("service track"):
+        if along_x:
+            cv.heightfield(x0, 6.5, x1, 9.5, lambda x, y: 0.05, M["gravel"])
+        else:
+            cv.heightfield(6.5, x0, 9.5, x1, lambda x, y: 0.05, M["gravel"])
 
 
 def solar_rows(cv, x0, x1, y0, y1, rows=3):
@@ -498,10 +563,12 @@ def solar_rows(cv, x0, x1, y0, y1, rows=3):
         xa = x0 + k * pitch + 0.8
         depth = pitch * 0.62
         # supports
-        for yy in (y0 + 0.5, (y0 + y1) / 2, y1 - 0.5):
-            cv.beam((xa + depth, yy, 0), (xa + depth, yy, 1.1), 0.3, M["steel_dark"])
-            cv.beam((xa, yy, 0), (xa, yy, 2.7), 0.3, M["steel_dark"])
-        cv.parallelogram((xa, y0, 3.0), (depth, 0, -1.9), (0, y1 - y0, 0), panel_mat)
+        with cv.part("panel supports"):
+            for yy in (y0 + 0.5, (y0 + y1) / 2, y1 - 0.5):
+                cv.beam((xa + depth, yy, 0), (xa + depth, yy, 1.1), 0.3, M["steel_dark"])
+                cv.beam((xa, yy, 0), (xa, yy, 2.7), 0.3, M["steel_dark"])
+        with cv.part("solar panels"):
+            cv.parallelogram((xa, y0, 3.0), (depth, 0, -1.9), (0, y1 - y0, 0), panel_mat)
 
 
 def _panel_pattern(p, n):
@@ -523,31 +590,41 @@ def t_hydro_dam_n(cv):
     # dam wall along the SW edge, standing in the river (the tile's water
     # ground).  No raised reservoir: it would float in front of the wall
     # when the dam is turned to face the viewer.
-    cv.box(10.5, 0, 0, 16, 16, 26, M["concrete"], top=M["concrete_dark"])
-    cv.box(10.2, 0, 26, 11.2, 16, 27.5, M["concrete"])  # parapet
-    for yy in (3, 8, 13):  # buttresses on the downstream face
-        cv.box(15.5, yy - 0.8, 0, 16.8, yy + 0.8, 24, M["concrete"])
+    with cv.part("dam wall"):
+        cv.box(10.5, 0, 0, 16, 16, 26, M["concrete"], top=M["concrete_dark"])
+    with cv.part("parapet"):
+        cv.box(10.2, 0, 26, 11.2, 16, 27.5, M["concrete"])
+    with cv.part("buttresses"):
+        for yy in (3, 8, 13):  # on the downstream face
+            cv.box(15.5, yy - 0.8, 0, 16.8, yy + 0.8, 24, M["concrete"])
 
 
 def t_hydro_dam_s(cv):
     t_hydro_dam_n(cv)
     # intake tower on the reservoir side
-    cv.box(6, 6, 0, 10, 10, 30, M["concrete"], top=M["grey"])
-    cv.box(6.5, 6.5, 30, 9.5, 9.5, 32, M["red"])
+    with cv.part("intake tower"):
+        cv.box(6, 6, 0, 10, 10, 30, M["concrete"], top=M["grey"])
+    with cv.part("tower cap"):
+        cv.box(6.5, 6.5, 30, 9.5, 9.5, 32, M["red"])
 
 
 def t_hydro_power_n(cv):
     # spillway channel + penstocks down from the dam
-    cv.heightfield(0, 2, 16, 14, lambda x, y: 0.3 + max(0.0, 6 - x) * 0.9, M["water"])
-    cv.box(0, 1, 0, 16, 2, 2.5, M["concrete"])
-    cv.box(0, 14, 0, 16, 15, 2.5, M["concrete"])
+    with cv.part("spillway water"):
+        cv.heightfield(0, 2, 16, 14, lambda x, y: 0.3 + max(0.0, 6 - x) * 0.9, M["water"])
+    with cv.part("channel walls"):
+        cv.box(0, 1, 0, 16, 2, 2.5, M["concrete"])
+        cv.box(0, 14, 0, 16, 15, 2.5, M["concrete"])
 
 
 def t_hydro_power_s(cv):
     # powerhouse with penstocks
-    for yy in (3.5, 7.0, 10.5):
-        cv.beam((0, yy, 18), (5, yy, 6), 1.4, M["steel"])
-    cv.gable(4, 1.5, 0, 13, 14.5, 9, 3, windowed(M["beige"], every=2.5, z_every=4.5), M["green_roof"], along_x=False)
+    with cv.part("penstocks"):
+        for yy in (3.5, 7.0, 10.5):
+            cv.beam((0, yy, 18), (5, yy, 6), 1.4, M["steel"])
+    with cv.part("powerhouse"):
+        cv.gable(4, 1.5, 0, 13, 14.5, 9, 3, windowed(M["beige"], every=2.5, z_every=4.5), M["green_roof"],
+                 along_x=False)
     transformer(cv, 13.5, 3, 2, 3, 3)
     transformer(cv, 13.5, 9, 2, 3, 3)
 
@@ -603,6 +680,9 @@ class RotatedCanvas:
         a, b, c, d = self._rect(x0, y0, x1, y1)
         self.cv.gable(a, b, z0, c, d, z1, ridge, wall, roof, along_x != self.swap)
 
+    def part(self, name):
+        return self.cv.part(name)
+
     def beam(self, a, b, w, mat):
         self.cv.beam(self._p3(a), self._p3(b), w, mat)
 
@@ -634,22 +714,27 @@ def hydro_tiles():
 
 def t_uranium_headframe(cv):
     # steel headframe with sheave wheel over the shaft
-    cv.box(3, 3, 0, 13, 13, 1, M["concrete"])
-    for a, b in (((4, 4, 0), (7, 7, 30)), ((4, 12, 0), (7, 9, 30)), ((12, 4, 0), (9, 7, 30)), ((12, 12, 0), (9, 9, 30))):
-        cv.beam(a, b, 0.7, M["red"])
-    for z in (8, 16, 24):
-        f = z / 30.0
-        lo, hi = 4 + 3 * f, 12 - 3 * f
-        cv.beam((lo, lo, z), (lo, hi, z), 0.5, M["red"])
-        cv.beam((lo, lo, z), (hi, lo, z), 0.5, M["red"])
-        cv.beam((hi, lo, z), (hi, hi, z), 0.5, M["red"])
-        cv.beam((lo, hi, z), (hi, hi, z), 0.5, M["red"])
-    cv.box(6.5, 6.5, 30, 9.5, 9.5, 31, M["steel"])
-    for k in range(24):  # sheave wheel (in the x-z plane)
-        th = 2 * math.pi * k / 24
-        cv.beam((8 + 3 * math.cos(th), 8, 33 + 3 * math.sin(th)),
-                (8 + 3 * math.cos(th + 0.27), 8, 33 + 3 * math.sin(th + 0.27)), 0.5, M["steel_dark"])
-    cv.box(12, 2, 0, 16, 6, 6, M["brick"], top=M["steel_dark"])  # hoist house
+    with cv.part("shaft pad"):
+        cv.box(3, 3, 0, 13, 13, 1, M["concrete"])
+    with cv.part("headframe"):
+        for a, b in (((4, 4, 0), (7, 7, 30)), ((4, 12, 0), (7, 9, 30)), ((12, 4, 0), (9, 7, 30)),
+                     ((12, 12, 0), (9, 9, 30))):
+            cv.beam(a, b, 0.7, M["red"])
+        for z in (8, 16, 24):
+            f = z / 30.0
+            lo, hi = 4 + 3 * f, 12 - 3 * f
+            cv.beam((lo, lo, z), (lo, hi, z), 0.5, M["red"])
+            cv.beam((lo, lo, z), (hi, lo, z), 0.5, M["red"])
+            cv.beam((hi, lo, z), (hi, hi, z), 0.5, M["red"])
+            cv.beam((lo, hi, z), (hi, hi, z), 0.5, M["red"])
+        cv.box(6.5, 6.5, 30, 9.5, 9.5, 31, M["steel"])
+    with cv.part("sheave wheel"):
+        for k in range(24):  # in the x-z plane
+            th = 2 * math.pi * k / 24
+            cv.beam((8 + 3 * math.cos(th), 8, 33 + 3 * math.sin(th)),
+                    (8 + 3 * math.cos(th + 0.27), 8, 33 + 3 * math.sin(th + 0.27)), 0.5, M["steel_dark"])
+    with cv.part("hoist house"):
+        cv.box(12, 2, 0, 16, 6, 6, M["brick"], top=M["steel_dark"])
 
 
 def t_uranium_tailings(cv):
@@ -658,15 +743,20 @@ def t_uranium_tailings(cv):
         if d > 1:
             return None
         return 11 * (1 - d ** 1.6) + hash01(x, y, 3) * 0.6
-    cv.heightfield(0, 0, 16, 16, mound, M["tailings"])
+    with cv.part("tailings mound"):
+        cv.heightfield(0, 0, 16, 16, mound, M["tailings"])
 
 
 def t_uranium_mill(cv):
-    cv.box(1, 2, 0, 12, 14, 12, windowed(M["steel"], every=3, z_every=6), top=M["grey"])
-    cv.box(3, 4, 12, 9, 12, 16, M["steel"], top=M["grey"])
-    cv.column(14, 5, 0, 22, 0.8, M["grey"], cap=M["dark"])  # vent stack
-    for k, yy in enumerate((3, 6, 9, 12)):  # yellowcake drums
-        cv.column(13.8, yy, 0, 2, 0.8, M["yellow"])
+    with cv.part("mill building"):
+        cv.box(1, 2, 0, 12, 14, 12, windowed(M["steel"], every=3, z_every=6), top=M["grey"])
+    with cv.part("rooftop block"):
+        cv.box(3, 4, 12, 9, 12, 16, M["steel"], top=M["grey"])
+    with cv.part("vent stack"):
+        cv.column(14, 5, 0, 22, 0.8, M["grey"], cap=M["dark"])
+    with cv.part("yellowcake drums"):
+        for k, yy in enumerate((3, 6, 9, 12)):
+            cv.column(13.8, yy, 0, 2, 0.8, M["yellow"])
 
 
 def t_uranium_ore(cv):
@@ -675,11 +765,13 @@ def t_uranium_ore(cv):
         if d > 1:
             return None
         return 6 * (1 - d * d) + hash01(x * 2, y * 2, 5) * 0.7
-    cv.heightfield(0, 0, 12, 16, pile, M["ore"])
-    # ore truck
-    cv.box(11, 4, 0.6, 15, 6.5, 3, M["yellow"])
-    cv.box(11, 6.5, 0.6, 15, 8, 4.2, M["yellow"], top=M["glass"])
-    cv.box(12, 9.5, 0, 15.5, 14.5, 3.5, M["concrete"])  # weighbridge hut
+    with cv.part("ore pile"):
+        cv.heightfield(0, 0, 12, 16, pile, M["ore"])
+    with cv.part("ore truck"):
+        cv.box(11, 4, 0.6, 15, 6.5, 3, M["yellow"])
+        cv.box(11, 6.5, 0.6, 15, 8, 4.2, M["yellow"], top=M["glass"])
+    with cv.part("weighbridge hut"):
+        cv.box(12, 9.5, 0, 15.5, 14.5, 3.5, M["concrete"])
 
 
 def t_nuc_cooling(cv):
@@ -691,29 +783,43 @@ def t_nuc_reactor(cv):
 
 
 def t_nuc_turbine(cv):
+    with cv.part("turbine hall"):
+        _nuc_turbine(cv)
+
+
+def _nuc_turbine(cv):
     cv.gable(1, 1, 0, 15, 15, 14, 3, windowed(M["steel"], every=3.5, z_every=5, z_band=(0.2, 0.45)),
              M["blue_roof"], along_x=True)
 
 
 def t_nuc_turbine2(cv):
-    cv.box(1, 1, 0, 15, 15, 14, windowed(M["steel"], every=3.5, z_every=5, z_band=(0.2, 0.45)), top=M["grey"])
-    cv.box(4, 4, 14, 9, 12, 17, M["steel"], top=M["grey"])
-    cv.column(12, 6, 14, 24, 0.9, striped(M["white"], M["red"], 3), cap=M["dark"])
+    with cv.part("turbine hall"):
+        cv.box(1, 1, 0, 15, 15, 14, windowed(M["steel"], every=3.5, z_every=5, z_band=(0.2, 0.45)), top=M["grey"])
+    with cv.part("rooftop block"):
+        cv.box(4, 4, 14, 9, 12, 17, M["steel"], top=M["grey"])
+    with cv.part("vent stack"):
+        cv.column(12, 6, 14, 24, 0.9, striped(M["white"], M["red"], 3), cap=M["dark"])
 
 
 def t_nuc_admin(cv):
-    cv.box(2, 2, 0, 12, 14, 10, windowed(M["white"], every=2.2, z_every=3.3), top=M["grey"])
-    for k in range(4):  # car park
-        cv.box(13, 2 + k * 3, 0, 15, 4 + k * 3, 1.2, [M["red"], M["blue_roof"], M["white"], M["yellow"]][k])
+    with cv.part("admin building"):
+        cv.box(2, 2, 0, 12, 14, 10, windowed(M["white"], every=2.2, z_every=3.3), top=M["grey"])
+    with cv.part("parked cars"):
+        for k in range(4):
+            cv.box(13, 2 + k * 3, 0, 15, 4 + k * 3, 1.2, [M["red"], M["blue_roof"], M["white"], M["yellow"]][k])
 
 
 def t_nuc_intake(cv):
-    cv.heightfield(0, 1, 16, 7, lambda x, y: 0.3, M["water"])
-    cv.box(0, 0, 0, 16, 1, 2, M["concrete"])
-    cv.box(0, 7, 0, 16, 8, 2, M["concrete"])
-    cv.box(3, 9, 0, 13, 15, 7, windowed(M["concrete"], every=3, z_every=4), top=M["grey"])
-    for xx in (4, 8, 12):
-        cv.beam((xx, 7.5, 3), (xx, 2, 1), 0.9, M["steel"])
+    with cv.part("intake channel"):
+        cv.heightfield(0, 1, 16, 7, lambda x, y: 0.3, M["water"])
+    with cv.part("channel walls"):
+        cv.box(0, 0, 0, 16, 1, 2, M["concrete"])
+        cv.box(0, 7, 0, 16, 8, 2, M["concrete"])
+    with cv.part("pump house"):
+        cv.box(3, 9, 0, 13, 15, 7, windowed(M["concrete"], every=3, z_every=4), top=M["grey"])
+    with cv.part("intake pipes"):
+        for xx in (4, 8, 12):
+            cv.beam((xx, 7.5, 3), (xx, 2, 1), 0.9, M["steel"])
 
 
 def t_nuc_switchyard(cv):
@@ -725,25 +831,37 @@ def t_nuc_switchyard(cv):
 
 
 def t_nuc_tanks(cv):
-    for cx, cy, r, h in ((5, 5, 3.5, 9), (5, 12, 3, 7), (12, 7, 2.5, 12)):
-        cv.column(cx, cy, 0, h, r, M["white"], cap=M["grey"])
-        cv.beam((cx + r, cy, 0), (cx + r * 0.7, cy + r * 0.7, h), 0.3, M["steel_dark"])  # ladder
+    # tanks numbered back to front
+    for k, (cx, cy, r, h) in enumerate(((5, 5, 3.5, 9), (5, 12, 3, 7), (12, 7, 2.5, 12))):
+        with cv.part("tank %d" % (k + 1)):
+            cv.column(cx, cy, 0, h, r, M["white"], cap=M["grey"])
+        with cv.part("ladders"):
+            cv.beam((cx + r, cy, 0), (cx + r * 0.7, cy + r * 0.7, h), 0.3, M["steel_dark"])
     fence(cv, 15.5, 0, 15.5, 16)
     fence(cv, 0, 15.5, 16, 15.5)
 
 
 def t_tidal_barrage(cv):
-    cv.box(0, 6, 0, 16, 11, 7, M["concrete"], top=M["concrete_dark"])
-    for xx in (2, 7, 12):  # sluice gate towers
-        cv.box(xx, 5.5, 7, xx + 3, 11.5, 12, M["concrete"], top=M["steel"])
-        cv.box(xx + 0.5, 11.5, 1, xx + 2.5, 11.7, 5, M["dark"])
-    cv.box(0, 8, 7, 16, 9.5, 8, M["steel_dark"])  # roadway
-    cv.heightfield(0, 11.7, 16, 16, lambda x, y: 0.4 if (x % 5) < 3.5 and y < 13.5 else None, Material([251, 252, 252]))
+    with cv.part("barrage wall"):
+        cv.box(0, 6, 0, 16, 11, 7, M["concrete"], top=M["concrete_dark"])
+    for xx in (2, 7, 12):
+        with cv.part("sluice towers"):
+            cv.box(xx, 5.5, 7, xx + 3, 11.5, 12, M["concrete"], top=M["steel"])
+        with cv.part("sluice gates"):
+            cv.box(xx + 0.5, 11.5, 1, xx + 2.5, 11.7, 5, M["dark"])
+    with cv.part("roadway"):
+        cv.box(0, 8, 7, 16, 9.5, 8, M["steel_dark"])
+    with cv.part("surf"):
+        cv.heightfield(0, 11.7, 16, 16, lambda x, y: 0.4 if (x % 5) < 3.5 and y < 13.5 else None,
+                       Material([251, 252, 252]))
 
 
 def t_tidal_hall(cv):
-    cv.box(0, 6, 0, 6, 11, 7, M["concrete"], top=M["concrete_dark"])
-    cv.gable(5, 3, 0, 15, 13, 10, 3, windowed(M["concrete"], every=2.5, z_every=5), M["blue_roof"], along_x=True)
+    with cv.part("barrage wall"):
+        cv.box(0, 6, 0, 6, 11, 7, M["concrete"], top=M["concrete_dark"])
+    with cv.part("turbine hall"):
+        cv.gable(5, 3, 0, 15, 13, 10, 3, windowed(M["concrete"], every=2.5, z_every=5), M["blue_roof"],
+                 along_x=True)
     transformer(cv, 11, 13.2, 3, 2.5, 3)
 
 
@@ -780,8 +898,10 @@ def t_wind_track_y(cv):
 def t_wind_kiosk(cv):
     service_track(cv, along_x=True)
     service_track(cv, along_x=False)
-    cv.box(10.5, 10.5, 0, 14, 14.5, 3.2, M["white"], top=M["grey"])  # grid connection kiosk
-    cv.box(14, 11.2, 0.6, 14.3, 13.8, 2.4, M["steel_dark"])
+    with cv.part("grid kiosk"):
+        cv.box(10.5, 10.5, 0, 14, 14.5, 3.2, M["white"], top=M["grey"])
+    with cv.part("kiosk door"):
+        cv.box(14, 11.2, 0.6, 14.3, 13.8, 2.4, M["steel_dark"])
 
 
 def t_solar_panels(cv):
@@ -790,13 +910,16 @@ def t_solar_panels(cv):
 
 def t_solar_inverter(cv):
     solar_rows(cv, 0.5, 15.5, 0.5, 9.5)
-    cv.box(3, 11, 0, 9, 15, 4, M["white"], top=M["grey"])
+    with cv.part("inverter"):
+        cv.box(3, 11, 0, 9, 15, 4, M["white"], top=M["grey"])
     transformer(cv, 11, 11, 3, 3.5, 3.5)
 
 
 def t_solar_control(cv):
     solar_rows(cv, 5.5, 15.5, 0.5, 15.5, rows=2)
-    cv.gable(0.5, 3, 0, 4.5, 13, 5, 2, windowed(M["beige"], every=2.5, z_every=3.5), M["green_roof"], along_x=False)
+    with cv.part("control building"):
+        cv.gable(0.5, 3, 0, 4.5, 13, 5, 2, windowed(M["beige"], every=2.5, z_every=3.5), M["green_roof"],
+                 along_x=False)
 
 
 def t_sub_transformers(cv):
@@ -809,14 +932,18 @@ def t_sub_transformers(cv):
 
 def t_sub_pylon(cv):
     lattice_tower(cv, 5, 8, 34)
-    cv.box(9, 3, 0, 15, 13, 6, windowed(M["brick"], every=2.5, z_every=6, z_band=(0.35, 0.7)), top=M["grey"])
+    with cv.part("control building"):
+        cv.box(9, 3, 0, 15, 13, 6, windowed(M["brick"], every=2.5, z_every=6, z_band=(0.35, 0.7)), top=M["grey"])
     fence(cv, 0, 15.5, 16, 15.5)
 
 
 def t_coal_boiler(cv):
-    cv.box(1, 1, 0, 13, 11, 18, windowed(M["brick"], every=2.5, z_every=6, z_band=(0.4, 0.7)), top=M["grey"])
-    cv.box(2, 11, 0, 12, 15, 10, M["brick"], top=M["steel_dark"])
-    cv.column(13.5, 13, 0, 48, lambda t: 2.0 - 0.7 * t, striped(M["brick"], M["red"], 12), cap=M["dark"])
+    with cv.part("boiler house"):
+        cv.box(1, 1, 0, 13, 11, 18, windowed(M["brick"], every=2.5, z_every=6, z_band=(0.4, 0.7)), top=M["grey"])
+    with cv.part("annex"):
+        cv.box(2, 11, 0, 12, 15, 10, M["brick"], top=M["steel_dark"])
+    with cv.part("chimney"):
+        cv.column(13.5, 13, 0, 48, lambda t: 2.0 - 0.7 * t, striped(M["brick"], M["red"], 12), cap=M["dark"])
 
 
 def t_coal_yard(cv):
@@ -825,9 +952,12 @@ def t_coal_yard(cv):
         if d > 1:
             return None
         return 7 * (1 - d * d) + hash01(x * 2, y * 2, 9) * 0.8
-    cv.heightfield(0, 0, 15, 12, pile, M["coal"])
-    cv.beam((1, 13, 1), (1, 13, 12), 0.5, M["steel"])
-    cv.beam((14, 13, 1), (-2, 13, 14), 1.2, M["steel"])  # conveyor up to the boiler house
+    with cv.part("coal pile"):
+        cv.heightfield(0, 0, 15, 12, pile, M["coal"])
+    with cv.part("conveyor support"):
+        cv.beam((1, 13, 1), (1, 13, 12), 0.5, M["steel"])
+    with cv.part("conveyor"):  # up to the boiler house
+        cv.beam((14, 13, 1), (-2, 13, 14), 1.2, M["steel"])
 
 
 # name → (ground, H, [(tile_key, draw), ...]) – order defines sheet order
@@ -900,46 +1030,50 @@ def _in_poly(x, y, pts):
 
 
 def icon_power(u, v):
-    """Yellow lightning bolt, lit from the upper left."""
+    """Yellow lightning bolt, lit from the upper left.  Returns (index, part)."""
     if not _in_poly(u, v, _BOLT):
-        return 0
-    return YELLOW[min(6, max(3, int(7.5 - (u + v) * 0.3)))]
+        return 0, None
+    return YELLOW[min(6, max(3, int(7.5 - (u + v) * 0.3)))], "lightning bolt"
 
 
 _DRUM = [83, 85, 87, 209, 87, 86, 85, 84, 83, 82]  # left to right, lit from the left
 
 
 def icon_uranium(u, v):
-    """Green drum with a yellow radiation mark."""
+    """Green drum with a yellow radiation mark.  Returns (index, part)."""
     if not (2.0 <= u < 8.0 and 1.5 <= v < 9.0):
-        return 0
-    if (u - 5.0) ** 2 + ((v - 5.4) * 1.1) ** 2 < 1.6 ** 2:  # radiation mark
+        return 0, None
+    if (u - 5.0) ** 2 + ((v - 5.4) * 1.1) ** 2 < 1.6 ** 2:
         r = math.hypot(u - 5.0, v - 5.4)
         ang = math.degrees(math.atan2(v - 5.4, u - 5.0)) % 120
         if r < 0.45 or (r > 0.7 and 0 <= ang < 60):
-            return 1
-        return YELLOW[5]
-    if v < 2.5:  # lid
-        return 208
-    if 3.0 <= v < 3.5 or 7.8 <= v < 8.3:  # rims
-        return 82
-    return _DRUM[min(len(_DRUM) - 1, int((u - 2.0) / 6.0 * len(_DRUM)))]
+            return 1, "radiation symbol"
+        return YELLOW[5], "radiation symbol"
+    if v < 2.5:
+        return 208, "lid"
+    if 3.0 <= v < 3.5 or 7.8 <= v < 8.3:
+        return 82, "rims"
+    return _DRUM[min(len(_DRUM) - 1, int((u - 2.0) / 6.0 * len(_DRUM)))], "drum"
 
 
 CARGO_ICONS = {"powr": icon_power, "uran": icon_uranium}
 
 
-def render_icon(fn, s):
+def render_icon(fn, s, parts=None):
+    """If `parts` is a dict, it is filled with (col, row) -> part name."""
     n = ICON_W * s
-    px = [[fn((x + 0.5) / s, (y + 0.5) / s) for x in range(n)] for y in range(n)]
+    cells = [[fn((x + 0.5) / s, (y + 0.5) / s) for x in range(n)] for y in range(n)]
+    px = [[c for c, _ in row] for row in cells]
     im = Image.new("P", (n, n), 0)
     for y in range(n):
         for x in range(n):
-            c = px[y][x]
+            c, name = cells[y][x]
             if not c and any(0 <= y + dy < n and 0 <= x + dx < n and px[y + dy][x + dx]
                              for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
-                c = OUTLINE
+                c, name = OUTLINE, "outline"
             im.putpixel((x, y), c)
+            if parts is not None and c:
+                parts[x, y] = name
     return im
 
 
@@ -1044,6 +1178,9 @@ def main():
             if not only or name in only:
                 save(render_sheet(name, s), "%s%s.png" % (name, suffix))
     update_nml()
+    # annotated references with part names (docs/sprites/, spec section 12)
+    import sprite_refs
+    sprite_refs.write_all(sys.modules[__name__], only)
 
 
 if __name__ == "__main__":
