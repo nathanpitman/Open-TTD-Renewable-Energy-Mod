@@ -36,6 +36,7 @@ LAYOUTS = {
     "wind_farm/line_x": [(0, 0, "wind_a"), (1, 0, "wind_track_x"), (2, 0, "wind_d")],
     "wind_farm/line_y": [(0, 0, "wind_c"), (0, 1, "wind_track_y"), (0, 2, "wind_b")],
     "wind_farm/2x2": [(0, 0, None), (1, 0, "wind_b"), (0, 1, "wind_c"), (1, 1, "wind_kiosk")],
+    "wind_farm/single": [(0, 0, "wind_a")],
     "solar_farm": [(0, 0, "solar_panels"), (1, 0, "solar_panels"), (2, 0, "solar_inverter"),
                    (0, 1, "solar_control"), (1, 1, "solar_panels"), (2, 1, "solar_panels")],
     "substation": [(0, 0, "sub_transformers"), (1, 0, "sub_pylon")],
