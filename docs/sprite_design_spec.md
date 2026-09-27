@@ -48,7 +48,17 @@ Review every sprite at 1x zoom, and check it at 2x zoom too, where it should loo
 
 - 8bpp, OpenTTD DOS palette, taken verbatim from `nml`. Index 0 is transparent.
 - Don't use palette-animated indices (227–254), except the sea-water cycle (245–249) on water surfaces. The sprite then needs the `ANIM` flag, which the generator sets.
+- Don't use index 255 (pure white). Use 15 (almost white) instead. PalettesAndCoordinates reserves pure white for the background of a sprite sheet, and `nmlc` warns when a sprite contains it. The `WHITE` ramp stops at 15.
 - Colours come from the named ramps at the top of `tools/make_sprites.py` (`GREY`, `WHITE`, `STEEL`, `CONCRETE`, `BEIGE`, `SAND`, `BRICK`, `RED`, `YELLOW`, `GRASS`, `DIRT`, `TAILINGS`, `COAL`, `PANEL`, `GLASS`, `WATER`, `GREEN_ROOF`, `BLUE_ROOF`). Add a new ramp there rather than using raw indices in a draw function.
+
+**Decided: company colours stay, and sprites are never recoloured.** Two of our ramps sit on OpenTTD's company-colour ranges (RecolorSprites):
+
+- `GLASS` (198–205) is exactly the first company-colour range, 0xC6–0xCD.
+- `GRASS` (80–87) is exactly the second company-colour range, 0x50–0x57.
+
+The base game does the same. In OpenGFX, 50–60% of the grass ground's pixels are 80–87, and 198–205 make up about 13% of the vanilla buildings in `tools/compare_vanilla.py`, mostly as windows. There is no close green outside 80–87, so moving `GRASS` would make our ground clash with the base-game grass next to it (section 9). The nearest blues outside 198–205 are more saturated than base-game windows.
+
+So both ramps stay, and no sprite is ever drawn with recolouring on. If one were, OpenTTD would use the industry's random colour for industry tiles (NML: List of default colour translation palettes), and every window and patch of grass on that sprite would change colour. `tools/make_sprites.py` stops with an error if `energy_transition.nml` has a `recolour_mode:` or `palette:` line. If we ever want recoloured parts, decide here first what happens to `GLASS` and `GRASS`.
 
 **Open question:** accent colours. Base-game industries use rust, orange, brick, hazard yellow and red widely. Ours are mostly `GREY`, `WHITE` and `CONCRETE`. A rule on how much of a sprite should be accent colour is still to be decided.
 
@@ -57,6 +67,8 @@ Review every sprite at 1x zoom, and check it at 2x zoom too, where it should loo
 **Decided.** From the OpenTTD wiki, [Recommended Standards](https://wiki.openttd.org/en/Development/NewGRF/Recommended%20Standards):
 
 > Most original TTD graphics are drawn with the light source in the lower right of the screen (about "4.30 o'clock"). The light source is best imagined as 'high up in the sky'. Shadows fall towards the top-left of the screen. There are places which incorrectly state that light comes from the top-right. If you want your graphics to be compatible with original TTD style, don't be mistaken about the lighting.
+
+That page is marked "a draft for discussion" and is filed under the wiki's Archive category, so this is a community convention rather than an official rule. It is still the only written guidance on the light direction, and we follow it.
 
 For our sprites, that means:
 
@@ -172,14 +184,20 @@ The references are in [`docs/sprites/`](sprites/), and [`docs/sprites/index.md`]
 
 ## 13. Reference material
 
-Existing OpenTTD guidance to read before drawing or changing sprites. These links were collected in #3. The lighting text from Recommended Standards is quoted in section 4. The other summaries come from #3 and haven't been re-checked, because the wiki sites can't be reached from the environment this spec was written in.
+Existing OpenTTD guidance to read before drawing or changing sprites. These links were collected in #3. The summaries below were checked against the live pages on 2026-09-27. None of these pages says anything about accent colours, contrast, texture, outlines, detail density or scale (sections 3–8). Those have to be settled by comparing with the base-game sprites (`tools/compare_vanilla.py`).
 
-- **[Recommended Standards](https://wiki.openttd.org/en/Development/NewGRF/Recommended%20Standards)** (OpenTTD wiki): light source direction, quoted in section 4, and general drawing conventions. Issue #3 also summarises it as recommending drawing against consistent templates and keeping graphics sources in version control.
-- **[Alignment](https://wiki.openttd.org/en/Development/NewGRF/Alignment)** and **[Debugging](https://wiki.openttd.org/en/Development/NewGRF/Debugging)** (OpenTTD wiki): standard sprite-offset templates, and the in-game sprite alignment tool for checking bounding boxes by eye.
-- **[PalettesAndCoordinates](https://newgrf-specs.tt-wiki.net/wiki/PalettesAndCoordinates)** (NewGRF Specs wiki): the authoritative spec for the DOS and Windows 8bpp palettes and for the coordinate and bounding-box system. It backs section 3.
-- **[NML: List of default colour translation palettes](https://newgrf-specs.tt-wiki.net/wiki/NML:List_of_default_colour_translation_palettes)** (NewGRF Specs wiki): recolour sprites, for if we ever add company-colour remapping.
+- **[Recommended Standards](https://wiki.openttd.org/en/Development/NewGRF/Recommended%20Standards)** (OpenTTD wiki, marked as a draft): light source direction, quoted in section 4. Its only other graphics advice is to use sprite templates, and the templates it links are for trains and road vehicles, not industries. It also recommends keeping graphics sources in version control, and shipping a readme and licence with the GRF.
+- **[Alignment](https://wiki.openttd.org/en/Development/NewGRF/Alignment)** (OpenTTD wiki): a standard sheet layout and offsets for **train** sprites only. Its "See also" links go to the old TTDPatch wiki. Of little use for industry tiles.
+- **[Debugging](https://wiki.openttd.org/en/Development/NewGRF/Debugging)** (OpenTTD wiki): the in-game NewGRF developer tools. Turn them on with `set newgrf_developer_tools 1` in the console. Then:
+  - the **sprite aligner** (Information menu) nudges a sprite's offsets and has a picker to find the sprite under the cursor. It doesn't save anything: note the new offsets and put them in the generator. The page warns of a bug where the offsets it shows are 4 times too big and must be divided by 4, so check them against the sprite;
+  - the **bounding-box viewer** (Ctrl+B) shows every sprite's bounding box on the map;
+  - the **tile info window** has a debug button that shows an industry's variables and persistent storage;
+  - the `reload_newgrfs` console command reloads the GRF from disk, so a rebuilt `energy_transition.grf` can be checked without starting a new game. It overwrites the same file name, and it resets any offsets set in the aligner.
+- **[PalettesAndCoordinates](https://newgrf-specs.tt-wiki.net/wiki/PalettesAndCoordinates)** (NewGRF Specs wiki): the authoritative spec for the DOS and Windows 8bpp palettes and for the coordinate and bounding-box system. It backs section 3 (DOS palette, no palette-animated "action colours", no pure white, the company-colour range) and section 8 (3D X runs from top-right to bottom-left of the screen, Y from top-left to bottom-right, and north is the top of the screen).
+- **[RecolorSprites](https://newgrf-specs.tt-wiki.net/wiki/RecolorSprites)** (NewGRF Specs wiki): the palette indices OpenTTD recolours: 0xC6–0xCD for the first company colour and 0x50–0x57 for the second (section 3).
+- **[NML: List of default colour translation palettes](https://newgrf-specs.tt-wiki.net/wiki/NML:List_of_default_colour_translation_palettes)** (NewGRF Specs wiki): the named recolour palettes. For industry tiles, the default recolour uses the industry's random colour.
 - **[RealSprites](https://newgrf-specs.tt-wiki.net/wiki/RealSprites)** (NewGRF Specs wiki): sprite positioning (`xrel`/`yrel`), which is where the offsets in the generated `spriteset` blocks come from.
-- **[GraphicsTutorial hub](https://www.tt-wiki.net/wiki/GraphicsTutorial)** (tt-wiki.net): community drawing tutorials on palettes and coordinates, saving correctly paletted files, and drawing vehicles and stations. It also covers a MagicaVoxel workflow some artists use to render 8bpp isometric sprites.
+- **[GraphicsTutorial hub](https://www.tt-wiki.net/wiki/GraphicsTutorial)** (tt-wiki.net): community drawing tutorials on palettes and coordinates, saving correctly paletted files, and drawing vehicles and stations. It also links GraphicsTemplates (example templates with alignment) and a MagicaVoxel workflow some artists use to render 8bpp isometric sprites. Nothing on it is specific to industries.
 
 Read at least "Recommended Standards" (light and style) and "PalettesAndCoordinates" (palette) before starting.
 
@@ -189,6 +207,7 @@ Read at least "Recommended Standards" (light and style) and "PalettesAndCoordina
 
 - [ ] Viewed in game next to base-game industries, at 1x zoom and at 2x zoom (where the game enlarges the 1x sprite).
 - [ ] Viewed as part of the whole industry, not just on its own.
+- [ ] Offsets and bounding boxes checked with the NewGRF developer tools (`set newgrf_developer_tools 1`, then the sprite aligner and Ctrl+B; section 13).
 - [ ] Follows every **Decided** rule above.
 - [ ] Annotated reference in `docs/sprites/` is regenerated, and every visible part has a name (section 12).
 - [ ] Any global change found during the review is recorded here and added to the decision log.
@@ -203,3 +222,4 @@ Read at least "Recommended Standards" (light and style) and "PalettesAndCoordina
 | 2026-09-27 | Annotated references built (`tools/sprite_refs.py`, `docs/sprites/`); part names come from `cv.part()` tags in the drawing code | 12 | #34 |
 | 2026-09-27 | Light source is in the lower right of the screen (about 4:30), high in the sky, per the OpenTTD wiki Recommended Standards. The generator was changed to match in #76 | 4 | #34, #76 |
 | 2026-09-27 | Ship 1x sprites only; the 2x sheets and `alternative_sprites` blocks are removed and OpenTTD enlarges the 1x art when zoomed in | 2 | #34 |
+| 2026-09-27 | `GLASS` and `GRASS` stay on the company-colour ranges, as the base game's windows and grass do; sprites are never recoloured, and the generator fails if the NML turns recolouring on | 3 | #34 |
