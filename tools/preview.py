@@ -8,6 +8,8 @@ launching the game.
 Usage:
     python3 tools/preview.py [out.png] [--scale 1|2] [--zoom N]
     python3 tools/preview.py --each docs/industries [--scale 1|2] [--zoom N]
+
+--scale 2 shows the game at 2x zoom: the 1x sprites enlarged, as OpenTTD does.
 """
 
 import argparse
@@ -60,10 +62,15 @@ def compose(variant, s, bg=(60, 110, 60, 255)):
     name = variant.split("/")[0]
     _, H, tiles = ms.INDUSTRIES[name]
     keys = [k for k, _ in tiles]
-    sheet = Image.open(os.path.join(ms.OUT, "%s%s.png" % (name, "_2x" if s == 2 else "")))
-    ground = Image.open(os.path.join(ms.OUT, "ground%s.png" % ("_2x" if s == 2 else "")))
-    cw, ch = ms.CELL_W * s, (32 + H) * s
+    # Only 1x sheets exist; at scale s each sprite is enlarged s times with
+    # nearest-neighbour, which is what OpenTTD does when zoomed in.
+    sheet = Image.open(os.path.join(ms.OUT, "%s.png" % name))
+    ground = Image.open(os.path.join(ms.OUT, "ground.png"))
+    cw, ch = ms.CELL_W, 32 + H
     gh = ground.size[1]
+
+    def up(im):
+        return im.resize((im.size[0] * s, im.size[1] * s), Image.NEAREST) if s > 1 else im
     layout = LAYOUTS[variant]
     span = max(x + y for x, y, _ in layout) + 1
     w = (64 * span + 64) * s
@@ -76,7 +83,7 @@ def compose(variant, s, bg=(60, 110, 60, 255)):
         sx = ox + (y - x) * 32 * s
         sy = oy + (x + y) * 16 * s
         gi = ms.GROUND_ORDER.index(gname.get(key, ms.INDUSTRIES[name][0]))
-        g = rgb(ground.crop((gi * cw, 0, gi * cw + cw, gh)))
+        g = up(rgb(ground.crop((gi * cw, 0, gi * cw + cw, gh))))
         canvas.alpha_composite(g, (sx - 31 * s, sy))
     for x, y, key in sorted(layout, key=lambda t: t[0] + t[1]):
         if key is None:
@@ -85,7 +92,7 @@ def compose(variant, s, bg=(60, 110, 60, 255)):
         sy = oy + (x + y) * 16 * s
         k = keys.index(key)
         spr = sheet.crop((k * cw, 0, k * cw + cw, ch))
-        canvas.alpha_composite(rgb(spr), (sx - 31 * s, sy - H * s))
+        canvas.alpha_composite(up(rgb(spr)), (sx - 31 * s, sy - H * s))
     return canvas
 
 

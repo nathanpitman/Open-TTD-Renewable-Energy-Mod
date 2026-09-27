@@ -4,8 +4,9 @@ Annotated sprite references (docs/sprite_design_spec.md, section 12).
 
 For every sprite this writes docs/sprites/<key>.png: the 1x sprite on its
 ground, enlarged with nearest-neighbour scaling, with every visible part
-labelled.  It also writes a part map, the sprite at actual size (1x and
-2x), and docs/sprites/index.md listing every sprite's part names.
+labelled.  It also writes a part map, the sprite at actual size and as the
+game shows it at 2x zoom, and docs/sprites/index.md listing every sprite's
+part names.
 
 Part names come from the drawing code: each drawing call in
 tools/make_sprites.py runs inside `with cv.part("name"):`, and the canvas
@@ -227,12 +228,12 @@ def _sides(anchors, mid):
 # ── The reference image ───────────────────────────────────────────────
 def render_reference(ms, key, title, group, spec, issue, note):
     img1, parts = _render(ms, spec, 1)
-    img2, _ = _render(ms, spec, 2)
     bbox = img1.getbbox()
     x0, y0 = max(0, bbox[0] - 1), max(0, bbox[1] - 1)
     x1, y1 = min(img1.size[0], bbox[2] + 1), min(img1.size[1], bbox[3] + 1)
     img1 = img1.crop((x0, y0, x1, y1))
-    img2 = img2.crop((x0 * 2, y0 * 2, x1 * 2, y1 * 2))
+    # only 1x sprites ship; at 2x zoom OpenTTD enlarges them like this
+    img2 = img1.resize((img1.size[0] * 2, img1.size[1] * 2), Image.NEAREST)
     parts = {(c - x0, r - y0): n for (c, r), n in parts.items() if x0 <= c < x1 and y0 <= r < y1}
     w1, h1 = img1.size
     zoom = max(4, min(8, 560 // max(w1, 1))) if spec[0] != "icon" else 32
@@ -304,7 +305,7 @@ def render_reference(ms, key, title, group, spec, issue, note):
             d.ellipse((ax - 6, ay - 6, ax + 6, ay + 6), fill=(0, 0, 0))
             d.ellipse((ax - 4, ay - 4, ax + 4, ay + 4), fill=col)
 
-    # footer: part map, actual size 1x and 2x
+    # footer: part map, actual size, and as the game shows it at 2x zoom
     fy = header_h + main_h + pad
     x = pad
     pm = Image.new("RGB", (w1, h1), PANEL)
@@ -312,7 +313,7 @@ def render_reference(ms, key, title, group, spec, issue, note):
     for (c, r), n in parts.items():
         ppx[c, r] = colours[n]
     pm = pm.resize((w1 * zm, h1 * zm), Image.NEAREST)
-    for img, cap in ((pm, "part map"), (img1, "1x sprite, actual size"), (img2, "2x sprite, actual size")):
+    for img, cap in ((pm, "part map"), (img1, "1x sprite, actual size"), (img2, "in game at 2x zoom")):
         d.text((x, fy), cap, font=f_cap, fill=DIM)
         d.rectangle((x - 2, fy + 26, x + img.size[0] + 2, fy + 28 + img.size[1]), fill=PANEL)
         if img.mode == "RGBA":

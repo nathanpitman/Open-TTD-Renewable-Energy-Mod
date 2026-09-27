@@ -33,11 +33,14 @@ Known gaps today (#34): the sprites look too high-res, surfaces are too smooth a
 
 ## 2. Resolution and zoom levels
 
-**Current:** every spriteset has a 1x sheet (`sprites/<name>.png`) and a true 2x sheet (`sprites/<name>_2x.png`), both rendered from the same geometry.
+**Decided** (#34): ship **1x sprites only**, like almost all NewGRFs. OpenTTD enlarges them when zoomed in, just as it does the base graphics (OpenGFX and the original TTD set), so the mod's art is exactly as chunky as the map around it at every zoom level.
 
-**Proposed** (#34): ship **1x only**, like almost all NewGRFs, and let OpenTTD enlarge the sprites when zoomed in, just as it does for OpenGFX. Pixel-doubling the 1x art into new 2x files gains nothing. Only bring back 2x/4x if we deliberately target high-res base sets (zBase, OpenGFX2), and then draw to their standard.
+- `tools/make_sprites.py` writes only `sprites/<name>.png`. The NML has no `alternative_sprites` blocks.
+- Don't add pixel-doubled 2x files: OpenTTD already does that, so they would gain nothing.
+- Only bring back 2x/4x sprites if we deliberately target high-res base sets (zBase, OpenGFX2), and then draw them to those sets' standard, probably in 32bpp.
+- Players who zoom in see the 1x art enlarged. `tools/preview.py --scale 2` and the "in game at 2x zoom" panel of each annotated reference (section 12) show exactly that.
 
-Until this is decided, review every sprite at both 1x and 2x zoom in game.
+Review every sprite at 1x zoom, and check it at 2x zoom too, where it should look like base-game art at the same zoom.
 
 ## 3. Palette
 
@@ -51,11 +54,32 @@ Until this is decided, review every sprite at both 1x and 2x zoom in game.
 
 ## 4. Lighting and shading
 
-**Current:**
+**Decided.** From the OpenTTD wiki, [Recommended Standards](https://wiki.openttd.org/en/Development/NewGRF/Recommended%20Standards):
 
-- Light comes from the upper left of the screen. Roofs are brightest, walls facing lower-left are lit, and walls facing lower-right are in shade.
-- Brightness = `0.25 + 0.75 × max(0, N·L)`, mapped onto the material's ramp.
-- Unconfirmed: issue #3 says the OpenTTD wiki gives a different light direction. See section 13 before changing this.
+> Most original TTD graphics are drawn with the light source in the lower right of the screen (about "4.30 o'clock"). The light source is best imagined as 'high up in the sky'. Shadows fall towards the top-left of the screen. There are places which incorrectly state that light comes from the top-right. If you want your graphics to be compatible with original TTD style, don't be mistaken about the lighting.
+
+For our sprites, that means:
+
+- The light is high in the sky, towards the lower right of the screen. Roofs and other upward-facing surfaces are the brightest.
+- Walls facing the lower right (south-east, the +y faces in `tools/make_sprites.py`) face the light. They are the brightest walls.
+- Walls facing the lower left (south-west, the +x faces) are turned away from the light, so they are darker.
+- Shadows fall towards the upper left.
+
+**Current:** the generator follows this since #76. `LIGHT = (-0.15, 0.55, 0.82)` in `tools/make_sprites.py` gives:
+
+| Face | Brightness |
+|---|---|
+| Roof | 0.87 |
+| Walls facing lower-right (+y) | 0.66 |
+| Walls facing lower-left (+x) | 0.25 |
+
+Brightness = `0.25 + 0.75 × max(0, N·L)`, mapped onto the material's ramp. Windowed walls use the lighter glass colour on the lit, lower-right walls. `tools/compare_vanilla.py` draws our tiles next to OpenGFX buildings so the lighting can be checked against the base game.
+
+**Still to check after the light change:**
+
+- **Solar panels:** fixed. They now tilt to face the lower right (south-east), into the light. Because they are lit, they come out paler than before. Check that they still read as solar panels (#61–#63).
+- **Turbine blades:** fixed. Every blade pixel used to share one flat normal, `(1, 1, 0.3)`. That normal is symmetric in x and y, so the blades looked the same under the old light and the new, and showed no light direction at all. They are now shaded as a rounded section (`BLADE_CURVE` in `_blades`): the edge that faces the light (up and towards the lower right) is lighter and the far edge darker. This goes through `LIGHT`, so it will follow any later change to the light (#58).
+- **Cargo icons:** no change needed. They are flat menu icons with their own fixed shading, not world sprites, so they don't follow `LIGHT` (#76 left them unchanged). The `icon_power` docstring and the `_DRUM` comment now say this. Before, "lit from the upper left" read as if it contradicted this section (#73, #74).
 
 **Open question:** contrast. The base game has a bigger jump between the lit and shaded walls than our smooth shading gives. We still need to decide the minimum number of ramp steps between lit and shaded faces.
 
@@ -105,7 +129,7 @@ Every animation frame must follow the same rules as the still frame.
 
 ## 11. Cargo icons
 
-**Current:** 10 × 10 flat pixel art with a near-black outline, like the base game's cargo icons.
+**Current:** 10 × 10 flat pixel art with a near-black outline, like the base game's cargo icons. 1x only, like every other sprite (section 2).
 
 ## 12. Annotated references
 
@@ -123,7 +147,7 @@ The references are in [`docs/sprites/`](sprites/), and [`docs/sprites/index.md`]
 - A label for every visible part, with a leader line and a dot on a pixel of that part. The labels sit outside the sprite so they don't cover the art.
 - Below that:
   - a **part map**: the sprite with each part filled in its label colour, showing exactly which pixels belong to which part;
-  - the 1x and 2x sprites at actual size.
+  - the 1x sprite at actual size, and as the game shows it at 2x zoom (the 1x sprite enlarged, since only 1x ships; section 2).
 
 **Part names:**
 
@@ -134,7 +158,7 @@ The references are in [`docs/sprites/`](sprites/), and [`docs/sprites/index.md`]
   - A pitched roof drawn with `gable()` is named after its building plus "roof" ("powerhouse roof").
   - The ground under an industry tile is labelled "ground (<kind>)".
 - Stable. Renaming a part changes the vocabulary we use in requests, so record the rename in the decision log.
-- Only parts visible in the 1x sprite get a label. A part that is hidden, or too small to show at 1x (for example the rims on the Uranium icon), isn't listed.
+- Only parts visible in the sprite get a label. A part that is hidden, or too small to show at 1x (for example the rims on the Uranium icon), isn't listed.
 
 **How they're made:**
 
@@ -148,9 +172,9 @@ The references are in [`docs/sprites/`](sprites/), and [`docs/sprites/index.md`]
 
 ## 13. Reference material
 
-Existing OpenTTD guidance to read before drawing or changing sprites. These links were collected in #3. Their summaries below come from that issue and haven't been re-checked here: the wiki sites can't be reached from the environment this spec was written in.
+Existing OpenTTD guidance to read before drawing or changing sprites. These links were collected in #3. The lighting text from Recommended Standards is quoted in section 4. The other summaries come from #3 and haven't been re-checked, because the wiki sites can't be reached from the environment this spec was written in.
 
-- **[Recommended Standards](https://wiki.openttd.org/en/Development/NewGRF/Recommended%20Standards)** (OpenTTD wiki): light source direction and general drawing conventions. It also recommends drawing against consistent templates and keeping graphics sources in version control.
+- **[Recommended Standards](https://wiki.openttd.org/en/Development/NewGRF/Recommended%20Standards)** (OpenTTD wiki): light source direction, quoted in section 4, and general drawing conventions. Issue #3 also summarises it as recommending drawing against consistent templates and keeping graphics sources in version control.
 - **[Alignment](https://wiki.openttd.org/en/Development/NewGRF/Alignment)** and **[Debugging](https://wiki.openttd.org/en/Development/NewGRF/Debugging)** (OpenTTD wiki): standard sprite-offset templates, and the in-game sprite alignment tool for checking bounding boxes by eye.
 - **[PalettesAndCoordinates](https://newgrf-specs.tt-wiki.net/wiki/PalettesAndCoordinates)** (NewGRF Specs wiki): the authoritative spec for the DOS and Windows 8bpp palettes and for the coordinate and bounding-box system. It backs section 3.
 - **[NML: List of default colour translation palettes](https://newgrf-specs.tt-wiki.net/wiki/NML:List_of_default_colour_translation_palettes)** (NewGRF Specs wiki): recolour sprites, for if we ever add company-colour remapping.
@@ -159,11 +183,11 @@ Existing OpenTTD guidance to read before drawing or changing sprites. These link
 
 Read at least "Recommended Standards" (light and style) and "PalettesAndCoordinates" (palette) before starting.
 
-**Light direction needs checking.** Issue #3 summarises Recommended Standards as saying the light comes from the lower right (about 4:30), with shadows falling to the upper left. That contradicts section 4, where our generator lights from the upper left. The base-game Oil Refinery in #34 looks lit from the left, which fits section 4. Read the wiki page and settle this in section 4 before changing any lighting.
+**Light direction: settled.** Recommended Standards puts the light in the lower right of the screen, about 4:30 (see section 4). An earlier version of this spec said the base-game Oil Refinery looked lit from the left. That was a misreading, so disregard it.
 
 ## Review checklist (for each sprite issue)
 
-- [ ] Viewed in game next to base-game industries, at 1x and 2x zoom (or 1x only, if section 2 is decided that way).
+- [ ] Viewed in game next to base-game industries, at 1x zoom and at 2x zoom (where the game enlarges the 1x sprite).
 - [ ] Viewed as part of the whole industry, not just on its own.
 - [ ] Follows every **Decided** rule above.
 - [ ] Annotated reference in `docs/sprites/` is regenerated, and every visible part has a name (section 12).
@@ -177,3 +201,5 @@ Read at least "Recommended Standards" (light and style) and "PalettesAndCoordina
 | 2026-09-27 | Sprites must look at home next to base-game industries | 1 | #34 |
 | 2026-09-27 | Every sprite gets an annotated reference image, made by the build, naming its parts for use in change requests | 12 | #34 |
 | 2026-09-27 | Annotated references built (`tools/sprite_refs.py`, `docs/sprites/`); part names come from `cv.part()` tags in the drawing code | 12 | #34 |
+| 2026-09-27 | Light source is in the lower right of the screen (about 4:30), high in the sky, per the OpenTTD wiki Recommended Standards. The generator was changed to match in #76 | 4 | #34, #76 |
+| 2026-09-27 | Ship 1x sprites only; the 2x sheets and `alternative_sprites` blocks are removed and OpenTTD enlarges the 1x art when zoomed in | 2 | #34 |

@@ -5,8 +5,10 @@ Procedural sprite generator for the Energy Transition NewGRF.
 Renders every industry tile and ground tile from simple 3D primitives
 (boxes, tapered cylinders, domes, quads, height-field mounds) into
 8bpp PNGs that use OpenTTD's DOS palette exactly as nmlc expects it.
-Both 1x (ZOOM_LEVEL_NORMAL) and 2x (ZOOM_LEVEL_IN_2X) sprites are
-produced from the same geometry, so the two zoom levels always agree.
+Only 1x (ZOOM_LEVEL_NORMAL) sprites are shipped, like almost all NewGRFs:
+OpenTTD enlarges them when zoomed in, as it does the base graphics (see
+docs/sprite_design_spec.md, section 2).  The canvas can still render at
+other scales, which tools/sprite_refs.py does not need but keeps possible.
 
 Usage:
     pip install nml pillow
@@ -508,10 +510,22 @@ def wind_turbine(cv, cx, cy, angle, h=34, rotor=20.0):
         _blades(cv, hub, angle, rotor, ux, uy, blade, edge)
 
 
+BLADE_CURVE = 0.8  # how far the normal turns across the blade's width
+
+
+def _unit(v):
+    l = math.sqrt(sum(c * c for c in v))
+    return tuple(c / l for c in v)
+
+
 def _blades(cv, hub, angle, rotor, ux, uy, blade, edge):
+    face = _unit((1, 1, 0.3))  # the rotor faces the viewer
     for b in range(3):
         th = math.radians(angle + b * 120)
         c, sn = math.cos(th), math.sin(th)
+        # world direction across the blade (towards +w), so the blade can be
+        # shaded as a rounded section: the edge facing LIGHT comes out lighter
+        across = _unit((-sn * ux, -sn * uy, c))
         n = cv._n(rotor)
         for i in range(n + 1):
             t = i / n
@@ -524,7 +538,9 @@ def _blades(cv, hub, angle, rotor, ux, uy, blade, edge):
                 px = r * c - w * sn
                 pz = r * sn + w * c
                 p = (hub[0] + px * ux + 0.3, hub[1] + px * uy + 0.3, hub[2] + pz)
-                cv.splat(p, (1, 1, 0.3), edge if abs(j) == m and t < 0.9 else blade)
+                k = BLADE_CURVE * j / m
+                normal = tuple(f + k * a for f, a in zip(face, across))
+                cv.splat(p, normal, edge if abs(j) == m and t < 0.9 else blade)
 
 
 def service_track(cv, along_x=True, x0=0.0, x1=16.0):
@@ -537,23 +553,23 @@ def service_track(cv, along_x=True, x0=0.0, x1=16.0):
 
 
 def solar_rows(cv, x0, x1, y0, y1, rows=3):
-    """Rows of tilted panels (facing SW / the light)."""
-    pitch = (x1 - x0) / rows
+    """Rows of tilted panels facing SE (+y, screen lower right), towards the light."""
+    pitch = (y1 - y0) / rows
     for k in range(rows):
-        xa = x0 + k * pitch + 0.8
+        ya = y0 + k * pitch + 0.8
         depth = pitch * 0.62
-        # supports
+        # supports: tall at the back (NW) edge, short at the front (SE) edge
         with cv.part("panel supports"):
-            for yy in (y0 + 0.5, (y0 + y1) / 2, y1 - 0.5):
-                cv.beam((xa + depth, yy, 0), (xa + depth, yy, 1.1), 0.3, M["steel_dark"])
-                cv.beam((xa, yy, 0), (xa, yy, 2.7), 0.3, M["steel_dark"])
+            for xx in (x0 + 0.5, (x0 + x1) / 2, x1 - 0.5):
+                cv.beam((xx, ya + depth, 0), (xx, ya + depth, 1.1), 0.3, M["steel_dark"])
+                cv.beam((xx, ya, 0), (xx, ya, 2.7), 0.3, M["steel_dark"])
         with cv.part("solar panels"):
-            cv.parallelogram((xa, y0, 3.0), (depth, 0, -1.9), (0, y1 - y0, 0), panel_mat)
+            cv.parallelogram((x0, ya, 3.0), (x1 - x0, 0, 0), (0, depth, -1.9), panel_mat)
 
 
 def _panel_pattern(p, n):
     # cell grid lines give the panels texture
-    if (p[1] % 2.0) < 0.22:
+    if (p[0] % 2.0) < 0.22:
         return 21
     if (p[2] % 1.0) < 0.12:
         return 131
@@ -1044,7 +1060,7 @@ TILE_GROUND = {
 
 # ── Cargo icons ────────────────────────────────────────────────────────
 # Flat pixel art, not 3D: shapes are defined on a 10x10 grid and sampled at
-# each pixel centre, so the 2x icon is the same drawing at twice the detail.
+# each pixel centre (render_icon's `s` scales the sampling grid).
 # Each icon gets a near-black outline like the base game's cargo icons.
 ICON_W = 10
 OUTLINE = 1
@@ -1061,13 +1077,15 @@ def _in_poly(x, y, pts):
 
 
 def icon_power(u, v):
-    """Yellow lightning bolt, lit from the upper left.  Returns (index, part)."""
+    """Yellow lightning bolt, shaded lighter towards its upper left.  Returns
+    (index, part).  Cargo icons are flat menu art, not world sprites, so this
+    shading is part of the drawing and doesn't follow LIGHT."""
     if not _in_poly(u, v, _BOLT):
         return 0, None
     return YELLOW[min(6, max(3, int(7.5 - (u + v) * 0.3)))], "lightning bolt"
 
 
-_DRUM = [83, 85, 87, 209, 87, 86, 85, 84, 83, 82]  # left to right, lit from the left
+_DRUM = [83, 85, 87, 209, 87, 86, 85, 84, 83, 82]  # left to right, highlight left of centre (not LIGHT)
 
 
 def icon_uranium(u, v):
@@ -1163,25 +1181,21 @@ def _entries(fname, n, s, w, h, xoff, yoff):
 
 
 def nml_spritesets():
-    """NML for every spriteset, with 2x alternatives, matching the sheets."""
+    """NML for every spriteset (1x only), matching the sheets."""
     out = [NML_BEGIN + " - written by tools/make_sprites.py, do not edit by hand */"]
     out.append("/* ground: %s */" % ", ".join("%d=%s" % (k, g) for k, g in enumerate(GROUND_ORDER)))
 
-    def block(ss, fname, n, w, h1, h2, xoff, yoff):
+    def block(ss, fname, n, w, h, xoff, yoff):
         out.append('spriteset(%s, "sprites/%s.png") { %s }'
-                   % (ss, fname, _entries(fname + ".png", n, 1, w, h1, xoff, yoff)))
-        out.append('alternative_sprites(%s, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/%s_2x.png") { %s }'
-                   % (ss, fname, _entries(fname + "_2x.png", n, 2, w, h2, xoff, yoff)))
+                   % (ss, fname, _entries(fname + ".png", n, 1, w, h, xoff, yoff)))
 
-    block("ss_ground", "ground", len(GROUND_ORDER), CELL_W, 31, 63, -31, 0)
+    block("ss_ground", "ground", len(GROUND_ORDER), CELL_W, 31, -31, 0)
     for name, (_, H, tiles) in INDUSTRIES.items():
         out.append("/* %s: %s */" % (name, ", ".join("%d=%s" % (k, t[0]) for k, t in enumerate(tiles))))
-        block("ss_" + name, name, len(tiles), CELL_W, 32 + H, (32 + H) * 2, -31, -H)
+        block("ss_" + name, name, len(tiles), CELL_W, 32 + H, -31, -H)
     for k, cargo in enumerate(CARGO_ICONS):
         w = ICON_W
         out.append('spriteset(ss_cargo_%s, "sprites/cargo_icons.png") { [%d,0,%d,%d,0,0] }' % (cargo, k * w, w, w))
-        out.append('alternative_sprites(ss_cargo_%s, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/cargo_icons_2x.png") '
-                   '{ [%d,0,%d,%d,0,0] }' % (cargo, k * w * 2, w * 2, w * 2))
     out.append(NML_END)
     return "\n".join(out)
 
@@ -1200,14 +1214,13 @@ def update_nml():
 
 def main():
     only = set(sys.argv[1:])
-    for s, suffix in ((1, ""), (2, "_2x")):
-        if not only or "ground" in only:
-            save(render_ground(s), "ground%s.png" % suffix)
-        if not only or "cargo_icons" in only:
-            save(render_icons(s), "cargo_icons%s.png" % suffix)
-        for name in INDUSTRIES:
-            if not only or name in only:
-                save(render_sheet(name, s), "%s%s.png" % (name, suffix))
+    if not only or "ground" in only:
+        save(render_ground(1), "ground.png")
+    if not only or "cargo_icons" in only:
+        save(render_icons(1), "cargo_icons.png")
+    for name in INDUSTRIES:
+        if not only or name in only:
+            save(render_sheet(name, 1), "%s.png" % name)
     update_nml()
     # annotated references with part names (docs/sprites/, spec section 12)
     import sprite_refs
