@@ -63,7 +63,6 @@ COAL = [1, 2, 3, 4, 5, 6]
 PANEL = [128, 129, 130, 131, 132, 133]
 GLASS = [198, 199, 200, 201, 202, 203, 204, 205]
 WATER = [245, 246, 247, 248, 249]
-DAMWATER = [144, 145, 146, 147, 148, 149]
 GREEN_ROOF = [96, 97, 98, 99, 100, 101]
 BLUE_ROOF = [154, 155, 156, 157, 158, 159]
 
@@ -344,7 +343,6 @@ M = {
     "coal": Material(COAL, 0.4, grain=0.5),
     "panel": Material(PANEL, 0.0),
     "glass": Material(GLASS),
-    "damwater": Material(DAMWATER, 0.15, grain=1.5),
     "water": Material(WATER, 0.6, grain=1.0),
     "green_roof": Material(GREEN_ROOF),
     "blue_roof": Material(BLUE_ROOF),
@@ -520,12 +518,13 @@ panel_mat = Material(PANEL, 0.0, bias=0.1, pattern=_panel_pattern)
 # Each entry: name, (x,y) position in the tilelayout, height H, ground, draw(cv)
 
 def t_hydro_dam_n(cv):
-    # reservoir side: dam wall along the SW edge with curved crest
+    # dam wall along the SW edge, standing in the river (the tile's water
+    # ground).  No raised reservoir: it would float in front of the wall
+    # when the dam is turned to face the viewer.
     cv.box(10.5, 0, 0, 16, 16, 26, M["concrete"], top=M["concrete_dark"])
     cv.box(10.2, 0, 26, 11.2, 16, 27.5, M["concrete"])  # parapet
     for yy in (3, 8, 13):  # buttresses on the downstream face
         cv.box(15.5, yy - 0.8, 0, 16.8, yy + 0.8, 24, M["concrete"])
-    cv.heightfield(0, 0, 10.5, 16, lambda x, y: 20.0, M["damwater"])
 
 
 def t_hydro_dam_s(cv):
@@ -549,6 +548,86 @@ def t_hydro_power_s(cv):
     cv.gable(4, 1.5, 0, 13, 14.5, 9, 3, windowed(M["beige"], every=2.5, z_every=4.5), M["green_roof"], along_x=False)
     transformer(cv, 13.5, 3, 2, 3, 3)
     transformer(cv, 13.5, 9, 2, 3, 3)
+
+
+# Rotated copies of the hydro tiles, so the dam can face whichever side the
+# water is on.  The tiles above are drawn with the water on the north-east
+# (-x) side; each entry turns the whole 2x2 site about its centre so that
+# side becomes the one named.  Keys match the tile names in the NML.
+HYDRO_FACINGS = ("ne", "nw", "sw", "se")
+_ROT_POINT = {
+    "ne": lambda x, y: (x, y),
+    "nw": lambda x, y: (16 - y, x),
+    "sw": lambda x, y: (16 - x, 16 - y),
+    "se": lambda x, y: (y, 16 - x),
+}
+_ROT_VEC = {
+    "ne": lambda x, y: (x, y),
+    "nw": lambda x, y: (-y, x),
+    "sw": lambda x, y: (-x, -y),
+    "se": lambda x, y: (y, -x),
+}
+_UNROT_POINT = {"ne": "ne", "nw": "se", "sw": "sw", "se": "nw"}
+
+
+class RotatedCanvas:
+    """Canvas proxy that turns the drawing by quarter turns about the tile
+    centre.  Boxes and gables stay axis-aligned, so they are re-derived from
+    their rotated corners and still draw the faces that face the viewer."""
+
+    def __init__(self, cv, facing):
+        self.cv = cv
+        self.p = _ROT_POINT[facing]
+        self.v = _ROT_VEC[facing]
+        self.inv = _ROT_POINT[_UNROT_POINT[facing]]
+        self.swap = facing in ("nw", "se")
+
+    def _rect(self, x0, y0, x1, y1):
+        ax, ay = self.p(x0, y0)
+        bx, by = self.p(x1, y1)
+        return min(ax, bx), min(ay, by), max(ax, bx), max(ay, by)
+
+    def _p3(self, q):
+        return self.p(q[0], q[1]) + (q[2],)
+
+    def _v3(self, q):
+        return self.v(q[0], q[1]) + (q[2],)
+
+    def box(self, x0, y0, z0, x1, y1, z1, mat, top=None, side=None):
+        a, b, c, d = self._rect(x0, y0, x1, y1)
+        self.cv.box(a, b, z0, c, d, z1, mat, top, side)
+
+    def gable(self, x0, y0, z0, x1, y1, z1, ridge, wall, roof, along_x=True):
+        a, b, c, d = self._rect(x0, y0, x1, y1)
+        self.cv.gable(a, b, z0, c, d, z1, ridge, wall, roof, along_x != self.swap)
+
+    def beam(self, a, b, w, mat):
+        self.cv.beam(self._p3(a), self._p3(b), w, mat)
+
+    def column(self, cx, cy, z0, z1, radius, mat, cap=None, flare=0.0):
+        cx, cy = self.p(cx, cy)
+        self.cv.column(cx, cy, z0, z1, radius, mat, cap, flare)
+
+    def heightfield(self, x0, y0, x1, y1, f, mat):
+        a, b, c, d = self._rect(x0, y0, x1, y1)
+        self.cv.heightfield(a, b, c, d, lambda x, y: f(*self.inv(x, y)), mat)
+
+    def parallelogram(self, o, u, v, mat, normal=None):
+        self.cv.parallelogram(self._p3(o), self._v3(u), self._v3(v), mat,
+                              None if normal is None else self._v3(normal))
+
+
+def rotated(draw, facing):
+    if facing == "ne":
+        return draw
+    return lambda cv: draw(RotatedCanvas(cv, facing))
+
+
+def hydro_tiles():
+    base = [("hydro_dam_n", t_hydro_dam_n), ("hydro_dam_s", t_hydro_dam_s),
+            ("hydro_power_n", t_hydro_power_n), ("hydro_power_s", t_hydro_power_s)]
+    return [(key if f == "ne" else "%s_%s" % (key, f), rotated(draw, f))
+            for f in HYDRO_FACINGS for key, draw in base]
 
 
 def t_uranium_headframe(cv):
@@ -733,12 +812,7 @@ def t_coal_yard(cv):
 
 # name → (ground, H, [(tile_key, draw), ...]) – order defines sheet order
 INDUSTRIES = {
-    "hydro_dam": ("water", 36, [
-        ("hydro_dam_n", t_hydro_dam_n),
-        ("hydro_dam_s", t_hydro_dam_s),
-        ("hydro_power_n", t_hydro_power_n),
-        ("hydro_power_s", t_hydro_power_s),
-    ]),
+    "hydro_dam": ("water", 36, hydro_tiles()),
     "uranium_mine": ("dirt", 40, [
         ("uranium_headframe", t_uranium_headframe),
         ("uranium_tailings", t_uranium_tailings),
@@ -786,8 +860,7 @@ INDUSTRIES = {
 
 # Tiles whose ground differs from their industry's default ground.
 TILE_GROUND = {
-    "hydro_power_n": "grass",
-    "hydro_power_s": "grass",
+    **{k: "grass" for k, _ in hydro_tiles() if k.startswith("hydro_power")},
     "uranium_tailings": "dirt",
 }
 

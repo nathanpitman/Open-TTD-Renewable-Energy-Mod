@@ -3,7 +3,9 @@
 ## Unreleased
 
 - **Fixed: coal mines drawn as hydro dams.** Every industry tile in the NewGRF replaced base-game industry tile 0, which belongs to the coal mine, so coal mines showed dam art. The tiles no longer replace any base-game tile.
-- **Hydroelectric dams sit on water.** A dam used to be allowed anywhere within a few tiles of water, so it could appear in the middle of a field. Each tile of the dam wall now needs a water tile directly behind it, so the reservoir joins a real river, lake or canal. The "max water distance" parameter no longer has an effect. It stays in the list so your other parameter settings keep their values.
+- **Hydroelectric dams sit on water.** A dam used to be allowed anywhere within a few tiles of water, so it could appear in the middle of a field. Each tile of the dam wall now needs a water tile directly next to it, so the dam always meets a real river, lake or canal.
+- **Hydroelectric dams face any direction.** The dam comes in four orientations, so it can be built with the water on any side. The raised reservoir behind the wall is gone: the wall now stands in the river itself, which looks right from every side.
+- **Removed the "max water distance" setting.** It no longer did anything. The other settings keep their numbers, so values saved in existing games still apply to the right setting.
 
 ## v12
 
