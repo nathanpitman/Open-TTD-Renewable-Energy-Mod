@@ -1,0 +1,57 @@
+# Changelog
+
+## v0.1
+
+First public release of **Energy Transition Industries** for OpenTTD. It adds cleaner power generation, from hydro and nuclear through to wind and solar, and ties town growth to how much electricity reaches each town.
+
+### What's included
+
+- **`energy_transition.grf`**: a NewGRF with 7 new industries and 2 new cargos (Power and Uranium)
+- **`energy_transition_gs/`**: a Game Script ("Energy Transition Power Grid") that runs a hidden power grid and sets how fast towns grow
+
+### Highlights
+
+#### New industries, arriving over time
+
+| Industry | Default year | Placement |
+|---|---|---|
+| Hydroelectric Dam | 1950 | Near water |
+| Electrical Substation | 1950 | Near towns; makes towns grow faster |
+| Uranium Mine | 1953 | Remote areas |
+| Nuclear Power Plant | 1956 | Needs uranium deliveries |
+| Tidal Power Station | 1966 | Coast only |
+| Wind Farm | 1980 | High ground only |
+| Solar Farm | 1990 | Flat land only |
+
+#### Hidden power grid
+
+Every 30 days the Game Script adds up the power output of generators near each town and sets that town's growth rate. You don't need to transport power. Towns with no power stop growing. Towns with plenty of power grow quickly, and a nearby substation makes them grow faster still.
+
+#### Workers
+
+Every generator accepts Passengers as workers. A new generator starts at low output and increases as workers arrive. If deliveries stop, output slowly falls.
+
+#### Coal phase-out
+
+The standard Coal Power Station now also needs workers. No new coal plants appear after 1970, and existing plants start closing at random from 1990, faster from 2010. Both years can be changed.
+
+#### Configurable
+
+- **NewGRF parameters:** the start year for each type of power, the coal stop and close years, placement rules (distance to water, minimum height for wind, how often substations appear), how often each generator type appears, and whether workers are needed.
+- **Game Script settings:** how far a generator's power reaches, how far a substation's boost reaches, how much power a town needs to grow at all and to grow at full speed, whether towns with no power can grow, and how often the grid updates.
+
+### Installation
+
+1. Copy `energy_transition.grf` into your OpenTTD `newgrf/` folder and enable it under **NewGRF Settings**.
+2. Copy the `energy_transition_gs/` folder into your OpenTTD `game/` folder and select **Energy Transition Power Grid** under **AI/Game Script Settings → Game Script**.
+3. Start a **new game**. Both parts must be turned on before the game begins.
+
+See `README.md` and `INSTALL.txt` for the folder locations on each operating system and for how to rebuild from source (`nmlc`).
+
+### Known limitations
+
+- This is an early release, so the balance numbers (power thresholds, growth rates, how often industries appear) may change.
+- The README at this release mentions an `energy_transition_gs.tar` package, but the release doesn't include one. Use the folder install (option A) instead.
+- It hasn't been tested with saves from earlier games. Start a new game.
+
+Feedback and bug reports are welcome in Issues.
