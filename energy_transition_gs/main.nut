@@ -47,7 +47,8 @@ class EnergyTransition extends GSController {
         GSLog.Info("  POWR cargo id:     " + _powr_cargo);
 
         while (true) {
-            this.Sleep(_update_interval);
+            /* Sleep() counts ticks; a game day is 74 ticks */
+            this.Sleep(_update_interval * 74);
             this._UpdateGrid();
         }
     }
@@ -57,9 +58,8 @@ class EnergyTransition extends GSController {
         local list = GSCargoList();
         local c = list.Begin();
         while (!list.IsEnd()) {
-            /* GSCargo.GetCargoLabel returns a 32-bit int for the 4-char label */
-            /* "POWR" = 0x504F5752 */
-            if (GSCargo.GetCargoLabel(c) == 0x504F5752) {
+            /* GSCargo.GetCargoLabel returns the label as a 4-character string */
+            if (GSCargo.GetCargoLabel(c) == "POWR") {
                 GSLog.Info("Found POWR cargo at id: " + c);
                 return c;
             }
@@ -69,18 +69,20 @@ class EnergyTransition extends GSController {
         return -1;
     }
 
-    /* Identify energy generators by name */
+    /* Identify industries by cargo, not name: GSIndustry.GetName returns
+       the town-prefixed name (e.g. "Smallbridge Wind Farm"), and names
+       change with the game language. */
+
+    /* Generators produce POWR */
     function _IsGenerator(ind_id) {
-        local name = GSIndustry.GetName(ind_id);
-        return (name == "Hydroelectric Dam"   ||
-                name == "Nuclear Power Plant" ||
-                name == "Tidal Power Station" ||
-                name == "Wind Farm"           ||
-                name == "Solar Farm");
+        local type = GSIndustry.GetIndustryType(ind_id);
+        return GSIndustryType.GetProducedCargo(type).HasItem(_powr_cargo);
     }
 
+    /* Substations accept POWR */
     function _IsSubstation(ind_id) {
-        return GSIndustry.GetName(ind_id) == "Electrical Substation";
+        local type = GSIndustry.GetIndustryType(ind_id);
+        return GSIndustryType.GetAcceptedCargo(type).HasItem(_powr_cargo);
     }
 
     function _UpdateGrid() {
