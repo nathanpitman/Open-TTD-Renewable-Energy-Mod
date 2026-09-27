@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **News messages name the town.** When a generator, substation, uranium mine or coal power station opens, closes or changes output, the news now says where, for example "New Wind Farm constructed near Smallbridge!" or "Smallbridge Coal Power Station has been decommissioned". Before, the messages didn't say which town. ([#50](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/50))
+
 ## v13
 
 - **Cargo icons for Power and Uranium.** Both cargos now have their own icon in station and industry windows, the cargo payment graph and anywhere else OpenTTD shows cargo icons: a yellow lightning bolt for Power and a green drum with a radiation mark for Uranium. Previously they showed no icon.
