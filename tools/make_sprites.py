@@ -11,6 +11,7 @@ produced from the same geometry, so the two zoom levels always agree.
 Usage:
     pip install nml pillow
     python3 tools/make_sprites.py          # writes sprites/*.png
+    python3 tools/make_sprites.py cargo_icons   # just one sheet (or an industry name)
 
 Conventions (see README "Sprites" section):
   * World units: one tile is 16x16, one height level is 8 units.
@@ -444,9 +445,10 @@ def wind_turbine(cv, cx, cy, angle, h=34, rotor=20.0):
 
     The rotor plane is perpendicular to the view (normal +x+y), and blade
     lengths are set in screen pixels so the rotor reads as a circle of
-    radius `rotor` px rather than a squashed ellipse.  `angle` (degrees)
-    is the first blade's angle; keep every blade at least ~25 degrees
-    away from straight down (270) so none hides against the tower.
+    radius `rotor` px rather than a squashed ellipse.  `angle` (degrees,
+    anticlockwise) is the first blade's angle.  The base angles in
+    WIND_TURBINES keep every blade well away from straight down (270), so
+    the still frame 0 shows no blade hidden against the tower.
     """
     cv.heightfield(cx - 4.5, cy - 4.5, cx + 4.5, cy + 4.5, lambda x, y: 0.05, M["gravel"])  # crane pad
     # track stubs to every tile edge so the access tracks on neighbouring tiles join up
@@ -749,6 +751,24 @@ def t_wind(angle, dx=0.0, dy=0.0):
     return lambda cv: wind_turbine(cv, 8 + dx, 8 + dy, angle)
 
 
+# Rotor animation: the three blades repeat every 120 degrees, so WIND_FRAMES
+# frames step the rotor clockwise through 120 degrees and loop.  Frame 0 is
+# the base angle.  Each turbine's frames sit together in the sheet, so its
+# sprite is  turbine * WIND_FRAMES + frame  (see sw_wind_rotor in the NML).
+WIND_FRAMES = 8
+WIND_TURBINES = [("wind_a", 90, 0.0, 0.0), ("wind_b", 70, 0.5, -0.5),
+                 ("wind_c", 110, -0.5, 0.5), ("wind_d", 60, 0.5, 0.5)]
+
+
+def wind_tiles():
+    tiles = []
+    for key, angle, dx, dy in WIND_TURBINES:
+        for f in range(WIND_FRAMES):
+            tiles.append((key if f == 0 else "%s_f%d" % (key, f),
+                          t_wind(angle - f * 120.0 / WIND_FRAMES, dx, dy)))
+    return tiles
+
+
 def t_wind_track_x(cv):
     service_track(cv, along_x=True)
 
@@ -833,11 +853,7 @@ INDUSTRIES = {
         ("tidal_barrage", t_tidal_barrage),
         ("tidal_hall", t_tidal_hall),
     ]),
-    "wind_farm": ("grass", 48, [
-        ("wind_a", t_wind(90)),
-        ("wind_b", t_wind(70, 0.5, -0.5)),
-        ("wind_c", t_wind(110, -0.5, 0.5)),
-        ("wind_d", t_wind(60, 0.5, 0.5)),
+    "wind_farm": ("grass", 48, wind_tiles() + [
         ("wind_track_x", t_wind_track_x),
         ("wind_track_y", t_wind_track_y),
         ("wind_kiosk", t_wind_kiosk),
@@ -863,6 +879,76 @@ TILE_GROUND = {
     **{k: "grass" for k, _ in hydro_tiles() if k.startswith("hydro_power")},
     "uranium_tailings": "dirt",
 }
+
+
+# ── Cargo icons ────────────────────────────────────────────────────────
+# Flat pixel art, not 3D: shapes are defined on a 10x10 grid and sampled at
+# each pixel centre, so the 2x icon is the same drawing at twice the detail.
+# Each icon gets a near-black outline like the base game's cargo icons.
+ICON_W = 10
+OUTLINE = 1
+
+_BOLT = [(4.8, 0.6), (8.4, 0.6), (6.3, 3.6), (8.6, 3.6), (2.8, 9.5), (4.3, 5.8), (1.6, 5.8)]
+
+
+def _in_poly(x, y, pts):
+    inside = False
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:] + pts[:1]):
+        if (y0 > y) != (y1 > y) and x < x0 + (y - y0) * (x1 - x0) / (y1 - y0):
+            inside = not inside
+    return inside
+
+
+def icon_power(u, v):
+    """Yellow lightning bolt, lit from the upper left."""
+    if not _in_poly(u, v, _BOLT):
+        return 0
+    return YELLOW[min(6, max(3, int(7.5 - (u + v) * 0.3)))]
+
+
+_DRUM = [83, 85, 87, 209, 87, 86, 85, 84, 83, 82]  # left to right, lit from the left
+
+
+def icon_uranium(u, v):
+    """Green drum with a yellow radiation mark."""
+    if not (2.0 <= u < 8.0 and 1.5 <= v < 9.0):
+        return 0
+    if (u - 5.0) ** 2 + ((v - 5.4) * 1.1) ** 2 < 1.6 ** 2:  # radiation mark
+        r = math.hypot(u - 5.0, v - 5.4)
+        ang = math.degrees(math.atan2(v - 5.4, u - 5.0)) % 120
+        if r < 0.45 or (r > 0.7 and 0 <= ang < 60):
+            return 1
+        return YELLOW[5]
+    if v < 2.5:  # lid
+        return 208
+    if 3.0 <= v < 3.5 or 7.8 <= v < 8.3:  # rims
+        return 82
+    return _DRUM[min(len(_DRUM) - 1, int((u - 2.0) / 6.0 * len(_DRUM)))]
+
+
+CARGO_ICONS = {"powr": icon_power, "uran": icon_uranium}
+
+
+def render_icon(fn, s):
+    n = ICON_W * s
+    px = [[fn((x + 0.5) / s, (y + 0.5) / s) for x in range(n)] for y in range(n)]
+    im = Image.new("P", (n, n), 0)
+    for y in range(n):
+        for x in range(n):
+            c = px[y][x]
+            if not c and any(0 <= y + dy < n and 0 <= x + dx < n and px[y + dy][x + dx]
+                             for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                c = OUTLINE
+            im.putpixel((x, y), c)
+    return im
+
+
+def render_icons(s):
+    sheet = Image.new("P", (ICON_W * s * len(CARGO_ICONS), ICON_W * s), 0)
+    sheet.putpalette(PALETTE)
+    for k, fn in enumerate(CARGO_ICONS.values()):
+        sheet.paste(render_icon(fn, s), (k * ICON_W * s, 0))
+    return sheet
 
 
 def render_sheet(name, s):
@@ -926,6 +1012,11 @@ def nml_spritesets():
     for name, (_, H, tiles) in INDUSTRIES.items():
         out.append("/* %s: %s */" % (name, ", ".join("%d=%s" % (k, t[0]) for k, t in enumerate(tiles))))
         block("ss_" + name, name, len(tiles), CELL_W, 32 + H, (32 + H) * 2, -31, -H)
+    for k, cargo in enumerate(CARGO_ICONS):
+        w = ICON_W
+        out.append('spriteset(ss_cargo_%s, "sprites/cargo_icons.png") { [%d,0,%d,%d,0,0] }' % (cargo, k * w, w, w))
+        out.append('alternative_sprites(ss_cargo_%s, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/cargo_icons_2x.png") '
+                   '{ [%d,0,%d,%d,0,0] }' % (cargo, k * w * 2, w * 2, w * 2))
     out.append(NML_END)
     return "\n".join(out)
 
@@ -947,6 +1038,8 @@ def main():
     for s, suffix in ((1, ""), (2, "_2x")):
         if not only or "ground" in only:
             save(render_ground(s), "ground%s.png" % suffix)
+        if not only or "cargo_icons" in only:
+            save(render_icons(s), "cargo_icons%s.png" % suffix)
         for name in INDUSTRIES:
             if not only or name in only:
                 save(render_sheet(name, s), "%s%s.png" % (name, suffix))
