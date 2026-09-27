@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **Fixed: the Game Script never changed town growth.** It looked for the Power cargo by comparing its label to a number, but OpenTTD gives the label as text, so it never found Power and did nothing. It also looked for generators by an exact name, but each industry's name starts with its town ("Smallbridge Wind Farm"), so it never found any. It now finds generators as the industries that produce Power, and substations as the ones that accept it, which also works in any language.
+- **Fixed: the power grid updated far too often.** The "update interval" setting is in game days, but the script treated it as ticks, so it recalculated about every half day instead of every 30 days. It now uses days.
 - **Added a debug override to bypass all start-year limits.** A new "Debug: ignore all start-year limits" NewGRF parameter (off by default) makes every generator and the uranium mine available from the start of the game, for testing without needing to relax or wait out the individual era-date settings.
 - **Fixed: coal mines drawn as hydro dams.** Every industry tile in the NewGRF replaced base-game industry tile 0, which belongs to the coal mine, so coal mines showed dam art. The tiles no longer replace any base-game tile.
 - **Hydroelectric dams sit on water.** A dam used to be allowed anywhere within a few tiles of water, so it could appear in the middle of a field. Each tile of the dam wall now needs a water tile directly next to it, so the dam always meets a real river, lake or canal.
