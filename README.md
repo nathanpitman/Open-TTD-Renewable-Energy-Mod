@@ -4,6 +4,10 @@ Two components work together:
 - `energy_transition.grf` — NewGRF adding 7 new industries and 2 custom cargos
 - `energy_transition_gs/` (or `.tar`) — Game Script simulating an invisible power grid
 
+## Compatibility
+
+This mod is **likely incompatible with FIRS** (and other industry sets that replace the whole cargo and industry economy). FIRS defines its own set of cargos and industries, which can clash with the cargos and industries this mod adds or overrides. Expect missing or mislabelled cargos if both are active.
+
 ---
 
 ## Installation
@@ -58,7 +62,7 @@ Every 30 days the script scans every town and finds all energy generators within
 | Full power + nearby substation | Fast — 12 days/growth |
 
 ### Worker mechanic
-All generators accept Passengers (workers). Without regular worker deliveries, production slowly declines. Generators start at minimum output and ramp up as workers arrive.
+All generators accept Passengers (workers). Without regular worker deliveries, production slowly declines until it reaches the minimum level. A lack of workers never closes an industry. Generators start at minimum output and ramp up as workers arrive.
 
 ### Energy timeline (all dates configurable)
 | Industry | Default era | Placement rule |

@@ -167,8 +167,12 @@ grf {
 /* ── CARGO TABLE ──────────────────────────────────────────────── */
 cargotable { POWR, URAN, PASS, COAL, }
 
+/* Cargo item IDs are global cargo slots, not GRF-local IDs. Slots 0-11 hold
+ * the default cargos (0 = PASS, 1 = COAL, ...), so using them would replace
+ * those cargos. Use slots the default climates leave free. */
+
 /* ── CARGO: POWER ─────────────────────────────────────────────── */
-item(FEAT_CARGOS, item_cargo_powr, 0) {
+item(FEAT_CARGOS, item_cargo_powr, 32) {
     property {
         cargo_label:           "POWR";
         town_growth_effect:    TOWNGROWTH_GOODS;
@@ -185,7 +189,7 @@ item(FEAT_CARGOS, item_cargo_powr, 0) {
 }
 
 /* ── CARGO: URANIUM ───────────────────────────────────────────── */
-item(FEAT_CARGOS, item_cargo_uran, 1) {
+item(FEAT_CARGOS, item_cargo_uran, 33) {
     property {
         cargo_label:           "URAN";
         town_growth_effect:    TOWNGROWTH_NONE;
@@ -390,12 +394,19 @@ switch(FEAT_INDUSTRIES, SELF, sw_prob_solar,    current_year >= param_solar_year
    All generators accept PASS. param_workers_required toggles this.
    ═══════════════════════════════════════════════════════════ */
 
+/* Decrementing at the minimum production level (4) closes the industry.
+   Missing workers should only reduce output, so hold at the minimum instead. */
+switch(FEAT_INDUSTRIES, SELF, sw_workers_decrement, production_level) {
+    0..4: CB_RESULT_IND_PROD_NO_CHANGE;
+    CB_RESULT_IND_PROD_DECREMENT_BY_1;
+}
+
 /* Days since workers last arrived → production change */
 switch(FEAT_INDUSTRIES, SELF, sw_workers_days_inner,
        current_date - last_cargo_accepted_at("PASS")) {
     0..60:   CB_RESULT_IND_PROD_INCREMENT_BY_1;
     61..180: CB_RESULT_IND_PROD_NO_CHANGE;
-    CB_RESULT_IND_PROD_DECREMENT_BY_1;
+    return sw_workers_decrement;
 }
 
 /* Toggle via parameter */
@@ -587,7 +598,7 @@ item(FEAT_INDUSTRIES, industry_substation, 6) {
 }
 
 /* ── COAL POWER STATION OVERRIDE ── */
-item(FEAT_INDUSTRIES, ind_coal_power_plant, 0) {
+item(FEAT_INDUSTRIES, ind_coal_power_plant, 7) {
     property {
         substitute:  INDUSTRYTYPE_POWER_PLANT;
         override:    INDUSTRYTYPE_POWER_PLANT;
