@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Coal Power Station looks like the base game's power station again.** The mod drew its own two-tile coal plant in place of the default one. It now keeps the base game's power station layout and art (or your base graphics set's), and only changes when coal plants stop appearing and start closing. Coal plants already built with the mod's art in an existing game show the default power station buildings instead.
+
 ## v13
 
 - **Cargo icons for Power and Uranium.** Both cargos now have their own icon in station and industry windows, the cargo payment graph and anywhere else OpenTTD shows cargo icons: a yellow lightning bolt for Power and a green drum with a radiation mark for Uranium. Previously they showed no icon.

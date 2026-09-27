@@ -939,29 +939,6 @@ def t_sub_pylon(cv):
     fence(cv, 0, 15.5, 16, 15.5)
 
 
-def t_coal_boiler(cv):
-    with cv.part("boiler house"):
-        cv.box(1, 1, 0, 13, 11, 18, windowed(M["brick"], every=2.5, z_every=6, z_band=(0.4, 0.7)), top=M["grey"])
-    with cv.part("annex"):
-        cv.box(2, 11, 0, 12, 15, 10, M["brick"], top=M["steel_dark"])
-    with cv.part("chimney"):
-        cv.column(13.5, 13, 0, 48, lambda t: 2.0 - 0.7 * t, striped(M["brick"], M["red"], 12), cap=M["dark"])
-
-
-def t_coal_yard(cv):
-    def pile(x, y):
-        d = math.sqrt(((x - 7) / 6.5) ** 2 + ((y - 6) / 5.5) ** 2)
-        if d > 1:
-            return None
-        return 7 * (1 - d * d) + hash01(x * 2, y * 2, 9) * 0.8
-    with cv.part("coal pile"):
-        cv.heightfield(0, 0, 15, 12, pile, M["coal"])
-    with cv.part("conveyor support"):
-        cv.beam((1, 13, 1), (1, 13, 12), 0.5, M["steel"])
-    with cv.part("conveyor"):  # up to the boiler house
-        cv.beam((14, 13, 1), (-2, 13, 14), 1.2, M["steel"])
-
-
 # name → (ground, H, [(tile_key, draw), ...]) – order defines sheet order
 INDUSTRIES = {
     "hydro_dam": ("water", 36, hydro_tiles()),
@@ -998,10 +975,6 @@ INDUSTRIES = {
     "substation": ("concrete", 40, [
         ("sub_transformers", t_sub_transformers),
         ("sub_pylon", t_sub_pylon),
-    ]),
-    "coal_power_plant": ("dirt", 52, [
-        ("coal_boiler", t_coal_boiler),
-        ("coal_yard", t_coal_yard),
     ]),
 }
 

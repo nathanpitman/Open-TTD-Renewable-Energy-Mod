@@ -279,26 +279,6 @@ wind_track_y is the same track running the other way.
 - ground (concrete)
 - fence
 
-## Coal Power Plant
-
-### Boiler house and chimney
-
-[`coal_boiler.png`](coal_boiler.png) · tile `coal_boiler` · review [#66](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/66)
-
-- boiler house
-- chimney
-- annex
-- ground (dirt)
-
-### Coal yard and conveyor
-
-[`coal_yard.png`](coal_yard.png) · tile `coal_yard` · review [#67](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/67)
-
-- conveyor support
-- coal pile
-- conveyor
-- ground (dirt)
-
 ## Ground tiles
 
 ### Grass

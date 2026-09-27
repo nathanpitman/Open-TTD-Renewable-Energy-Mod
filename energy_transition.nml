@@ -247,9 +247,6 @@ alternative_sprites(ss_solar_farm, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/so
 /* substation: 0=sub_transformers, 1=sub_pylon */
 spriteset(ss_substation, "sprites/substation.png") { [0,0,64,72,-31,-40] [64,0,64,72,-31,-40] }
 alternative_sprites(ss_substation, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/substation_2x.png") { [0,0,128,144,-62,-80] [128,0,128,144,-62,-80] }
-/* coal_power_plant: 0=coal_boiler, 1=coal_yard */
-spriteset(ss_coal_power_plant, "sprites/coal_power_plant.png") { [0,0,64,84,-31,-52] [64,0,64,84,-31,-52] }
-alternative_sprites(ss_coal_power_plant, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/coal_power_plant_2x.png") { [0,0,128,168,-62,-104] [128,0,128,168,-62,-104] }
 spriteset(ss_cargo_powr, "sprites/cargo_icons.png") { [0,0,10,10,0,0] }
 alternative_sprites(ss_cargo_powr, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/cargo_icons_2x.png") { [0,0,20,20,0,0] }
 spriteset(ss_cargo_uran, "sprites/cargo_icons.png") { [10,0,10,10,0,0] }
@@ -305,10 +302,6 @@ spritelayout sl_solar_farm(tile) {
 spritelayout sl_substation(tile) {
     ground { sprite: ss_ground(2); }
     building { sprite: ss_substation(tile); xoffset:0; yoffset:0; zoffset:0; xextent:16; yextent:16; zextent:34; }
-}
-spritelayout sl_coal_power_plant(tile) {
-    ground { sprite: ss_ground(1); }
-    building { sprite: ss_coal_power_plant(tile); xoffset:0; yoffset:0; zoffset:0; xextent:16; yextent:16; zextent:48; }
 }
 
 /* ── INDUSTRY TILES ────────────────────────────────────────────── */
@@ -371,8 +364,11 @@ item(FEAT_INDUSTRYTILES, tile_solar_inverter,    23) { property { substitute:0; 
 item(FEAT_INDUSTRYTILES, tile_solar_control,     24) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_solar_farm(2); } }
 item(FEAT_INDUSTRYTILES, tile_sub_transformers,  25) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_substation(0); } }
 item(FEAT_INDUSTRYTILES, tile_sub_pylon,         26) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_substation(1); } }
-item(FEAT_INDUSTRYTILES, tile_coal_boiler,       27) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_coal_power_plant(0); } }
-item(FEAT_INDUSTRYTILES, tile_coal_yard,         28) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_coal_power_plant(1); } }
+/* Tiles 27 and 28 were the Coal Power Station's own art before it went back
+   to the default power station. Keep the IDs so plants built in older saves
+   still draw as a power station: base tiles 7 and 8 are its buildings. */
+item(FEAT_INDUSTRYTILES, tile_old_coal_boiler,   27) { property { substitute:7; land_shape_flags:0; } }
+item(FEAT_INDUSTRYTILES, tile_old_coal_yard,     28) { property { substitute:8; land_shape_flags:0; } }
 /* Wind farm spacing tiles: turbines never sit on adjacent tiles, so rotors don't overlap. */
 item(FEAT_INDUSTRYTILES, tile_wind_track_x,      29) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(32); } }
 item(FEAT_INDUSTRYTILES, tile_wind_track_y,      30) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(33); } }
@@ -439,7 +435,6 @@ tilelayout layout_wind_farm_2x2 { 0,0: tile_wind_grass;   1,0: tile_wind_b;
 tilelayout layout_solar_farm    { 0,0: tile_solar_panels;   1,0: tile_solar_panels; 2,0: tile_solar_inverter;
                                   0,1: tile_solar_control;  1,1: tile_solar_panels; 2,1: tile_solar_panels; }
 tilelayout layout_substation    { 0,0: tile_sub_transformers; 1,0: tile_sub_pylon; }
-tilelayout layout_coal_plant    { 0,0: tile_coal_boiler;      1,0: tile_coal_yard; }
 
 
 /* ── PRODUCTION ────────────────────────────────────────────────── */
@@ -663,8 +658,9 @@ item(FEAT_INDUSTRIES, ind_coal_power_plant, 7) {
     property {
         substitute:  INDUSTRYTYPE_POWER_PLANT;
         override:    INDUSTRYTYPE_POWER_PLANT;
+        /* No `layouts`: the substitute's default layouts and tiles are kept,
+           so it looks like the base game's power station. */
         name: string(STR_IND_COAL_PLANT); nearby_station_name: string(STR_STAT_COAL_PLANT);
-        layouts: [layout_coal_plant];
         life_type: IND_LIFE_TYPE_PROCESSING;
         map_colour: COLOUR_GREY;
         cargo_types: [accept_cargo("COAL")];
