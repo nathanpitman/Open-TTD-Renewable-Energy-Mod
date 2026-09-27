@@ -280,41 +280,50 @@ spritelayout sl_coal_power_plant(tile) {
 
 /* ── INDUSTRY TILES ────────────────────────────────────────────── */
 /* One tile type per distinct piece of art, so multi-tile industries read
-   as a single structure instead of a repeated icon. */
-item(FEAT_INDUSTRYTILES, tile_hydro_dam_n,        0) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_hydro_dam(0, 3); } }
-item(FEAT_INDUSTRYTILES, tile_hydro_dam_s,        1) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_hydro_dam(1, 3); } }
-item(FEAT_INDUSTRYTILES, tile_hydro_power_n,      2) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_hydro_dam(2, 0); } }
-item(FEAT_INDUSTRYTILES, tile_hydro_power_s,      3) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_hydro_dam(3, 0); } }
-item(FEAT_INDUSTRYTILES, tile_uranium_headframe,  4) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_uranium_mine(0); } }
-item(FEAT_INDUSTRYTILES, tile_uranium_tailings,   5) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_uranium_mine(1); } }
-item(FEAT_INDUSTRYTILES, tile_uranium_mill,       6) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_uranium_mine(2); } }
-item(FEAT_INDUSTRYTILES, tile_uranium_ore,        7) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_uranium_mine(3); } }
-item(FEAT_INDUSTRYTILES, tile_nuc_cooling,        8) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_nuclear_plant(0); } }
-item(FEAT_INDUSTRYTILES, tile_nuc_reactor,        9) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_nuclear_plant(1); } }
-item(FEAT_INDUSTRYTILES, tile_nuc_turbine,       10) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_nuclear_plant(2); } }
-item(FEAT_INDUSTRYTILES, tile_nuc_turbine2,      11) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_nuclear_plant(3); } }
-item(FEAT_INDUSTRYTILES, tile_nuc_admin,         12) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_nuclear_plant(4); } }
-item(FEAT_INDUSTRYTILES, tile_nuc_intake,        13) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_nuclear_plant(5); } }
-item(FEAT_INDUSTRYTILES, tile_nuc_switchyard,    14) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_nuclear_plant(6); } }
-item(FEAT_INDUSTRYTILES, tile_nuc_tanks,         15) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_nuclear_plant(7); } }
-item(FEAT_INDUSTRYTILES, tile_tidal_barrage,     16) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_tidal_station(0); } }
-item(FEAT_INDUSTRYTILES, tile_tidal_hall,        17) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_tidal_station(1); } }
-item(FEAT_INDUSTRYTILES, tile_wind_a,            18) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_wind_farm(0); } }
-item(FEAT_INDUSTRYTILES, tile_wind_b,            19) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_wind_farm(1); } }
-item(FEAT_INDUSTRYTILES, tile_wind_c,            20) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_wind_farm(2); } }
-item(FEAT_INDUSTRYTILES, tile_wind_d,            21) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_wind_farm(3); } }
-item(FEAT_INDUSTRYTILES, tile_solar_panels,      22) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_solar_farm(0); } }
-item(FEAT_INDUSTRYTILES, tile_solar_inverter,    23) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_solar_farm(1); } }
-item(FEAT_INDUSTRYTILES, tile_solar_control,     24) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_solar_farm(2); } }
-item(FEAT_INDUSTRYTILES, tile_sub_transformers,  25) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_substation(0); } }
-item(FEAT_INDUSTRYTILES, tile_sub_pylon,         26) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_substation(1); } }
-item(FEAT_INDUSTRYTILES, tile_coal_boiler,       27) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_coal_power_plant(0); } }
-item(FEAT_INDUSTRYTILES, tile_coal_yard,         28) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_coal_power_plant(1); } }
+   as a single structure instead of a repeated icon.
+   No tile sets `override`: that would replace a base-game industry tile
+   (override:0 is the coal mine's) with our art. */
+
+/* Hydro dam wall: the reservoir is drawn on the north-east side (x - 1),
+   so each wall tile must have real water directly behind it. */
+switch(FEAT_INDUSTRYTILES, SELF, sw_tile_check_hydro_dam, nearby_tile_is_water(-1, 0)) {
+    1: CB_RESULT_LOCATION_ALLOW;
+    CB_RESULT_LOCATION_DISALLOW;
+}
+item(FEAT_INDUSTRYTILES, tile_hydro_dam_n,        0) { property { substitute:0; land_shape_flags:0; } graphics { tile_check: sw_tile_check_hydro_dam; default: sl_hydro_dam(0, 3); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_dam_s,        1) { property { substitute:0; land_shape_flags:0; } graphics { tile_check: sw_tile_check_hydro_dam; default: sl_hydro_dam(1, 3); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_power_n,      2) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_dam(2, 0); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_power_s,      3) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_dam(3, 0); } }
+item(FEAT_INDUSTRYTILES, tile_uranium_headframe,  4) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_uranium_mine(0); } }
+item(FEAT_INDUSTRYTILES, tile_uranium_tailings,   5) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_uranium_mine(1); } }
+item(FEAT_INDUSTRYTILES, tile_uranium_mill,       6) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_uranium_mine(2); } }
+item(FEAT_INDUSTRYTILES, tile_uranium_ore,        7) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_uranium_mine(3); } }
+item(FEAT_INDUSTRYTILES, tile_nuc_cooling,        8) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_nuclear_plant(0); } }
+item(FEAT_INDUSTRYTILES, tile_nuc_reactor,        9) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_nuclear_plant(1); } }
+item(FEAT_INDUSTRYTILES, tile_nuc_turbine,       10) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_nuclear_plant(2); } }
+item(FEAT_INDUSTRYTILES, tile_nuc_turbine2,      11) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_nuclear_plant(3); } }
+item(FEAT_INDUSTRYTILES, tile_nuc_admin,         12) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_nuclear_plant(4); } }
+item(FEAT_INDUSTRYTILES, tile_nuc_intake,        13) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_nuclear_plant(5); } }
+item(FEAT_INDUSTRYTILES, tile_nuc_switchyard,    14) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_nuclear_plant(6); } }
+item(FEAT_INDUSTRYTILES, tile_nuc_tanks,         15) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_nuclear_plant(7); } }
+item(FEAT_INDUSTRYTILES, tile_tidal_barrage,     16) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_tidal_station(0); } }
+item(FEAT_INDUSTRYTILES, tile_tidal_hall,        17) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_tidal_station(1); } }
+item(FEAT_INDUSTRYTILES, tile_wind_a,            18) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(0); } }
+item(FEAT_INDUSTRYTILES, tile_wind_b,            19) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(1); } }
+item(FEAT_INDUSTRYTILES, tile_wind_c,            20) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(2); } }
+item(FEAT_INDUSTRYTILES, tile_wind_d,            21) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(3); } }
+item(FEAT_INDUSTRYTILES, tile_solar_panels,      22) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_solar_farm(0); } }
+item(FEAT_INDUSTRYTILES, tile_solar_inverter,    23) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_solar_farm(1); } }
+item(FEAT_INDUSTRYTILES, tile_solar_control,     24) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_solar_farm(2); } }
+item(FEAT_INDUSTRYTILES, tile_sub_transformers,  25) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_substation(0); } }
+item(FEAT_INDUSTRYTILES, tile_sub_pylon,         26) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_substation(1); } }
+item(FEAT_INDUSTRYTILES, tile_coal_boiler,       27) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_coal_power_plant(0); } }
+item(FEAT_INDUSTRYTILES, tile_coal_yard,         28) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_coal_power_plant(1); } }
 /* Wind farm spacing tiles: turbines never sit on adjacent tiles, so rotors don't overlap. */
-item(FEAT_INDUSTRYTILES, tile_wind_track_x,      29) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_wind_farm(4); } }
-item(FEAT_INDUSTRYTILES, tile_wind_track_y,      30) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_wind_farm(5); } }
-item(FEAT_INDUSTRYTILES, tile_wind_kiosk,        31) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_wind_farm(6); } }
-item(FEAT_INDUSTRYTILES, tile_wind_grass,        32) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_wind_farm_grass; } }
+item(FEAT_INDUSTRYTILES, tile_wind_track_x,      29) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(4); } }
+item(FEAT_INDUSTRYTILES, tile_wind_track_y,      30) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(5); } }
+item(FEAT_INDUSTRYTILES, tile_wind_kiosk,        31) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm(6); } }
+item(FEAT_INDUSTRYTILES, tile_wind_grass,        32) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_wind_farm_grass; } }
 
 /* ── TILE LAYOUTS ──────────────────────────────────────────────── */
 /* x runs to the lower-left of the screen, y to the lower-right; 0,0 is the back (north) tile. */
@@ -352,9 +361,11 @@ produce(prod_powr_6,  0, 0, 0, 6,  0, 0);
    LOCATION CHECK CALLBACKS  (use configurable parameters)
    ═══════════════════════════════════════════════════════════ */
 
-/* Hydro: within param_hydro_water_dist tiles of water */
-switch(FEAT_INDUSTRIES, SELF, sw_location_hydro,
-       water_distance <= param_hydro_water_dist) {
+/* Hydro: must touch water. The dam wall tiles also check that water lies
+   directly behind them (sw_tile_check_hydro_dam), so the reservoir art
+   always joins a real river, lake or canal. param_hydro_water_dist is kept
+   only so later parameter numbers don't shift; it no longer has an effect. */
+switch(FEAT_INDUSTRIES, SELF, sw_location_hydro, water_distance <= 1) {
     1: CB_RESULT_LOCATION_ALLOW;
     CB_RESULT_LOCATION_DISALLOW;
 }

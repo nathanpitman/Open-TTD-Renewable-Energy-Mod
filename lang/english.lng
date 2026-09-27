@@ -87,8 +87,8 @@ STR_PARAM_COAL_STOP_DESC        :After this year, no new coal power stations are
 STR_PARAM_COAL_CLOSE_NAME       :Coal: phaseout start year
 STR_PARAM_COAL_CLOSE_DESC       :From this year, existing coal plants begin closing stochastically. Accelerates 20 years later. (default: 1990)
 
-STR_PARAM_HYDRO_DIST_NAME       :Hydro Dam: max water distance
-STR_PARAM_HYDRO_DIST_DESC       :How many tiles from water a hydroelectric dam may be placed. Lower = must be closer to rivers/lakes. (default: 5)
+STR_PARAM_HYDRO_DIST_NAME       :Hydro Dam: max water distance (no longer used)
+STR_PARAM_HYDRO_DIST_DESC       :No longer has any effect. Hydroelectric dams are now always built with their reservoir against water.
 
 STR_PARAM_WIND_HEIGHT_NAME      :Wind Farm: minimum terrain height
 STR_PARAM_WIND_HEIGHT_DESC      :Minimum ground height for wind farm placement. 0 = anywhere, 4 = hills only, 8 = mountaintops only. (default: 4)
