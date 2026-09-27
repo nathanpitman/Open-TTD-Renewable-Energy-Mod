@@ -60,3 +60,40 @@ source" — only what a player would want to read in-game.
 
 If you notice `readme.txt` has drifted from `README.md`, point it out.
 Don't quietly change one without the other.
+
+## Verify changes in the game
+
+A change isn't fixed until it has been seen working in OpenTTD. A clean
+`nmlc` build, a read of the compiled NFO or a `tools/preview.py` image
+only shows the GRF compiles and the art renders. None of them shows the
+game does what was intended.
+
+For every change to the NML, the GRF, the sprites or the Game Script:
+
+1. **Run the headless check:** `python3 tools/ingame_check.py`. It loads the
+   GRF and Game Script in a real OpenTTD with no screen, generates a map,
+   runs a few game months, and fails if:
+   - the GRF doesn't load, or the Power or Uranium cargo is missing;
+   - an industry doesn't accept or produce exactly the cargos listed in
+     `tools/ingame_check_gs/main.nut`;
+   - a generator or the Uranium Mine produces nothing, or the Nuclear
+     Power Plant produces power with no uranium delivered;
+   - either Game Script errors, or the real one doesn't find Power.
+
+   It needs `openttd` and `openttd-opengfx` (`apt install openttd
+   openttd-opengfx`). When you change an industry's cargos or add an
+   industry, update the `EXPECTED` table in
+   `tools/ingame_check_gs/main.nut` in the same change. Paste the result
+   into the PR under Testing.
+2. **Check it by eye in a local game.** The headless check can't see art,
+   cargo icons, animation, windows or text. List what a person needs to
+   look at in the PR's Testing section. For example:
+   - which window to open (industry chain, station, cargo payment graph);
+   - which zoom levels;
+   - a new game and an existing save.
+
+Until both have been done, say so plainly. Write "not yet verified
+in-game" in the PR, don't close an issue as fixed, and don't describe
+the change as working. If the headless check can't run (for example
+OpenTTD can't be installed), say that too, rather than skipping it
+silently.
