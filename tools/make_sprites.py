@@ -38,6 +38,7 @@ Conventions (see README "Sprites" section):
 import contextlib
 import math
 import os
+import re
 import sys
 
 from PIL import Image
@@ -66,13 +67,13 @@ SAND = [56, 57, 58, 59, 37, 38]
 BRICK = [72, 73, 74, 75, 76, 77, 78]
 RED = [178, 179, 180, 181, 182, 183, 184]
 YELLOW = [62, 63, 64, 65, 66, 67, 68]
-GRASS = [80, 81, 82, 83, 84, 85, 86, 87]
+GRASS = [80, 81, 82, 83, 84, 85, 86, 87]  # 2nd company colour, as base-game grass; never recoloured
 DIRT = [104, 105, 106, 107, 108, 109, 110, 111]
 TAILINGS = [24, 25, 26, 27, 28, 29, 30]
 COAL = [1, 2, 3, 4, 5, 6]
 TOWER = [105, 32, 33, 34, 35, 36, 37]  # weathered cooling-tower concrete, as the base-game power station
 PANEL = [128, 129, 130, 131, 132, 133]
-GLASS = [198, 199, 200, 201, 202, 203, 204, 205]
+GLASS = [198, 199, 200, 201, 202, 203, 204, 205]  # 1st company colour, as base-game windows; never recoloured
 WATER = [245, 246, 247, 248, 249]
 GREEN_ROOF = [96, 97, 98, 99, 100, 101]
 BLUE_ROOF = [154, 155, 156, 157, 158, 159]
@@ -1228,9 +1229,24 @@ def nml_spritesets():
     return "\n".join(out)
 
 
+# GLASS and GRASS sit on the company-colour ranges (0xC6-0xCD, 0x50-0x57),
+# as the base game's windows and grass do.  Recolouring a sprite would repaint
+# them in the industry's random colour, so sprites are never recoloured (spec
+# section 3).
+RECOLOUR = re.compile(r"\b(recolour_mode|palette)\s*:")
+
+
+def check_no_recolour(text):
+    for n, line in enumerate(text.splitlines(), 1):
+        if RECOLOUR.search(line):
+            sys.exit("energy_transition.nml:%d recolours a sprite, which would repaint GLASS and GRASS "
+                     "(docs/sprite_design_spec.md, section 3): %s" % (n, line.strip()))
+
+
 def update_nml():
     with open(NML_FILE, encoding="utf-8") as f:
         text = f.read()
+    check_no_recolour(text)
     a, b = text.find(NML_BEGIN), text.find(NML_END)
     if a < 0 or b < 0:
         sys.exit("generated-spriteset markers not found in energy_transition.nml")
