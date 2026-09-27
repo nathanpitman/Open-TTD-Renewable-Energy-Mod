@@ -530,10 +530,22 @@ def wind_turbine(cv, cx, cy, angle, h=34, rotor=20.0):
         _blades(cv, hub, angle, rotor, ux, uy, blade, edge)
 
 
+BLADE_CURVE = 0.8  # how far the normal turns across the blade's width
+
+
+def _unit(v):
+    l = math.sqrt(sum(c * c for c in v))
+    return tuple(c / l for c in v)
+
+
 def _blades(cv, hub, angle, rotor, ux, uy, blade, edge):
+    face = _unit((1, 1, 0.3))  # the rotor faces the viewer
     for b in range(3):
         th = math.radians(angle + b * 120)
         c, sn = math.cos(th), math.sin(th)
+        # world direction across the blade (towards +w), so the blade can be
+        # shaded as a rounded section: the edge facing LIGHT comes out lighter
+        across = _unit((-sn * ux, -sn * uy, c))
         n = cv._n(rotor)
         for i in range(n + 1):
             t = i / n
@@ -546,7 +558,9 @@ def _blades(cv, hub, angle, rotor, ux, uy, blade, edge):
                 px = r * c - w * sn
                 pz = r * sn + w * c
                 p = (hub[0] + px * ux + 0.3, hub[1] + px * uy + 0.3, hub[2] + pz)
-                cv.splat(p, (1, 1, 0.3), edge if abs(j) == m and t < 0.9 else blade)
+                k = BLADE_CURVE * j / m
+                normal = tuple(f + k * a for f, a in zip(face, across))
+                cv.splat(p, normal, edge if abs(j) == m and t < 0.9 else blade)
 
 
 def service_track(cv, along_x=True, x0=0.0, x1=16.0):

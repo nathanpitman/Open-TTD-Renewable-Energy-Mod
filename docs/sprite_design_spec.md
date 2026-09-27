@@ -75,7 +75,7 @@ Brightness = `0.25 + 0.75 × max(0, N·L)`, mapped onto the material's ramp. Win
 **Still to check after the light change:**
 
 - **Solar panels:** fixed. They now tilt to face the lower right (south-east), into the light. Because they are lit, they come out paler than before. Check that they still read as solar panels (#61–#63).
-- **Turbine blades:** they use fixed colours (`blade` and `edge` in `wind_turbine`), not the light. Check that they sit well next to the newly lit tower (#58).
+- **Turbine blades:** fixed. Every blade pixel used to share one flat normal, `(1, 1, 0.3)`. That normal is symmetric in x and y, so the blades looked the same under the old light and the new, and showed no light direction at all. They are now shaded as a rounded section (`BLADE_CURVE` in `_blades`): the edge that faces the light (up and towards the lower right) is lighter and the far edge darker. This goes through `LIGHT`, so it will follow any later change to the light (#58).
 - **Cargo icons:** these are flat menu icons and keep their own shading. The Power icon's docstring still says "lit from the upper left" (#73).
 
 **Open question:** contrast. The base game has a bigger jump between the lit and shaded walls than our smooth shading gives. We still need to decide the minimum number of ramp steps between lit and shaded faces.
