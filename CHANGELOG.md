@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **New Electrical Substation art.** The substation no longer has a transmission pylon, since the game has no overhead power lines; its power is taken to be carried by buried cables. It is now a fenced yard with a large grid transformer (tall brown bushings, cooling radiators and a conservator tank), switchgear cabinets, a switch rack, two smaller transformers and a control building. Substations already on the map in existing games show the new art.
 - **Coal Power Station looks like the base game's power station again.** The mod drew its own two-tile coal plant in place of the default one. It now keeps the base game's power station layout and art (or your base graphics set's), and only changes when coal plants stop appearing and start closing. Coal plants already built with the mod's art in an existing game show the default power station buildings instead.
 
 ## v13

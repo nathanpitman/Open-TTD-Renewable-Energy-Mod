@@ -44,7 +44,7 @@ PAIRS = [
     ("factory shed", [(2190, 0, 0)], V_PAVED, "tidal_hall"),
     ("tanks", [(2080, -6, 0), (2082, 10, 4)], V_PAVED, "nuc_tanks"),
     ("brick hall", [(2171, 0, 0)], V_PAVED, "hydro_power_s"),
-    ("town house", [(1425, 0, 0)], V_GRASS, "sub_pylon"),
+    ("town house", [(1425, 0, 0)], V_GRASS, "sub_switchgear"),
 ]
 
 SEARCH = [

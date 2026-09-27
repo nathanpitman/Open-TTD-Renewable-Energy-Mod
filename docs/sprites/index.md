@@ -263,19 +263,27 @@ wind_track_y is the same track running the other way.
 
 [`sub_transformers.png`](sub_transformers.png) · tile `sub_transformers` · review [#64](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/64)
 
-- insulators
-- gantry
-- transformer
+- conservator tank
+- bushings
+- transformer tank
+- control box
+- switchgear cabinets
+- radiators
+- transformer plinth
 - ground (concrete)
 - fence
 
-### Pylon and control building
+### Switchgear and control building
 
-[`sub_pylon.png`](sub_pylon.png) · tile `sub_pylon` · review [#65](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/65)
+[`sub_switchgear.png`](sub_switchgear.png) · tile `sub_switchgear` · review [#65](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/65)
 
-- insulators
-- lattice pylon
 - control building
+- building door
+- switchgear cabinets
+- bushings
+- insulators
+- transformer
+- switch rack
 - ground (concrete)
 - fence
 

@@ -69,7 +69,7 @@ REFS = [
     ("solar_inverter", "Inverter station", "Solar Farm", ("tile", "solar_farm", "solar_inverter"), 62, None),
     ("solar_control", "Control building", "Solar Farm", ("tile", "solar_farm", "solar_control"), 63, None),
     ("sub_transformers", "Transformer yard", "Substation", ("tile", "substation", "sub_transformers"), 64, None),
-    ("sub_pylon", "Pylon and control building", "Substation", ("tile", "substation", "sub_pylon"), 65, None),
+    ("sub_switchgear", "Switchgear and control building", "Substation", ("tile", "substation", "sub_switchgear"), 65, None),
     ("ground_grass", "Grass", "Ground tiles", ("ground", "grass"), 68, None),
     ("ground_dirt", "Dirt", "Ground tiles", ("ground", "dirt"), 69, None),
     ("ground_concrete", "Concrete", "Ground tiles", ("ground", "concrete"), 70, None),
