@@ -16,7 +16,7 @@
 
 Two components work together:
 - `energy_transition.grf` — NewGRF adding 7 new industries and 2 custom cargos
-- `energy_transition_gs/` (or `.tar`) — Game Script simulating an invisible power grid
+- `energy_transition_gs/` — Game Script simulating an invisible power grid
 
 ## Compatibility
 
@@ -34,18 +34,13 @@ Copy `energy_transition.grf` to your OpenTTD `newgrf/` folder:
 
 Enable in: **Main Menu → NewGRF Settings → Add**
 
-### Game Script — choose one option
-
-**Option A (recommended): folder**
+### Game Script
 Copy the `energy_transition_gs/` folder into your OpenTTD `game/` folder so the path is:
 `game/energy_transition_gs/info.nut`
 
-**Option B: tar file**
-Copy `energy_transition_gs.tar` into your OpenTTD `game/` folder.
-
 `game/` locations:
 - **Windows**: `Documents\OpenTTD\game\`
-- **Mac**: `~/Documents/OpenTTD/game\`
+- **Mac**: `~/Documents/OpenTTD/game/`
 - **Linux**: `~/.local/share/openttd/game/`
 
 Enable in: **Main Menu → AI/Game Script Settings → Game Script → select "Energy Transition Power Grid"**
