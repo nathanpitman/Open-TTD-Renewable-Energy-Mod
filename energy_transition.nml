@@ -439,7 +439,8 @@ switch(FEAT_INDUSTRIES, SELF, sw_prob_solar,    current_year >= param_solar_year
 
 /* ═══════════════════════════════════════════════════════════
    WORKER MECHANIC — monthly production change callbacks
-   All generators accept PASS. param_workers_required toggles this.
+   All power stations and the Uranium Mine accept PASS. No other industry
+   needs workers. param_workers_required toggles this.
    ═══════════════════════════════════════════════════════════ */
 
 /* Decrementing at the minimum production level (4) closes the industry.
@@ -508,14 +509,14 @@ item(FEAT_INDUSTRIES, industry_uranium_mine, 0) {
         substitute: INDUSTRYTYPE_COAL_MINE;
         name: string(STR_IND_URANIUM_MINE); nearby_station_name: string(STR_STAT_URANIUM_MINE);
         layouts: [layout_uranium_mine]; life_type: IND_LIFE_TYPE_EXTRACTIVE;
-        map_colour: COLOUR_PALE_GREEN; cargo_types: [produce_cargo("URAN", 6)];
+        map_colour: COLOUR_PALE_GREEN; cargo_types: [accept_cargo("PASS"), produce_cargo("URAN", 6)];
         fund_cost_multiplier: 100;
         closure_msg: string(STR_NEWS_URANIUM_CLOSE); prod_increase_msg: string(STR_NEWS_URANIUM_UP);
         prod_decrease_msg: string(STR_NEWS_URANIUM_DOWN); new_ind_msg: string(STR_NEWS_URANIUM_NEW);
         prospect_chance: 0x18000000; prob_in_game: param_prob_uranium; prob_random: param_prob_uranium;
         spec_flags: bitmask(IND_FLAG_ALLOW_CLOSING_LAST_INSTANCE);
     }
-    graphics { construction_probability: sw_prob_uranium; }
+    graphics { construction_probability: sw_prob_uranium; monthly_prod_change: sw_workers_grace; }
 }
 
 /* ── NUCLEAR POWER PLANT ── */

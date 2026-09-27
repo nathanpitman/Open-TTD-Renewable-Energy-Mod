@@ -8,6 +8,7 @@
 - **Fixed: Power and Uranium missing from the game.** Both cargos were defined without the setting that tells OpenTTD they exist, so the game dropped them. The Uranium Mine produced nothing, the Nuclear Power Plant didn't accept uranium, and no generator produced power. Both cargos now appear, with their own names.
 - **Nuclear power needs uranium.** The Nuclear Power Plant used to make power even with no uranium delivered. It now makes power only from uranium: each tonne delivered becomes 1 MWh.
 - **Fixed: generators and the Uranium Mine produced twice.** Each one produced from two separate sources that were added together, and only one of them reacted to workers. They now produce from one source: Hydro 12, Tidal 10, Wind 8, Solar 6 MWh and Uranium Mine 6 tonnes per production cycle at normal output, rising and falling with workers.
+- **The Uranium Mine needs workers.** Like the power stations, it now accepts Passengers, and its output rises and falls with worker deliveries. No other industry needs workers.
 - **Removed the "max water distance" setting.** It no longer did anything. The other settings keep their numbers, so values saved in existing games still apply to the right setting.
 
 ## v12

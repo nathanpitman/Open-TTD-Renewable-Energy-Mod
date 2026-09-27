@@ -71,7 +71,7 @@ Every 30 days the script scans every town and finds all energy generators within
 | Full power + nearby substation | Fast — 12 days/growth |
 
 ### Worker mechanic
-All generators accept Passengers (workers). Without regular worker deliveries, production slowly declines until it reaches the minimum level. A lack of workers never closes an industry. Generators start at minimum output and ramp up as workers arrive. The Nuclear Power Plant is the exception for now: it makes exactly as much power as the uranium delivered to it, and workers don't change that yet.
+Power stations and the Uranium Mine accept Passengers (workers). No other industry needs workers. Without regular worker deliveries, production slowly declines until it reaches the minimum level. A lack of workers never closes an industry. Generators start at minimum output and ramp up as workers arrive. The Nuclear Power Plant is the exception for now: it makes exactly as much power as the uranium delivered to it, and workers don't change that yet.
 
 ### Energy timeline (all dates configurable)
 | | Industry | Default era | Placement rule |
