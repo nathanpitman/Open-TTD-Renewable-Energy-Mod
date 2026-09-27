@@ -1,5 +1,5 @@
 /*
- * Energy Transition Industries — OpenTTD NewGRF v10
+ * Energy Transition Industries — OpenTTD NewGRF v11
  * ==================================================
  * Full energy economy with configurable parameters.
  *
@@ -15,7 +15,7 @@ grf {
     grfid: "RE01";
     name: string(STR_GRF_NAME);
     desc: string(STR_GRF_DESC);
-    version: 10;
+    version: 11;
     min_compatible_version: 1;
 
     /* ── ERA DATES ─────────────────────────────────────────────── */
@@ -167,8 +167,12 @@ grf {
 /* ── CARGO TABLE ──────────────────────────────────────────────── */
 cargotable { POWR, URAN, PASS, COAL, }
 
+/* Cargo item IDs are global cargo slots, not GRF-local IDs. Slots 0-11 hold
+ * the default cargos (0 = PASS, 1 = COAL, ...), so using them would replace
+ * those cargos. Use slots the default climates leave free. */
+
 /* ── CARGO: POWER ─────────────────────────────────────────────── */
-item(FEAT_CARGOS, item_cargo_powr, 0) {
+item(FEAT_CARGOS, item_cargo_powr, 32) {
     property {
         cargo_label:           "POWR";
         town_growth_effect:    TOWNGROWTH_GOODS;
@@ -185,7 +189,7 @@ item(FEAT_CARGOS, item_cargo_powr, 0) {
 }
 
 /* ── CARGO: URANIUM ───────────────────────────────────────────── */
-item(FEAT_CARGOS, item_cargo_uran, 1) {
+item(FEAT_CARGOS, item_cargo_uran, 33) {
     property {
         cargo_label:           "URAN";
         town_growth_effect:    TOWNGROWTH_NONE;
@@ -517,7 +521,7 @@ item(FEAT_INDUSTRIES, industry_substation, 6) {
 }
 
 /* ── COAL POWER STATION OVERRIDE ── */
-item(FEAT_INDUSTRIES, ind_coal_power_plant, 0) {
+item(FEAT_INDUSTRIES, ind_coal_power_plant, 7) {
     property {
         substitute:  INDUSTRYTYPE_POWER_PLANT;
         override:    INDUSTRYTYPE_POWER_PLANT;
