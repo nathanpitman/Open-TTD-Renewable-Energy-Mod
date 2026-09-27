@@ -103,8 +103,11 @@ silently.
 `docs/sprite_design_spec.md` sets out how every sprite should look.
 Follow its **Decided** rules for any new or changed sprite.
 
-Sprites are refined one at a time, with one issue per sprite under
-issue #34. When a refinement should apply to every sprite (an outline
+Sprites are reviewed with one issue per industry under issue #34
+(plus one for ground tiles and one for cargo icons). Each issue has a
+section and a checklist item for every sprite in that industry. Don't
+open a separate issue for a single sprite; add it to its industry's
+issue instead. When a refinement should apply to every sprite (an outline
 rule, a texture level, a palette choice, a zoom-level decision),
 update the spec and its decision log in the same change. Put the rule
 in `tools/make_sprites.py` as shared code, not in one draw function.
