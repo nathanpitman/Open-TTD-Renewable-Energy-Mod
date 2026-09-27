@@ -5,6 +5,10 @@
  * industry windows, straight from the running game:
  *   - the NewGRF is loaded and the POWR and URAN cargos exist
  *   - each industry type accepts and produces exactly the expected cargos
+ *   - a Hydroelectric Dam can be built across a river on this map: the
+ *     script tries each dry tile beside a river until one takes
+ *   - every Hydroelectric Dam on the map (that one and any the map generator
+ *     placed) has its wall across a river and its ends on dry bank
  *   - after a couple of months, every generator on the map is producing
  *     power, the Uranium Mine produces uranium, and the Nuclear Power
  *     Plant (no uranium delivered) produces none
@@ -70,6 +74,7 @@ class IngameCheck extends GSController {
         if (powr == -1) this.Fail("cargo POWR missing"); else this.Pass("cargo POWR exists: " + GSCargo.GetName(powr));
         if (uran == -1) this.Fail("cargo URAN missing"); else this.Pass("cargo URAN exists: " + GSCargo.GetName(uran));
         local types = this.CheckChains();
+        if ("Hydroelectric Dam" in types) this.BuildHydroAcrossRiver(types["Hydroelectric Dam"]);
 
         /* Let a couple of months pass so every industry has a full month of history. */
         local start = GSDate.GetCurrentDate();
@@ -108,6 +113,67 @@ class IngameCheck extends GSController {
         return types;
     }
 
+    /* Dry tiles with river on the next tile in +x or +y: where a dam's north
+       (start) bank tile would be. The GRF's own checks decide the rest. */
+    function RiverBankTiles() {
+        local out = [];
+        local mx = GSMap.GetMapSizeX(), my = GSMap.GetMapSizeY();
+        for (local y = 1; y < my - 2; y++) {
+            for (local x = 1; x < mx - 2; x++) {
+                local t = GSMap.GetTileIndex(x, y);
+                if (GSTile.IsWaterTile(t)) continue;
+                if (GSTile.IsRiverTile(GSMap.GetTileIndex(x + 1, y)) || GSTile.IsRiverTile(GSMap.GetTileIndex(x, y + 1))) out.append(t);
+            }
+        }
+        return out;
+    }
+
+    function BuildHydroAcrossRiver(type) {
+        local before = {};
+        foreach (i, _ in GSIndustryList()) before[i] <- 1;
+        local banks = this.RiverBankTiles();
+        if (banks.len() == 0) { this.Warn("hydro build: no rivers on this map, dam across a river not tested"); return; }
+        local tried = 0;
+        foreach (t in banks) {
+            tried++;
+            if (!GSIndustryType.BuildIndustry(type, t)) continue;
+            local id = -1;
+            foreach (i, _ in GSIndustryList()) if (!(i in before) && GSIndustry.GetIndustryType(i) == type) id = i;
+            if (id == -1) { this.Fail("hydro build: BuildIndustry succeeded but no new dam found"); return; }
+            this.Pass("hydro build: built at bank tile " + tried + " of " + banks.len());
+            return;
+        }
+        this.Fail("hydro build: no dam could be built across a river (" + banks.len() + " river bank tiles tried)");
+    }
+
+    /* The dam runs from its start bank tile t along x or y: dry bank, wall,
+       dry bank. The wall tiles are industry tiles now, so check the river
+       still runs past them upstream and downstream, and that neither end is
+       on water. */
+    function CheckRiverDam(id) {
+        local t = GSIndustry.GetLocation(id);
+        local x = GSMap.GetTileX(t), y = GSMap.GetTileY(t);
+        local dx = GSIndustry.GetIndustryID(GSMap.GetTileIndex(x + 1, y)) == id ? 1 : 0;
+        local dy = 1 - dx;
+        local n = 0;
+        while (GSIndustry.GetIndustryID(GSMap.GetTileIndex(x + dx * n, y + dy * n)) == id) n++;
+        local width = n - 2;
+        local ok = width >= 1 && width <= 3;
+        for (local k = 1; k <= width; k++) {
+            local up = GSMap.GetTileIndex(x + dx * k - dy, y + dy * k - dx);
+            local down = GSMap.GetTileIndex(x + dx * k + dy, y + dy * k + dx);
+            if (!GSTile.IsRiverTile(up) || !GSTile.IsRiverTile(down)) ok = false;
+        }
+        foreach (k in [0, n - 1]) {
+            local b = GSMap.GetTileIndex(x + dx * k, y + dy * k);
+            if (GSTile.IsWaterTile(b) || GSTile.IsRiverTile(b)) ok = false;
+        }
+        local where = GSIndustry.GetName(id) + " at " + x + "," + y + " along " + (dx ? "x" : "y") + ", "
+                      + width + " wall tile(s)";
+        if (ok) this.Pass("hydro placement: across a river: " + where);
+        else this.Fail("hydro placement: not across a river: " + where);
+    }
+
     function CheckProduction(types, powr, uran) {
         local counts = {};
         foreach (name, _ in types) counts[name] <- 0;
@@ -117,6 +183,7 @@ class IngameCheck extends GSController {
                 if (tt != t) continue;
                 counts[name]++;
                 local label = GSIndustry.GetName(i);
+                if (name == "Hydroelectric Dam") this.CheckRiverDam(i);
                 if (name in GENERATORS) {
                     local p = GSIndustry.GetLastMonthProduction(i, powr);
                     if (p > 0) this.Pass("production " + label + ": " + p + " POWR last month");

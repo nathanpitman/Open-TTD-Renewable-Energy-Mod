@@ -632,6 +632,99 @@ def hydro_tiles():
             for f in HYDRO_FACINGS for key, draw in base]
 
 
+# ── Hydro dam across a river ──
+# Drawn for a dam running along x (the river runs along y), with the
+# reservoir on the back (-y) side and the downstream face, spillway and power
+# house on the front (+y) side, towards the viewer.  "start" and "end" are the
+# bank tiles at the low-x and high-x end: the wall meets them at x = 16 and
+# x = 0.  The river tiles are drawn by OpenTTD itself; the wall stands on them.
+DAM_Z = 12        # crest height
+DAM_Y0 = 4.5      # upstream (vertical) face
+DAM_Y1 = 7.5      # downstream edge of the crest
+DAM_TOE = 12.5    # foot of the sloping downstream face
+
+
+def dam_wall(cv, x0, x1, spill=False):
+    """Gravity dam section from x0 to x1: vertical upstream face, road on the
+    crest, sloping downstream face (water pouring down it on a spillway)."""
+    cv.box(x0, DAM_Y0, 0, x1, DAM_Y1, DAM_Z, M["concrete"], top=M["concrete_dark"])
+    face = M["water"] if spill else M["concrete"]
+    cv.parallelogram((x0, DAM_Y1, DAM_Z), (x1 - x0, 0, 0), (0, DAM_TOE - DAM_Y1, -DAM_Z), face)
+    if not spill:
+        cv.box(x0, DAM_Y0 - 0.4, DAM_Z, x1, DAM_Y0 + 0.4, DAM_Z + 1.2, M["concrete"])  # parapets
+        cv.box(x0, DAM_Y1 - 0.6, DAM_Z, x1, DAM_Y1 + 0.2, DAM_Z + 1.2, M["concrete"])
+
+
+def t_hydro_wall(cv):
+    dam_wall(cv, 0, 16)
+
+
+def t_hydro_spillway(cv):
+    # gated spillway: water pours over the crest between piers, with a road
+    # bridge over the piers and white water where it hits the river
+    dam_wall(cv, 0, 16, spill=True)
+    for x in (0, 5.3, 10.7, 16):
+        a, b = max(0, x - 0.8), min(16, x + 0.8)
+        cv.box(a, DAM_Y0, 0, b, DAM_TOE - 1.5, DAM_Z + 5, M["concrete"], top=M["concrete_dark"])
+    for x0, x1 in ((0.8, 4.5), (6.1, 9.9), (11.5, 15.2)):  # gates, raised
+        cv.box(x0, DAM_Y0 + 0.2, DAM_Z + 2.5, x1, DAM_Y0 + 1.0, DAM_Z + 5, M["steel_dark"])
+    cv.box(0, DAM_Y0, DAM_Z + 5, 16, DAM_Y1, DAM_Z + 6, M["concrete"], top=M["concrete_dark"])
+    cv.box(0, DAM_TOE - 0.2, 0, 16, DAM_TOE + 2.5, 0.6, Material([12, 13, 14, 15], 0.6, grain=0.5))
+
+
+def dam_bank(cv, reach):
+    """The wall running into the bank from the river side (x = 16) as far as
+    x = reach, ending in a concrete block set into the ground."""
+    dam_wall(cv, reach, 16)
+    cv.box(reach - 3, DAM_Y0 - 1.5, 0, reach, DAM_TOE - 3, DAM_Z + 2, M["concrete"], top=M["concrete_dark"])
+
+
+def t_hydro_abutment_start(cv):
+    dam_bank(cv, 9)
+    cv.box(1, 1, 0, 5, 3, 3, windowed(M["brick"], every=2.0), top=M["grey"])  # gate house
+
+
+def t_hydro_power_start(cv):
+    dam_bank(cv, 12)
+    # penstocks from the reservoir down the bank to the power house
+    for x in (2.8, 5.8, 8.8):
+        cv.beam((x, DAM_Y1 - 1.5, DAM_Z - 1), (x, 9.5, 5), 1.3, M["steel"])
+    cv.gable(1, 9, 0, 11, 15.5, 7, 2.5, windowed(M["beige"], every=2.5, z_every=4.5), M["green_roof"])
+    transformer(cv, 12.5, 13, 2, 2.5, 3)
+    lattice_tower(cv, 2, 3, 22)
+
+
+class MirroredCanvas(RotatedCanvas):
+    """Canvas proxy that mirrors the drawing in x (x -> 16 - x)."""
+
+    def __init__(self, cv):
+        self.cv = cv
+        self.p = lambda x, y: (16 - x, y)
+        self.v = lambda x, y: (-x, y)
+        self.inv = self.p
+        self.swap = False
+
+
+def mirrored(draw):
+    return lambda cv: draw(MirroredCanvas(cv))
+
+
+def river_dam_tiles():
+    """The x tiles as drawn, then the y tiles: the same pieces turned a
+    quarter so the dam runs along y with its downstream side still towards
+    the viewer.  That turn takes x = 16 to y = 0, so a piece that meets the
+    wall at x = 16 (a start piece) becomes the y dam's end piece."""
+    abut, power = t_hydro_abutment_start, t_hydro_power_start
+    x = [("wall", t_hydro_wall), ("spillway", t_hydro_spillway),
+         ("abutment_start", abut), ("abutment_end", mirrored(abut)),
+         ("power_start", power), ("power_end", mirrored(power))]
+    y = [("wall", t_hydro_wall), ("spillway", t_hydro_spillway),
+         ("abutment_start", mirrored(abut)), ("abutment_end", abut),
+         ("power_start", mirrored(power)), ("power_end", power)]
+    return ([("hydro_%s_x" % k, d) for k, d in x] +
+            [("hydro_%s_y" % k, rotated(d, "se")) for k, d in y])
+
+
 def t_uranium_headframe(cv):
     # steel headframe with sheave wheel over the shaft
     cv.box(3, 3, 0, 13, 13, 1, M["concrete"])
@@ -832,7 +925,7 @@ def t_coal_yard(cv):
 
 # name → (ground, H, [(tile_key, draw), ...]) – order defines sheet order
 INDUSTRIES = {
-    "hydro_dam": ("water", 36, hydro_tiles()),
+    "hydro_dam": ("water", 36, hydro_tiles() + river_dam_tiles()),
     "uranium_mine": ("dirt", 40, [
         ("uranium_headframe", t_uranium_headframe),
         ("uranium_tailings", t_uranium_tailings),
@@ -877,6 +970,7 @@ INDUSTRIES = {
 # Tiles whose ground differs from their industry's default ground.
 TILE_GROUND = {
     **{k: "grass" for k, _ in hydro_tiles() if k.startswith("hydro_power")},
+    **{k: "grass" for k, _ in river_dam_tiles() if k.endswith(("_start_x", "_end_x", "_start_y", "_end_y"))},
     "uranium_tailings": "dirt",
 }
 

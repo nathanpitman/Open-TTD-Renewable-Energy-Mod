@@ -23,12 +23,32 @@ import make_sprites as ms  # noqa: E402
 # tile_key None is a ground-only tile.  Must mirror the tilelayouts in
 # energy_transition.nml.
 _HYDRO = [(0, 0, "hydro_dam_n"), (0, 1, "hydro_dam_s"), (1, 0, "hydro_power_n"), (1, 1, "hydro_power_s")]
-# the hydro dam in its other three facings: the 2x2 site turned about its centre
+# the old (v13) hydro dam in its other three facings: the 2x2 site turned about its centre
 _HYDRO_TURN = {"nw": lambda x, y: (1 - y, x), "sw": lambda x, y: (1 - x, 1 - y), "se": lambda x, y: (y, 1 - x)}
 
+
+
+def _river_dam(axis, width, power_start):
+    """Dam across a river `width` tiles wide, with the river tiles either side
+    of the wall (tile_key None) so the preview shows it crossing the river."""
+    ends = ("power", "abutment") if power_start else ("abutment", "power")
+    walls = ["wall"] * width
+    walls[(width - 1) // 2] = "spillway"
+    keys = ["%s_start" % ends[0]] + walls + ["%s_end" % ends[1]]
+    out = []
+    for i, k in enumerate(keys):
+        out.append((i, 1, "hydro_%s_%s" % (k, axis)))
+        if 0 < i <= width:
+            out += [(i, 0, None), (i, 2, None)]
+    return out if axis == "x" else [(y, x, k) for x, y, k in out]
+
+
 LAYOUTS = {
-    "hydro_dam": _HYDRO,
-    **{"hydro_dam/" + f: [turn(x, y) + ("%s_%s" % (k, f),) for x, y, k in _HYDRO]
+    "hydro_dam": _river_dam("x", 2, True),
+    **{"hydro_dam/%s%d_%s" % (a, w, "ps" if p else "pe"): _river_dam(a, w, p)
+       for a in "xy" for w in (1, 2, 3) for p in (True, False)},
+    "hydro_dam/old": _HYDRO,
+    **{"hydro_dam/old_" + f: [turn(x, y) + ("%s_%s" % (k, f),) for x, y, k in _HYDRO]
        for f, turn in _HYDRO_TURN.items()},
     "uranium_mine": [(0, 0, "uranium_headframe"), (1, 0, "uranium_mill"), (0, 1, "uranium_tailings"),
                      (1, 1, "uranium_ore")],
