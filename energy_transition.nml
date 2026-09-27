@@ -157,6 +157,16 @@ grf {
         }
     }
 
+    /* ── DEBUG ─────────────────────────────────────────────────── */
+    param {
+        param_debug_all_available {
+            type: bool;
+            name: string(STR_PARAM_DEBUG_ALL_AVAILABLE_NAME);
+            desc: string(STR_PARAM_DEBUG_ALL_AVAILABLE_DESC);
+            def_value: 0;
+        }
+    }
+
 }
 
 /* ── CARGO TABLE ──────────────────────────────────────────────── */
@@ -420,12 +430,12 @@ switch(FEAT_INDUSTRIES, SELF, sw_location_solar, nearby_tile_slope(0, 0)) {
    CONSTRUCTION PROBABILITY — year-gated via parameters
    ═══════════════════════════════════════════════════════════ */
 
-switch(FEAT_INDUSTRIES, SELF, sw_prob_uranium,  current_year >= 1953)              { 1: CB_RESULT_IND_PROBABILITY_FROM_PROPERTY; CB_RESULT_IND_NO_CONSTRUCTION; }
-switch(FEAT_INDUSTRIES, SELF, sw_prob_hydro,    current_year >= param_hydro_year)  { 1: CB_RESULT_IND_PROBABILITY_FROM_PROPERTY; CB_RESULT_IND_NO_CONSTRUCTION; }
-switch(FEAT_INDUSTRIES, SELF, sw_prob_nuclear,  current_year >= param_nuclear_year){ 1: CB_RESULT_IND_PROBABILITY_FROM_PROPERTY; CB_RESULT_IND_NO_CONSTRUCTION; }
-switch(FEAT_INDUSTRIES, SELF, sw_prob_tidal,    current_year >= param_tidal_year)  { 1: CB_RESULT_IND_PROBABILITY_FROM_PROPERTY; CB_RESULT_IND_NO_CONSTRUCTION; }
-switch(FEAT_INDUSTRIES, SELF, sw_prob_wind,     current_year >= param_wind_year)   { 1: CB_RESULT_IND_PROBABILITY_FROM_PROPERTY; CB_RESULT_IND_NO_CONSTRUCTION; }
-switch(FEAT_INDUSTRIES, SELF, sw_prob_solar,    current_year >= param_solar_year)  { 1: CB_RESULT_IND_PROBABILITY_FROM_PROPERTY; CB_RESULT_IND_NO_CONSTRUCTION; }
+switch(FEAT_INDUSTRIES, SELF, sw_prob_uranium,  param_debug_all_available || current_year >= 1953)              { 1: CB_RESULT_IND_PROBABILITY_FROM_PROPERTY; CB_RESULT_IND_NO_CONSTRUCTION; }
+switch(FEAT_INDUSTRIES, SELF, sw_prob_hydro,    param_debug_all_available || current_year >= param_hydro_year)  { 1: CB_RESULT_IND_PROBABILITY_FROM_PROPERTY; CB_RESULT_IND_NO_CONSTRUCTION; }
+switch(FEAT_INDUSTRIES, SELF, sw_prob_nuclear,  param_debug_all_available || current_year >= param_nuclear_year){ 1: CB_RESULT_IND_PROBABILITY_FROM_PROPERTY; CB_RESULT_IND_NO_CONSTRUCTION; }
+switch(FEAT_INDUSTRIES, SELF, sw_prob_tidal,    param_debug_all_available || current_year >= param_tidal_year)  { 1: CB_RESULT_IND_PROBABILITY_FROM_PROPERTY; CB_RESULT_IND_NO_CONSTRUCTION; }
+switch(FEAT_INDUSTRIES, SELF, sw_prob_wind,     param_debug_all_available || current_year >= param_wind_year)   { 1: CB_RESULT_IND_PROBABILITY_FROM_PROPERTY; CB_RESULT_IND_NO_CONSTRUCTION; }
+switch(FEAT_INDUSTRIES, SELF, sw_prob_solar,    param_debug_all_available || current_year >= param_solar_year)  { 1: CB_RESULT_IND_PROBABILITY_FROM_PROPERTY; CB_RESULT_IND_NO_CONSTRUCTION; }
 
 /* ═══════════════════════════════════════════════════════════
    WORKER MECHANIC — monthly production change callbacks

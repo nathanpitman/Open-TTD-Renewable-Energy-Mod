@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Added a debug override to bypass all start-year limits.** A new "Debug: ignore all start-year limits" NewGRF parameter (off by default) makes every generator and the uranium mine available from the start of the game, for testing without needing to relax or wait out the individual era-date settings.
 - **Fixed: coal mines drawn as hydro dams.** Every industry tile in the NewGRF replaced base-game industry tile 0, which belongs to the coal mine, so coal mines showed dam art. The tiles no longer replace any base-game tile.
 - **Hydroelectric dams sit on water.** A dam used to be allowed anywhere within a few tiles of water, so it could appear in the middle of a field. Each tile of the dam wall now needs a water tile directly next to it, so the dam always meets a real river, lake or canal.
 - **Hydroelectric dams face any direction.** The dam comes in four orientations, so it can be built with the water on any side. The raised reservoir behind the wall is gone: the wall now stands in the river itself, which looks right from every side.

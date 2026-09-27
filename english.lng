@@ -114,3 +114,6 @@ STR_PARAM_PROB_NUCLEAR_DESC     :How frequently nuclear power plants appear. 0=n
 
 STR_PARAM_PROB_URANIUM_NAME     :Uranium Mine: spawn rate
 STR_PARAM_PROB_URANIUM_DESC     :How frequently uranium mines appear. Must have mines for nuclear plants to function. (default: 2)
+
+STR_PARAM_DEBUG_ALL_AVAILABLE_NAME :Debug: ignore all start-year limits
+STR_PARAM_DEBUG_ALL_AVAILABLE_DESC :Testing only. When on, every generator and the uranium mine can appear from the very start of the game, ignoring their era date settings above. Leave off for normal play. (default: off)

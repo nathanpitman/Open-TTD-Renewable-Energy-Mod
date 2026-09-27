@@ -89,10 +89,12 @@ game.
   Era dates:    Hydro (1930-1960), Nuclear (1950-1975), Tidal (1960-1985),
                 Wind (1970-1995), Solar (1980-2005), Coal stop (1960-1990),
                 Coal close (1980-2020)
-  Placement:    Hydro water distance (2-15), Wind min height (0-8),
-                Substation spawn rate (1-10)
+  Placement:    Wind min height (0-8), Substation spawn rate (1-10)
   Spawn rates:  Individual sliders for each generator type (0 = disabled)
   Gameplay:     Workers required toggle (on/off)
+  Debug:        Ignore all start-year limits (off by default; testing only -
+                makes every generator and the uranium mine available from
+                the start of the game)
 
 
 GAME SCRIPT PARAMETERS
