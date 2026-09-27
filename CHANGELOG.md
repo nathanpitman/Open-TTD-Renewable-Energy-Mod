@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Cargo icons for Power and Uranium.** Both cargos now have their own icon in station and industry windows, the cargo payment graph and anywhere else OpenTTD shows cargo icons: a yellow lightning bolt for Power and a green drum with a radiation mark for Uranium. Previously they showed no icon.
+
 ## v13
 
 - **Fixed: the Game Script never changed town growth.** It looked for the Power cargo by comparing its label to a number, but OpenTTD gives the label as text, so it never found Power and did nothing. It also looked for generators by an exact name, but each industry's name starts with its town ("Smallbridge Wind Farm"), so it never found any. It now finds generators as the industries that produce Power, and substations as the ones that accept it, which also works in any language.

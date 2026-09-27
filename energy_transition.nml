@@ -182,6 +182,7 @@ item(FEAT_CARGOS, item_cargo_powr, 32) {
         type_name:             string(STR_CARGO_POWER_NAME);
         unit_name:             string(STR_CARGO_POWER_SINGLE);
         type_abbreviation:     string(STR_CARGO_POWER_ABBREV);
+        sprite:                NEW_CARGO_SPRITE;
         town_growth_effect:    TOWNGROWTH_GOODS;
         units_of_cargo:        string(STR_CARGO_POWER_UNIT);
         items_of_cargo:        string(STR_CARGO_POWER_ITEM);
@@ -203,6 +204,7 @@ item(FEAT_CARGOS, item_cargo_uran, 33) {
         type_name:             string(STR_CARGO_URAN_NAME);
         unit_name:             string(STR_CARGO_URAN_SINGLE);
         type_abbreviation:     string(STR_CARGO_URAN_ABBREV);
+        sprite:                NEW_CARGO_SPRITE;
         town_growth_effect:    TOWNGROWTH_NONE;
         units_of_cargo:        string(STR_CARGO_URAN_UNIT);
         items_of_cargo:        string(STR_CARGO_URAN_ITEM);
@@ -248,7 +250,18 @@ alternative_sprites(ss_substation, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/su
 /* coal_power_plant: 0=coal_boiler, 1=coal_yard */
 spriteset(ss_coal_power_plant, "sprites/coal_power_plant.png") { [0,0,64,84,-31,-52] [64,0,64,84,-31,-52] }
 alternative_sprites(ss_coal_power_plant, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/coal_power_plant_2x.png") { [0,0,128,168,-62,-104] [128,0,128,168,-62,-104] }
+spriteset(ss_cargo_powr, "sprites/cargo_icons.png") { [0,0,10,10,0,0] }
+alternative_sprites(ss_cargo_powr, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/cargo_icons_2x.png") { [0,0,20,20,0,0] }
+spriteset(ss_cargo_uran, "sprites/cargo_icons.png") { [10,0,10,10,0,0] }
+alternative_sprites(ss_cargo_uran, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/cargo_icons_2x.png") { [20,0,20,20,0,0] }
 /* END GENERATED SPRITESETS */
+
+/* ── CARGO ICONS ───────────────────────────────────────────────── */
+/* sprite: NEW_CARGO_SPRITE (set on the cargos above) makes OpenTTD use
+   these instead of a base-game icon. They can only be linked here, after
+   the generated spritesets. */
+item(FEAT_CARGOS, item_cargo_powr) { graphics { default: ss_cargo_powr; } }
+item(FEAT_CARGOS, item_cargo_uran) { graphics { default: ss_cargo_uran; } }
 
 /* ── SPRITELAYOUTS ─────────────────────────────────────────────── */
 /* Parameters: tile = sprite index in the industry sheet,
