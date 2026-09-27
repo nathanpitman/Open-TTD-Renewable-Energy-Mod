@@ -5,8 +5,10 @@ Procedural sprite generator for the Energy Transition NewGRF.
 Renders every industry tile and ground tile from simple 3D primitives
 (boxes, tapered cylinders, domes, quads, height-field mounds) into
 8bpp PNGs that use OpenTTD's DOS palette exactly as nmlc expects it.
-Both 1x (ZOOM_LEVEL_NORMAL) and 2x (ZOOM_LEVEL_IN_2X) sprites are
-produced from the same geometry, so the two zoom levels always agree.
+Only 1x (ZOOM_LEVEL_NORMAL) sprites are shipped, like almost all NewGRFs:
+OpenTTD enlarges them when zoomed in, as it does the base graphics (see
+docs/sprite_design_spec.md, section 2).  The canvas can still render at
+other scales, which tools/sprite_refs.py does not need but keeps possible.
 
 Usage:
     pip install nml pillow
@@ -1002,7 +1004,7 @@ TILE_GROUND = {
 
 # ── Cargo icons ────────────────────────────────────────────────────────
 # Flat pixel art, not 3D: shapes are defined on a 10x10 grid and sampled at
-# each pixel centre, so the 2x icon is the same drawing at twice the detail.
+# each pixel centre (render_icon's `s` scales the sampling grid).
 # Each icon gets a near-black outline like the base game's cargo icons.
 ICON_W = 10
 OUTLINE = 1
@@ -1123,25 +1125,21 @@ def _entries(fname, n, s, w, h, xoff, yoff):
 
 
 def nml_spritesets():
-    """NML for every spriteset, with 2x alternatives, matching the sheets."""
+    """NML for every spriteset (1x only), matching the sheets."""
     out = [NML_BEGIN + " - written by tools/make_sprites.py, do not edit by hand */"]
     out.append("/* ground: %s */" % ", ".join("%d=%s" % (k, g) for k, g in enumerate(GROUND_ORDER)))
 
-    def block(ss, fname, n, w, h1, h2, xoff, yoff):
+    def block(ss, fname, n, w, h, xoff, yoff):
         out.append('spriteset(%s, "sprites/%s.png") { %s }'
-                   % (ss, fname, _entries(fname + ".png", n, 1, w, h1, xoff, yoff)))
-        out.append('alternative_sprites(%s, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/%s_2x.png") { %s }'
-                   % (ss, fname, _entries(fname + "_2x.png", n, 2, w, h2, xoff, yoff)))
+                   % (ss, fname, _entries(fname + ".png", n, 1, w, h, xoff, yoff)))
 
-    block("ss_ground", "ground", len(GROUND_ORDER), CELL_W, 31, 63, -31, 0)
+    block("ss_ground", "ground", len(GROUND_ORDER), CELL_W, 31, -31, 0)
     for name, (_, H, tiles) in INDUSTRIES.items():
         out.append("/* %s: %s */" % (name, ", ".join("%d=%s" % (k, t[0]) for k, t in enumerate(tiles))))
-        block("ss_" + name, name, len(tiles), CELL_W, 32 + H, (32 + H) * 2, -31, -H)
+        block("ss_" + name, name, len(tiles), CELL_W, 32 + H, -31, -H)
     for k, cargo in enumerate(CARGO_ICONS):
         w = ICON_W
         out.append('spriteset(ss_cargo_%s, "sprites/cargo_icons.png") { [%d,0,%d,%d,0,0] }' % (cargo, k * w, w, w))
-        out.append('alternative_sprites(ss_cargo_%s, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/cargo_icons_2x.png") '
-                   '{ [%d,0,%d,%d,0,0] }' % (cargo, k * w * 2, w * 2, w * 2))
     out.append(NML_END)
     return "\n".join(out)
 
@@ -1160,14 +1158,13 @@ def update_nml():
 
 def main():
     only = set(sys.argv[1:])
-    for s, suffix in ((1, ""), (2, "_2x")):
-        if not only or "ground" in only:
-            save(render_ground(s), "ground%s.png" % suffix)
-        if not only or "cargo_icons" in only:
-            save(render_icons(s), "cargo_icons%s.png" % suffix)
-        for name in INDUSTRIES:
-            if not only or name in only:
-                save(render_sheet(name, s), "%s%s.png" % (name, suffix))
+    if not only or "ground" in only:
+        save(render_ground(1), "ground.png")
+    if not only or "cargo_icons" in only:
+        save(render_icons(1), "cargo_icons.png")
+    for name in INDUSTRIES:
+        if not only or name in only:
+            save(render_sheet(name, 1), "%s.png" % name)
     update_nml()
     # annotated references with part names (docs/sprites/, spec section 12)
     import sprite_refs
