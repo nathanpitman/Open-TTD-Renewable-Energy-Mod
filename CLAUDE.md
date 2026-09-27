@@ -38,3 +38,25 @@ Leave `min_compatible_version` (NML) and `MinVersionToLoad()` (GS) alone unless 
 Only move to a new number when you're cutting a release, not for each change in between.
 
 If you notice the files don't match `VERSION` or the latest release, point it out. Don't quietly change the numbers as part of an unrelated change.
+
+## readme.txt must track README.md
+
+OpenTTD's in-game UI (NewGRF Settings, AI/Game Script Settings, and the
+BaNaNaS content window) shows bundled `.txt` files as plain text — it
+cannot render Markdown or HTML. `README.md` is GitHub-facing and uses
+Markdown/HTML (image banners, tables, links); `readme.txt` is the
+plain-text mirror players see in-game, and `INSTALL.txt` is its
+already-existing installation-only counterpart.
+
+Whenever `README.md`'s player-facing content changes (mod description,
+compatibility, how it works, NewGRF/Game Script parameters, energy
+timeline), update `readme.txt` to match in plain text: no Markdown syntax
+(`**bold**`, `` `code` ``, `[text](url)`) and no HTML (`<img>`, `<p
+align="center">`, tables). Reflow Markdown tables as simple aligned text,
+and images as their `alt` text or omit them.
+
+`readme.txt` does not need repo-only sections like "Rebuilding from
+source" — only what a player would want to read in-game.
+
+If you notice `readme.txt` has drifted from `README.md`, point it out.
+Don't quietly change one without the other.
