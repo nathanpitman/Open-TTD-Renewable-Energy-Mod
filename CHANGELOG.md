@@ -5,6 +5,9 @@
 - **Fixed: coal mines drawn as hydro dams.** Every industry tile in the NewGRF replaced base-game industry tile 0, which belongs to the coal mine, so coal mines showed dam art. The tiles no longer replace any base-game tile.
 - **Hydroelectric dams sit on water.** A dam used to be allowed anywhere within a few tiles of water, so it could appear in the middle of a field. Each tile of the dam wall now needs a water tile directly next to it, so the dam always meets a real river, lake or canal.
 - **Hydroelectric dams face any direction.** The dam comes in four orientations, so it can be built with the water on any side. The raised reservoir behind the wall is gone: the wall now stands in the river itself, which looks right from every side.
+- **Fixed: Power and Uranium missing from the game.** Both cargos were defined without the setting that tells OpenTTD they exist, so the game dropped them. The Uranium Mine produced nothing, the Nuclear Power Plant didn't accept uranium, and no generator produced power. Both cargos now appear, with their own names.
+- **Nuclear power needs uranium.** The Nuclear Power Plant used to make power even with no uranium delivered. It now makes power only from uranium: each tonne delivered becomes 1 MWh.
+- **Fixed: generators and the Uranium Mine produced twice.** Each one produced from two separate sources that were added together, and only one of them reacted to workers. They now produce from one source: Hydro 12, Tidal 10, Wind 8, Solar 6 MWh and Uranium Mine 6 tonnes per production cycle at normal output, rising and falling with workers.
 - **Removed the "max water distance" setting.** It no longer did anything. The other settings keep their numbers, so values saved in existing games still apply to the right setting.
 
 ## v12

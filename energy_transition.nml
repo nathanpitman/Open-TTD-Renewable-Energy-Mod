@@ -164,12 +164,20 @@ cargotable { POWR, URAN, PASS, COAL, }
 
 /* Cargo item IDs are global cargo slots, not GRF-local IDs. Slots 0-11 hold
  * the default cargos (0 = PASS, 1 = COAL, ...), so using them would replace
- * those cargos. Use slots the default climates leave free. */
+ * those cargos. Use slots the default climates leave free.
+ *
+ * `number` (the cargo bit) is what makes OpenTTD treat a new cargo as valid.
+ * Without it the cargo is dropped, along with every industry's production and
+ * acceptance of it. Each bit must be unique, so it matches the slot. */
 
 /* ── CARGO: POWER ─────────────────────────────────────────────── */
 item(FEAT_CARGOS, item_cargo_powr, 32) {
     property {
+        number:                32;
         cargo_label:           "POWR";
+        type_name:             string(STR_CARGO_POWER_NAME);
+        unit_name:             string(STR_CARGO_POWER_SINGLE);
+        type_abbreviation:     string(STR_CARGO_POWER_ABBREV);
         town_growth_effect:    TOWNGROWTH_GOODS;
         units_of_cargo:        string(STR_CARGO_POWER_UNIT);
         items_of_cargo:        string(STR_CARGO_POWER_ITEM);
@@ -186,7 +194,11 @@ item(FEAT_CARGOS, item_cargo_powr, 32) {
 /* ── CARGO: URANIUM ───────────────────────────────────────────── */
 item(FEAT_CARGOS, item_cargo_uran, 33) {
     property {
+        number:                33;
         cargo_label:           "URAN";
+        type_name:             string(STR_CARGO_URAN_NAME);
+        unit_name:             string(STR_CARGO_URAN_SINGLE);
+        type_abbreviation:     string(STR_CARGO_URAN_ABBREV);
         town_growth_effect:    TOWNGROWTH_NONE;
         units_of_cargo:        string(STR_CARGO_URAN_UNIT);
         items_of_cargo:        string(STR_CARGO_URAN_ITEM);
@@ -376,13 +388,11 @@ tilelayout layout_substation    { 0,0: tile_sub_transformers; 1,0: tile_sub_pylo
 tilelayout layout_coal_plant    { 0,0: tile_coal_boiler;      1,0: tile_coal_yard; }
 
 
-/* ── PRODUCE BLOCKS ────────────────────────────────────────────── */
-produce(prod_uran_6,  0, 0, 0, 6,  0, 0);
-
-produce(prod_powr_12, 0, 0, 0, 12, 0, 0);
-produce(prod_powr_10, 0, 0, 0, 10, 0, 0);
-produce(prod_powr_8,  0, 0, 0, 8,  0, 0);
-produce(prod_powr_6,  0, 0, 0, 6,  0, 0);
+/* ── PRODUCTION ────────────────────────────────────────────────── */
+/* Output comes only from each industry's produce_cargo() rate in cargo_types,
+   which OpenTTD adds every 256 ticks. That rate scales with production_level,
+   so the worker mechanic below raises and lowers it. A produce_256_ticks
+   callback would add on top of the rate and ignore production_level. */
 
 /* ═══════════════════════════════════════════════════════════
    LOCATION CHECK CALLBACKS  (use configurable parameters)
@@ -498,14 +508,14 @@ item(FEAT_INDUSTRIES, industry_uranium_mine, 0) {
         substitute: INDUSTRYTYPE_COAL_MINE;
         name: string(STR_IND_URANIUM_MINE); nearby_station_name: string(STR_STAT_URANIUM_MINE);
         layouts: [layout_uranium_mine]; life_type: IND_LIFE_TYPE_EXTRACTIVE;
-        map_colour: COLOUR_PALE_GREEN; cargo_types: [produce_cargo("URAN", 3)];
+        map_colour: COLOUR_PALE_GREEN; cargo_types: [produce_cargo("URAN", 6)];
         fund_cost_multiplier: 100;
         closure_msg: string(STR_NEWS_URANIUM_CLOSE); prod_increase_msg: string(STR_NEWS_URANIUM_UP);
         prod_decrease_msg: string(STR_NEWS_URANIUM_DOWN); new_ind_msg: string(STR_NEWS_URANIUM_NEW);
         prospect_chance: 0x18000000; prob_in_game: param_prob_uranium; prob_random: param_prob_uranium;
         spec_flags: bitmask(IND_FLAG_ALLOW_CLOSING_LAST_INSTANCE);
     }
-    graphics { construction_probability: sw_prob_uranium; produce_256_ticks: prod_uran_6; }
+    graphics { construction_probability: sw_prob_uranium; }
 }
 
 /* ── NUCLEAR POWER PLANT ── */
@@ -515,7 +525,7 @@ item(FEAT_INDUSTRIES, industry_nuclear_plant, 1) {
         name: string(STR_IND_NUCLEAR_PLANT); nearby_station_name: string(STR_STAT_NUCLEAR_PLANT);
         layouts: [layout_nuclear_plant]; life_type: IND_LIFE_TYPE_BLACK_HOLE;
         map_colour: COLOUR_RED;
-        cargo_types: [accept_cargo("PASS"), accept_cargo("URAN", produce_cargo("POWR", 1)), produce_cargo("POWR", 10)];
+        cargo_types: [accept_cargo("PASS"), accept_cargo("URAN", produce_cargo("POWR", 1)), produce_cargo("POWR", 0)];
         fund_cost_multiplier: 200;
         closure_msg: string(STR_NEWS_NUCLEAR_CLOSE); prod_increase_msg: string(STR_NEWS_NUCLEAR_UP);
         prod_decrease_msg: string(STR_NEWS_NUCLEAR_DOWN); new_ind_msg: string(STR_NEWS_NUCLEAR_NEW);
@@ -524,8 +534,9 @@ item(FEAT_INDUSTRIES, industry_nuclear_plant, 1) {
     graphics {
         construction_probability: sw_prob_nuclear;
         monthly_prod_change: sw_workers_grace;
-        /* No produce_256_ticks or produce_cargo_arrival: URAN->POWR conversion
-           is handled entirely by cargo_types. Without uranium delivery, zero POWR. */
+        /* Power comes only from uranium: each tonne delivered becomes 1 MWh
+           (the 1 in accept_cargo is a 1:1 ratio). The base POWR rate is 0,
+           so without uranium deliveries the plant makes no power. */
     }
 }
 
@@ -536,7 +547,7 @@ item(FEAT_INDUSTRIES, industry_hydro_dam, 2) {
         name: string(STR_IND_HYDRO_DAM); nearby_station_name: string(STR_STAT_HYDRO_DAM);
         layouts: [layout_hydro_dam, layout_hydro_dam_nw, layout_hydro_dam_sw, layout_hydro_dam_se]; life_type: IND_LIFE_TYPE_BLACK_HOLE;
         map_colour: COLOUR_DARK_BLUE;
-        cargo_types: [accept_cargo("PASS"), produce_cargo("POWR", 6)];
+        cargo_types: [accept_cargo("PASS"), produce_cargo("POWR", 12)];
         fund_cost_multiplier: 80;
         closure_msg: string(STR_NEWS_HYDRO_CLOSE); prod_increase_msg: string(STR_NEWS_HYDRO_UP);
         prod_decrease_msg: string(STR_NEWS_HYDRO_DOWN); new_ind_msg: string(STR_NEWS_HYDRO_NEW);
@@ -546,7 +557,6 @@ item(FEAT_INDUSTRIES, industry_hydro_dam, 2) {
         construction_probability: sw_prob_hydro;
         location_check: sw_location_hydro;
         monthly_prod_change: sw_workers_grace;
-        produce_256_ticks: prod_powr_12;
     }
 }
 
@@ -557,7 +567,7 @@ item(FEAT_INDUSTRIES, industry_tidal_station, 3) {
         name: string(STR_IND_TIDAL_STATION); nearby_station_name: string(STR_STAT_TIDAL_STATION);
         layouts: [layout_tidal_station]; life_type: IND_LIFE_TYPE_BLACK_HOLE;
         map_colour: COLOUR_LIGHT_BLUE;
-        cargo_types: [accept_cargo("PASS"), produce_cargo("POWR", 5)];
+        cargo_types: [accept_cargo("PASS"), produce_cargo("POWR", 10)];
         fund_cost_multiplier: 60;
         closure_msg: string(STR_NEWS_TIDAL_CLOSE); prod_increase_msg: string(STR_NEWS_TIDAL_UP);
         prod_decrease_msg: string(STR_NEWS_TIDAL_DOWN); new_ind_msg: string(STR_NEWS_TIDAL_NEW);
@@ -568,7 +578,6 @@ item(FEAT_INDUSTRIES, industry_tidal_station, 3) {
         construction_probability: sw_prob_tidal;
         location_check: sw_location_tidal;
         monthly_prod_change: sw_workers_grace;
-        produce_256_ticks: prod_powr_10;
     }
 }
 
@@ -580,7 +589,7 @@ item(FEAT_INDUSTRIES, industry_wind_farm, 4) {
         layouts: [layout_wind_farm_3x3, layout_wind_farm_line_x, layout_wind_farm_line_y, layout_wind_farm_2x2];
         life_type: IND_LIFE_TYPE_BLACK_HOLE;
         map_colour: COLOUR_PALE_GREEN;
-        cargo_types: [accept_cargo("PASS"), produce_cargo("POWR", 4)];
+        cargo_types: [accept_cargo("PASS"), produce_cargo("POWR", 8)];
         fund_cost_multiplier: 50;
         closure_msg: string(STR_NEWS_WIND_CLOSE); prod_increase_msg: string(STR_NEWS_WIND_UP);
         prod_decrease_msg: string(STR_NEWS_WIND_DOWN); new_ind_msg: string(STR_NEWS_WIND_NEW);
@@ -591,7 +600,6 @@ item(FEAT_INDUSTRIES, industry_wind_farm, 4) {
         construction_probability: sw_prob_wind;
         location_check: sw_location_wind;
         monthly_prod_change: sw_workers_grace;
-        produce_256_ticks: prod_powr_8;
     }
 }
 
@@ -602,7 +610,7 @@ item(FEAT_INDUSTRIES, industry_solar_farm, 5) {
         name: string(STR_IND_SOLAR_FARM); nearby_station_name: string(STR_STAT_SOLAR_FARM);
         layouts: [layout_solar_farm]; life_type: IND_LIFE_TYPE_BLACK_HOLE;
         map_colour: COLOUR_YELLOW;
-        cargo_types: [accept_cargo("PASS"), produce_cargo("POWR", 3)];
+        cargo_types: [accept_cargo("PASS"), produce_cargo("POWR", 6)];
         fund_cost_multiplier: 40;
         closure_msg: string(STR_NEWS_SOLAR_CLOSE); prod_increase_msg: string(STR_NEWS_SOLAR_UP);
         prod_decrease_msg: string(STR_NEWS_SOLAR_DOWN); new_ind_msg: string(STR_NEWS_SOLAR_NEW);
@@ -613,7 +621,6 @@ item(FEAT_INDUSTRIES, industry_solar_farm, 5) {
         construction_probability: sw_prob_solar;
         location_check: sw_location_solar;
         monthly_prod_change: sw_workers_grace;
-        produce_256_ticks: prod_powr_6;
     }
 }
 
