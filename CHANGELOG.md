@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- **Hydroelectric dams span rivers.** A dam is now built straight across a river 1, 2 or 3 tiles wide, in either direction. The wall stands on the river tiles, with an abutment on one bank and the power house on the other. The wall tiles must be flat river water with river upstream and downstream, and both ends must be dry land, so the dam always crosses the river. Dams are no longer built beside lakes, canals or the sea coast. Boats can't pass a dam, and the river comes back when a dam closes. ([#16](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/16))
+- **New setting: Hydro Dam minimum river size.** The number of river or lake tiles needed within 7 tiles of a new dam's spillway (default 12), which keeps dams off small ponds and short stubs of river.
+
+### Compatibility
+
+- Dams already on the map in existing games keep their old look and keep working. Only new dams use the new layout.
+
 ## v14
 
 - **News messages name the town.** When a generator, substation, uranium mine or coal power station opens, closes or changes output, the news now says where, for example "New Wind Farm constructed near Smallbridge!" or "Smallbridge Coal Power Station has been decommissioned". Before, the messages didn't say which town. ([#50](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/50))

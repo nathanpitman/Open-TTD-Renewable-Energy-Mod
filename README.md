@@ -76,13 +76,25 @@ Hydro, tidal, wind and solar generators need nothing delivered: they make power 
 ### Energy timeline (all dates configurable)
 | | Industry | Default era | Placement rule |
 |---|---|---|---|
-| <img src="docs/industries/hydro_dam.png" alt="Hydroelectric Dam" width="160"> | Hydroelectric Dam | 1950 | Dam wall directly against water (river, lake or canal), facing whichever way the water is |
+| <img src="docs/industries/hydro_dam.png" alt="Hydroelectric Dam" width="160"> | Hydroelectric Dam | 1950 | Across a river 1–3 tiles wide, with dry bank at each end |
 | <img src="docs/industries/uranium_mine.png" alt="Uranium Mine" width="160"> | Uranium Mine | 1953 | Remote |
 | <img src="docs/industries/nuclear_plant.png" alt="Nuclear Power Plant" width="160"> | Nuclear Power Plant | 1956 | Requires Uranium delivery |
 | <img src="docs/industries/tidal_station.png" alt="Tidal Power Station" width="160"> | Tidal Power Station | 1966 | Coast only |
 | <img src="docs/industries/wind_farm.png" alt="Wind Farm" width="160"> | Wind Farm | 1980 | High ground only |
 | <img src="docs/industries/solar_farm.png" alt="Solar Farm" width="160"> | Solar Farm | 1990 | Flat land only |
 | <img src="docs/industries/substation.png" alt="Electrical Substation" width="160"> | Electrical Substation | 1950 | Near towns, amplifies growth |
+
+### Hydroelectric dams
+A dam is built straight across a river. The wall stands on the river tiles, with an abutment on one bank and the power house on the other. It fits rivers 1, 2 or 3 tiles wide, running either way across the map.
+
+- The wall tiles must be flat river water, with river upstream and downstream of them, so the dam crosses the river rather than following its edge.
+- The tiles at each end must be dry land.
+- Dams aren't built on sea coast (that's what the Tidal Power Station is for) or on canals.
+- There must be enough river around the dam. The "minimum river size" setting (default 12) is the number of river or lake tiles needed within 7 tiles of the dam's spillway. It keeps dams off small ponds and short stubs of river.
+- Boats can't get past a dam.
+- When a dam closes, the river comes back.
+
+To fund one, open **Fund new industry**, choose Hydroelectric Dam and click the dry bank tile at the north end of the crossing: the bank tile to the upper left or upper right of the river on screen. The game picks whichever width and direction fits.
 
 ### Coal phaseout
 
@@ -95,7 +107,7 @@ Configure in **NewGRF Settings → select mod → Parameters** before starting a
 
 **Era dates:** Hydro (1930–1960), Nuclear (1950–1975), Tidal (1960–1985), Wind (1970–1995), Solar (1980–2005), Coal stop (1960–1990), Coal close (1980–2020)
 
-**Placement:** Wind min height (0–8), Substation spawn rate (1–10)
+**Placement:** Wind min height (0–8), Substation spawn rate (1–10), Hydro minimum river size (3–100, default 12)
 
 **Spawn rates:** Individual sliders for each generator type (0 = disabled)
 

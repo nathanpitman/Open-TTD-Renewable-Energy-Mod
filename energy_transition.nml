@@ -161,6 +161,17 @@ grf {
         }
     }
 
+    /* ── PLACEMENT (added later) ───────────────────────────────────── */
+    /* New settings go after the existing ones so their numbers don't change. */
+    param 18 {
+        param_hydro_min_water {
+            type: int;
+            name: string(STR_PARAM_HYDRO_MIN_WATER_NAME);
+            desc: string(STR_PARAM_HYDRO_MIN_WATER_DESC);
+            min_value: 3;  max_value: 100;  def_value: 12;
+        }
+    }
+
 }
 
 /* ── CARGO TABLE ──────────────────────────────────────────────── */
@@ -225,8 +236,8 @@ item(FEAT_CARGOS, item_cargo_uran, 33) {
 /* BEGIN GENERATED SPRITESETS - written by tools/make_sprites.py, do not edit by hand */
 /* ground: 0=grass, 1=dirt, 2=concrete, 3=water, 4=shore */
 spriteset(ss_ground, "sprites/ground.png") { [0,0,64,31,-31,0] [64,0,64,31,-31,0] [128,0,64,31,-31,0] [192,0,64,31,-31,0, ANIM] [256,0,64,31,-31,0, ANIM] }
-/* hydro_dam: 0=hydro_dam_n, 1=hydro_dam_s, 2=hydro_power_n, 3=hydro_power_s, 4=hydro_dam_n_nw, 5=hydro_dam_s_nw, 6=hydro_power_n_nw, 7=hydro_power_s_nw, 8=hydro_dam_n_sw, 9=hydro_dam_s_sw, 10=hydro_power_n_sw, 11=hydro_power_s_sw, 12=hydro_dam_n_se, 13=hydro_dam_s_se, 14=hydro_power_n_se, 15=hydro_power_s_se */
-spriteset(ss_hydro_dam, "sprites/hydro_dam.png") { [0,0,64,68,-31,-36] [64,0,64,68,-31,-36] [128,0,64,68,-31,-36, ANIM] [192,0,64,68,-31,-36] [256,0,64,68,-31,-36] [320,0,64,68,-31,-36] [384,0,64,68,-31,-36, ANIM] [448,0,64,68,-31,-36] [512,0,64,68,-31,-36] [576,0,64,68,-31,-36] [640,0,64,68,-31,-36, ANIM] [704,0,64,68,-31,-36] [768,0,64,68,-31,-36] [832,0,64,68,-31,-36] [896,0,64,68,-31,-36, ANIM] [960,0,64,68,-31,-36] }
+/* hydro_dam: 0=hydro_dam_n, 1=hydro_dam_s, 2=hydro_power_n, 3=hydro_power_s, 4=hydro_dam_n_nw, 5=hydro_dam_s_nw, 6=hydro_power_n_nw, 7=hydro_power_s_nw, 8=hydro_dam_n_sw, 9=hydro_dam_s_sw, 10=hydro_power_n_sw, 11=hydro_power_s_sw, 12=hydro_dam_n_se, 13=hydro_dam_s_se, 14=hydro_power_n_se, 15=hydro_power_s_se, 16=hydro_wall_x, 17=hydro_spillway_x, 18=hydro_abutment_start_x, 19=hydro_abutment_end_x, 20=hydro_power_start_x, 21=hydro_power_end_x, 22=hydro_wall_y, 23=hydro_spillway_y, 24=hydro_abutment_start_y, 25=hydro_abutment_end_y, 26=hydro_power_start_y, 27=hydro_power_end_y */
+spriteset(ss_hydro_dam, "sprites/hydro_dam.png") { [0,0,64,68,-31,-36] [64,0,64,68,-31,-36] [128,0,64,68,-31,-36, ANIM] [192,0,64,68,-31,-36] [256,0,64,68,-31,-36] [320,0,64,68,-31,-36] [384,0,64,68,-31,-36, ANIM] [448,0,64,68,-31,-36] [512,0,64,68,-31,-36] [576,0,64,68,-31,-36] [640,0,64,68,-31,-36, ANIM] [704,0,64,68,-31,-36] [768,0,64,68,-31,-36] [832,0,64,68,-31,-36] [896,0,64,68,-31,-36, ANIM] [960,0,64,68,-31,-36] [1024,0,64,68,-31,-36] [1088,0,64,68,-31,-36, ANIM] [1152,0,64,68,-31,-36] [1216,0,64,68,-31,-36] [1280,0,64,68,-31,-36] [1344,0,64,68,-31,-36] [1408,0,64,68,-31,-36] [1472,0,64,68,-31,-36, ANIM] [1536,0,64,68,-31,-36] [1600,0,64,68,-31,-36] [1664,0,64,68,-31,-36] [1728,0,64,68,-31,-36] }
 /* uranium_mine: 0=uranium_headframe, 1=uranium_tailings, 2=uranium_mill, 3=uranium_ore */
 spriteset(ss_uranium_mine, "sprites/uranium_mine.png") { [0,0,64,72,-31,-40] [64,0,64,72,-31,-40] [128,0,64,72,-31,-40] [192,0,64,72,-31,-40] }
 /* nuclear_plant: 0=nuc_cooling, 1=nuc_reactor, 2=nuc_turbine, 3=nuc_turbine2, 4=nuc_admin, 5=nuc_intake, 6=nuc_switchyard, 7=nuc_tanks */
@@ -260,6 +271,12 @@ item(FEAT_CARGOS, item_cargo_uran) { graphics { default: ss_cargo_uran; } }
    base set draws it as snow or sand to suit the climate. */
 spritelayout sl_hydro_dam(tile, gnd) {
     ground { sprite: ss_ground(gnd); }
+    building { sprite: ss_hydro_dam(tile); xoffset:0; yoffset:0; zoffset:0; xextent:16; yextent:16; zextent:32; }
+}
+/* GROUNDSPRITE_WATER on a tile built over water makes OpenTTD draw that
+   tile's own water (river, with its banks) underneath. */
+spritelayout sl_hydro_wall(tile) {
+    ground { sprite: GROUNDSPRITE_WATER; }
     building { sprite: ss_hydro_dam(tile); xoffset:0; yoffset:0; zoffset:0; xextent:16; yextent:16; zextent:32; }
 }
 spritelayout sl_hydro_power(tile) {
@@ -300,9 +317,138 @@ spritelayout sl_substation(tile) {
    No tile sets `override`: that would replace a base-game industry tile
    (override:0 is the coal mine's) with our art. */
 
-/* Hydro dam: four facings, named after the side the water is on
-   (ne = x - 1, nw = y - 1, sw = x + 1, se = y + 1). Each dam wall tile must
-   have real water on that side, so the dam always meets a river, lake or canal. */
+/* Hydro dam across a river.
+   The wall stands on the river tiles, with dry bank at each end: the power
+   house on one bank and an abutment on the other. "x" tiles are for a dam
+   running along x (the river runs along y); "y" tiles are for a dam running
+   along y. "start" and "end" are the bank tiles at the low and high end of
+   the dam. The wall tiles carry LSF_ALLOW_ON_WATER, which turns off
+   OpenTTD's "no land industry on water" check for them; the bank tiles
+   don't, so OpenTTD refuses them on water. When the dam closes, OpenTTD puts
+   the river back under the wall tiles. */
+
+/* Flat river water, with river water upstream and downstream of it, so the
+   wall crosses the river rather than running along its edge. River class
+   only: sea and coast are for the Tidal Station, and canals belong to
+   companies. */
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_crossing_x,
+       nearby_tile_slope(0, 0) == SLOPE_FLAT &&
+       nearby_tile_class(0, 0)  == TILE_CLASS_WATER && nearby_tile_water_class(0, 0)  == WATER_CLASS_RIVER &&
+       nearby_tile_class(0, -1) == TILE_CLASS_WATER && nearby_tile_water_class(0, -1) == WATER_CLASS_RIVER &&
+       nearby_tile_class(0, 1)  == TILE_CLASS_WATER && nearby_tile_water_class(0, 1)  == WATER_CLASS_RIVER) { return; }
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_crossing_y,
+       nearby_tile_slope(0, 0) == SLOPE_FLAT &&
+       nearby_tile_class(0, 0)  == TILE_CLASS_WATER && nearby_tile_water_class(0, 0)  == WATER_CLASS_RIVER &&
+       nearby_tile_class(-1, 0) == TILE_CLASS_WATER && nearby_tile_water_class(-1, 0) == WATER_CLASS_RIVER &&
+       nearby_tile_class(1, 0)  == TILE_CLASS_WATER && nearby_tile_water_class(1, 0)  == WATER_CLASS_RIVER) { return; }
+
+/* Minimum water size: the number of river tiles in the 15x15 window centred
+   on the dam's spillway tile. A tile can only see -8..+7 tiles away and a
+   callback can't loop, so this counts the window one row at a time.
+   Water class is 3 for river and 0-2 otherwise, so class / 3 is 1 for a
+   river tile and 0 for anything else. It rules out ponds and short stubs;
+   it can't measure a whole river. */
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_river_row_m7,
+       nearby_tile_water_class(-7, -7) / 3 + nearby_tile_water_class(-6, -7) / 3 + nearby_tile_water_class(-5, -7) / 3 + nearby_tile_water_class(-4, -7) / 3 + nearby_tile_water_class(-3, -7) / 3 +
+       nearby_tile_water_class(-2, -7) / 3 + nearby_tile_water_class(-1, -7) / 3 + nearby_tile_water_class(0, -7) / 3 + nearby_tile_water_class(1, -7) / 3 + nearby_tile_water_class(2, -7) / 3 +
+       nearby_tile_water_class(3, -7) / 3 + nearby_tile_water_class(4, -7) / 3 + nearby_tile_water_class(5, -7) / 3 + nearby_tile_water_class(6, -7) / 3 + nearby_tile_water_class(7, -7) / 3) { return; }
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_river_row_m6,
+       nearby_tile_water_class(-7, -6) / 3 + nearby_tile_water_class(-6, -6) / 3 + nearby_tile_water_class(-5, -6) / 3 + nearby_tile_water_class(-4, -6) / 3 + nearby_tile_water_class(-3, -6) / 3 +
+       nearby_tile_water_class(-2, -6) / 3 + nearby_tile_water_class(-1, -6) / 3 + nearby_tile_water_class(0, -6) / 3 + nearby_tile_water_class(1, -6) / 3 + nearby_tile_water_class(2, -6) / 3 +
+       nearby_tile_water_class(3, -6) / 3 + nearby_tile_water_class(4, -6) / 3 + nearby_tile_water_class(5, -6) / 3 + nearby_tile_water_class(6, -6) / 3 + nearby_tile_water_class(7, -6) / 3) { return; }
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_river_row_m5,
+       nearby_tile_water_class(-7, -5) / 3 + nearby_tile_water_class(-6, -5) / 3 + nearby_tile_water_class(-5, -5) / 3 + nearby_tile_water_class(-4, -5) / 3 + nearby_tile_water_class(-3, -5) / 3 +
+       nearby_tile_water_class(-2, -5) / 3 + nearby_tile_water_class(-1, -5) / 3 + nearby_tile_water_class(0, -5) / 3 + nearby_tile_water_class(1, -5) / 3 + nearby_tile_water_class(2, -5) / 3 +
+       nearby_tile_water_class(3, -5) / 3 + nearby_tile_water_class(4, -5) / 3 + nearby_tile_water_class(5, -5) / 3 + nearby_tile_water_class(6, -5) / 3 + nearby_tile_water_class(7, -5) / 3) { return; }
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_river_row_m4,
+       nearby_tile_water_class(-7, -4) / 3 + nearby_tile_water_class(-6, -4) / 3 + nearby_tile_water_class(-5, -4) / 3 + nearby_tile_water_class(-4, -4) / 3 + nearby_tile_water_class(-3, -4) / 3 +
+       nearby_tile_water_class(-2, -4) / 3 + nearby_tile_water_class(-1, -4) / 3 + nearby_tile_water_class(0, -4) / 3 + nearby_tile_water_class(1, -4) / 3 + nearby_tile_water_class(2, -4) / 3 +
+       nearby_tile_water_class(3, -4) / 3 + nearby_tile_water_class(4, -4) / 3 + nearby_tile_water_class(5, -4) / 3 + nearby_tile_water_class(6, -4) / 3 + nearby_tile_water_class(7, -4) / 3) { return; }
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_river_row_m3,
+       nearby_tile_water_class(-7, -3) / 3 + nearby_tile_water_class(-6, -3) / 3 + nearby_tile_water_class(-5, -3) / 3 + nearby_tile_water_class(-4, -3) / 3 + nearby_tile_water_class(-3, -3) / 3 +
+       nearby_tile_water_class(-2, -3) / 3 + nearby_tile_water_class(-1, -3) / 3 + nearby_tile_water_class(0, -3) / 3 + nearby_tile_water_class(1, -3) / 3 + nearby_tile_water_class(2, -3) / 3 +
+       nearby_tile_water_class(3, -3) / 3 + nearby_tile_water_class(4, -3) / 3 + nearby_tile_water_class(5, -3) / 3 + nearby_tile_water_class(6, -3) / 3 + nearby_tile_water_class(7, -3) / 3) { return; }
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_river_row_m2,
+       nearby_tile_water_class(-7, -2) / 3 + nearby_tile_water_class(-6, -2) / 3 + nearby_tile_water_class(-5, -2) / 3 + nearby_tile_water_class(-4, -2) / 3 + nearby_tile_water_class(-3, -2) / 3 +
+       nearby_tile_water_class(-2, -2) / 3 + nearby_tile_water_class(-1, -2) / 3 + nearby_tile_water_class(0, -2) / 3 + nearby_tile_water_class(1, -2) / 3 + nearby_tile_water_class(2, -2) / 3 +
+       nearby_tile_water_class(3, -2) / 3 + nearby_tile_water_class(4, -2) / 3 + nearby_tile_water_class(5, -2) / 3 + nearby_tile_water_class(6, -2) / 3 + nearby_tile_water_class(7, -2) / 3) { return; }
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_river_row_m1,
+       nearby_tile_water_class(-7, -1) / 3 + nearby_tile_water_class(-6, -1) / 3 + nearby_tile_water_class(-5, -1) / 3 + nearby_tile_water_class(-4, -1) / 3 + nearby_tile_water_class(-3, -1) / 3 +
+       nearby_tile_water_class(-2, -1) / 3 + nearby_tile_water_class(-1, -1) / 3 + nearby_tile_water_class(0, -1) / 3 + nearby_tile_water_class(1, -1) / 3 + nearby_tile_water_class(2, -1) / 3 +
+       nearby_tile_water_class(3, -1) / 3 + nearby_tile_water_class(4, -1) / 3 + nearby_tile_water_class(5, -1) / 3 + nearby_tile_water_class(6, -1) / 3 + nearby_tile_water_class(7, -1) / 3) { return; }
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_river_row_p0,
+       nearby_tile_water_class(-7, 0) / 3 + nearby_tile_water_class(-6, 0) / 3 + nearby_tile_water_class(-5, 0) / 3 + nearby_tile_water_class(-4, 0) / 3 + nearby_tile_water_class(-3, 0) / 3 +
+       nearby_tile_water_class(-2, 0) / 3 + nearby_tile_water_class(-1, 0) / 3 + nearby_tile_water_class(0, 0) / 3 + nearby_tile_water_class(1, 0) / 3 + nearby_tile_water_class(2, 0) / 3 +
+       nearby_tile_water_class(3, 0) / 3 + nearby_tile_water_class(4, 0) / 3 + nearby_tile_water_class(5, 0) / 3 + nearby_tile_water_class(6, 0) / 3 + nearby_tile_water_class(7, 0) / 3) { return; }
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_river_row_p1,
+       nearby_tile_water_class(-7, 1) / 3 + nearby_tile_water_class(-6, 1) / 3 + nearby_tile_water_class(-5, 1) / 3 + nearby_tile_water_class(-4, 1) / 3 + nearby_tile_water_class(-3, 1) / 3 +
+       nearby_tile_water_class(-2, 1) / 3 + nearby_tile_water_class(-1, 1) / 3 + nearby_tile_water_class(0, 1) / 3 + nearby_tile_water_class(1, 1) / 3 + nearby_tile_water_class(2, 1) / 3 +
+       nearby_tile_water_class(3, 1) / 3 + nearby_tile_water_class(4, 1) / 3 + nearby_tile_water_class(5, 1) / 3 + nearby_tile_water_class(6, 1) / 3 + nearby_tile_water_class(7, 1) / 3) { return; }
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_river_row_p2,
+       nearby_tile_water_class(-7, 2) / 3 + nearby_tile_water_class(-6, 2) / 3 + nearby_tile_water_class(-5, 2) / 3 + nearby_tile_water_class(-4, 2) / 3 + nearby_tile_water_class(-3, 2) / 3 +
+       nearby_tile_water_class(-2, 2) / 3 + nearby_tile_water_class(-1, 2) / 3 + nearby_tile_water_class(0, 2) / 3 + nearby_tile_water_class(1, 2) / 3 + nearby_tile_water_class(2, 2) / 3 +
+       nearby_tile_water_class(3, 2) / 3 + nearby_tile_water_class(4, 2) / 3 + nearby_tile_water_class(5, 2) / 3 + nearby_tile_water_class(6, 2) / 3 + nearby_tile_water_class(7, 2) / 3) { return; }
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_river_row_p3,
+       nearby_tile_water_class(-7, 3) / 3 + nearby_tile_water_class(-6, 3) / 3 + nearby_tile_water_class(-5, 3) / 3 + nearby_tile_water_class(-4, 3) / 3 + nearby_tile_water_class(-3, 3) / 3 +
+       nearby_tile_water_class(-2, 3) / 3 + nearby_tile_water_class(-1, 3) / 3 + nearby_tile_water_class(0, 3) / 3 + nearby_tile_water_class(1, 3) / 3 + nearby_tile_water_class(2, 3) / 3 +
+       nearby_tile_water_class(3, 3) / 3 + nearby_tile_water_class(4, 3) / 3 + nearby_tile_water_class(5, 3) / 3 + nearby_tile_water_class(6, 3) / 3 + nearby_tile_water_class(7, 3) / 3) { return; }
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_river_row_p4,
+       nearby_tile_water_class(-7, 4) / 3 + nearby_tile_water_class(-6, 4) / 3 + nearby_tile_water_class(-5, 4) / 3 + nearby_tile_water_class(-4, 4) / 3 + nearby_tile_water_class(-3, 4) / 3 +
+       nearby_tile_water_class(-2, 4) / 3 + nearby_tile_water_class(-1, 4) / 3 + nearby_tile_water_class(0, 4) / 3 + nearby_tile_water_class(1, 4) / 3 + nearby_tile_water_class(2, 4) / 3 +
+       nearby_tile_water_class(3, 4) / 3 + nearby_tile_water_class(4, 4) / 3 + nearby_tile_water_class(5, 4) / 3 + nearby_tile_water_class(6, 4) / 3 + nearby_tile_water_class(7, 4) / 3) { return; }
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_river_row_p5,
+       nearby_tile_water_class(-7, 5) / 3 + nearby_tile_water_class(-6, 5) / 3 + nearby_tile_water_class(-5, 5) / 3 + nearby_tile_water_class(-4, 5) / 3 + nearby_tile_water_class(-3, 5) / 3 +
+       nearby_tile_water_class(-2, 5) / 3 + nearby_tile_water_class(-1, 5) / 3 + nearby_tile_water_class(0, 5) / 3 + nearby_tile_water_class(1, 5) / 3 + nearby_tile_water_class(2, 5) / 3 +
+       nearby_tile_water_class(3, 5) / 3 + nearby_tile_water_class(4, 5) / 3 + nearby_tile_water_class(5, 5) / 3 + nearby_tile_water_class(6, 5) / 3 + nearby_tile_water_class(7, 5) / 3) { return; }
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_river_row_p6,
+       nearby_tile_water_class(-7, 6) / 3 + nearby_tile_water_class(-6, 6) / 3 + nearby_tile_water_class(-5, 6) / 3 + nearby_tile_water_class(-4, 6) / 3 + nearby_tile_water_class(-3, 6) / 3 +
+       nearby_tile_water_class(-2, 6) / 3 + nearby_tile_water_class(-1, 6) / 3 + nearby_tile_water_class(0, 6) / 3 + nearby_tile_water_class(1, 6) / 3 + nearby_tile_water_class(2, 6) / 3 +
+       nearby_tile_water_class(3, 6) / 3 + nearby_tile_water_class(4, 6) / 3 + nearby_tile_water_class(5, 6) / 3 + nearby_tile_water_class(6, 6) / 3 + nearby_tile_water_class(7, 6) / 3) { return; }
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_river_row_p7,
+       nearby_tile_water_class(-7, 7) / 3 + nearby_tile_water_class(-6, 7) / 3 + nearby_tile_water_class(-5, 7) / 3 + nearby_tile_water_class(-4, 7) / 3 + nearby_tile_water_class(-3, 7) / 3 +
+       nearby_tile_water_class(-2, 7) / 3 + nearby_tile_water_class(-1, 7) / 3 + nearby_tile_water_class(0, 7) / 3 + nearby_tile_water_class(1, 7) / 3 + nearby_tile_water_class(2, 7) / 3 +
+       nearby_tile_water_class(3, 7) / 3 + nearby_tile_water_class(4, 7) / 3 + nearby_tile_water_class(5, 7) / 3 + nearby_tile_water_class(6, 7) / 3 + nearby_tile_water_class(7, 7) / 3) { return; }
+switch(FEAT_INDUSTRYTILES, SELF, sw_hydro_river_tiles,
+       sw_hydro_river_row_m7() + sw_hydro_river_row_m6() + sw_hydro_river_row_m5() + sw_hydro_river_row_m4() + sw_hydro_river_row_m3() +
+       sw_hydro_river_row_m2() + sw_hydro_river_row_m1() + sw_hydro_river_row_p0() + sw_hydro_river_row_p1() + sw_hydro_river_row_p2() +
+       sw_hydro_river_row_p3() + sw_hydro_river_row_p4() + sw_hydro_river_row_p5() + sw_hydro_river_row_p6() + sw_hydro_river_row_p7()) { return; }
+
+switch(FEAT_INDUSTRYTILES, SELF, sw_tile_check_hydro_wall_x, sw_hydro_crossing_x()) {
+    1: CB_RESULT_LOCATION_ALLOW;
+    CB_RESULT_LOCATION_DISALLOW;
+}
+switch(FEAT_INDUSTRYTILES, SELF, sw_tile_check_hydro_wall_y, sw_hydro_crossing_y()) {
+    1: CB_RESULT_LOCATION_ALLOW;
+    CB_RESULT_LOCATION_DISALLOW;
+}
+/* The spillway tile also checks the minimum water size, so each dam counts once. */
+switch(FEAT_INDUSTRYTILES, SELF, sw_tile_check_hydro_spillway_x,
+       sw_hydro_crossing_x() && sw_hydro_river_tiles() >= param_hydro_min_water) {
+    1: CB_RESULT_LOCATION_ALLOW;
+    CB_RESULT_LOCATION_DISALLOW;
+}
+switch(FEAT_INDUSTRYTILES, SELF, sw_tile_check_hydro_spillway_y,
+       sw_hydro_crossing_y() && sw_hydro_river_tiles() >= param_hydro_min_water) {
+    1: CB_RESULT_LOCATION_ALLOW;
+    CB_RESULT_LOCATION_DISALLOW;
+}
+
+item(FEAT_INDUSTRYTILES, tile_hydro_wall_x,          45) { property { substitute:0; land_shape_flags:bitmask(LSF_ALLOW_ON_WATER); } graphics { tile_check: sw_tile_check_hydro_wall_x;     default: sl_hydro_wall(16); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_spillway_x,      46) { property { substitute:0; land_shape_flags:bitmask(LSF_ALLOW_ON_WATER); } graphics { tile_check: sw_tile_check_hydro_spillway_x; default: sl_hydro_wall(17); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_abutment_start_x, 47) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_power(18); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_abutment_end_x,   48) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_power(19); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_power_start_x,   49) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_power(20); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_power_end_x,     50) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_power(21); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_wall_y,          51) { property { substitute:0; land_shape_flags:bitmask(LSF_ALLOW_ON_WATER); } graphics { tile_check: sw_tile_check_hydro_wall_y;     default: sl_hydro_wall(22); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_spillway_y,      52) { property { substitute:0; land_shape_flags:bitmask(LSF_ALLOW_ON_WATER); } graphics { tile_check: sw_tile_check_hydro_spillway_y; default: sl_hydro_wall(23); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_abutment_start_y, 53) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_power(24); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_abutment_end_y,   54) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_power(25); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_power_start_y,   55) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_power(26); } }
+item(FEAT_INDUSTRYTILES, tile_hydro_power_end_y,     56) { property { substitute:0; land_shape_flags:0; } graphics { default: sl_hydro_power(27); } }
+
+/* Hydro dam, old style (v13 and earlier): a 2x2 block beside the water, in
+   four facings. No layout uses these tiles any more, but dams already on the
+   map in existing games still use them, so they stay defined. */
 switch(FEAT_INDUSTRYTILES, SELF, sw_tile_check_hydro_ne, nearby_tile_is_water(-1, 0)) {
     1: CB_RESULT_LOCATION_ALLOW;
     CB_RESULT_LOCATION_DISALLOW;
@@ -404,15 +550,21 @@ tilelayout layout_uranium_mine  { 0,0: tile_uranium_headframe; 1,0: tile_uranium
 tilelayout layout_nuclear_plant { 0,0: tile_nuc_cooling;    0,1: tile_nuc_cooling;  0,2: tile_nuc_switchyard;
                                   1,0: tile_nuc_turbine2;   1,1: tile_nuc_reactor;  1,2: tile_nuc_turbine;
                                   2,0: tile_nuc_intake;     2,1: tile_nuc_admin;    2,2: tile_nuc_tanks; }
-/* Hydro dam: the wall tiles sit on the water side, the power house on the other. */
-tilelayout layout_hydro_dam     { 0,0: tile_hydro_dam_n;       0,1: tile_hydro_dam_s;
-                                  1,0: tile_hydro_power_n;     1,1: tile_hydro_power_s; }
-tilelayout layout_hydro_dam_nw  { 1,0: tile_hydro_dam_n_nw;    0,0: tile_hydro_dam_s_nw;
-                                  1,1: tile_hydro_power_n_nw;  0,1: tile_hydro_power_s_nw; }
-tilelayout layout_hydro_dam_sw  { 1,1: tile_hydro_dam_n_sw;    1,0: tile_hydro_dam_s_sw;
-                                  0,1: tile_hydro_power_n_sw;  0,0: tile_hydro_power_s_sw; }
-tilelayout layout_hydro_dam_se  { 0,1: tile_hydro_dam_n_se;    1,1: tile_hydro_dam_s_se;
-                                  0,0: tile_hydro_power_n_se;  1,0: tile_hydro_power_s_se; }
+/* Hydro dam across a river 1, 2 or 3 tiles wide: bank, wall, bank. The
+   spillway is the middle wall tile (the first of two). Each width comes
+   with the power house on either bank, in both river directions. */
+tilelayout layout_hydro_x1_ps { 0,0: tile_hydro_power_start_x;    1,0: tile_hydro_spillway_x; 2,0: tile_hydro_abutment_end_x; }
+tilelayout layout_hydro_x1_pe { 0,0: tile_hydro_abutment_start_x; 1,0: tile_hydro_spillway_x; 2,0: tile_hydro_power_end_x; }
+tilelayout layout_hydro_x2_ps { 0,0: tile_hydro_power_start_x;    1,0: tile_hydro_spillway_x; 2,0: tile_hydro_wall_x;     3,0: tile_hydro_abutment_end_x; }
+tilelayout layout_hydro_x2_pe { 0,0: tile_hydro_abutment_start_x; 1,0: tile_hydro_spillway_x; 2,0: tile_hydro_wall_x;     3,0: tile_hydro_power_end_x; }
+tilelayout layout_hydro_x3_ps { 0,0: tile_hydro_power_start_x;    1,0: tile_hydro_wall_x;     2,0: tile_hydro_spillway_x; 3,0: tile_hydro_wall_x; 4,0: tile_hydro_abutment_end_x; }
+tilelayout layout_hydro_x3_pe { 0,0: tile_hydro_abutment_start_x; 1,0: tile_hydro_wall_x;     2,0: tile_hydro_spillway_x; 3,0: tile_hydro_wall_x; 4,0: tile_hydro_power_end_x; }
+tilelayout layout_hydro_y1_ps { 0,0: tile_hydro_power_start_y;    0,1: tile_hydro_spillway_y; 0,2: tile_hydro_abutment_end_y; }
+tilelayout layout_hydro_y1_pe { 0,0: tile_hydro_abutment_start_y; 0,1: tile_hydro_spillway_y; 0,2: tile_hydro_power_end_y; }
+tilelayout layout_hydro_y2_ps { 0,0: tile_hydro_power_start_y;    0,1: tile_hydro_spillway_y; 0,2: tile_hydro_wall_y;     0,3: tile_hydro_abutment_end_y; }
+tilelayout layout_hydro_y2_pe { 0,0: tile_hydro_abutment_start_y; 0,1: tile_hydro_spillway_y; 0,2: tile_hydro_wall_y;     0,3: tile_hydro_power_end_y; }
+tilelayout layout_hydro_y3_ps { 0,0: tile_hydro_power_start_y;    0,1: tile_hydro_wall_y;     0,2: tile_hydro_spillway_y; 0,3: tile_hydro_wall_y; 0,4: tile_hydro_abutment_end_y; }
+tilelayout layout_hydro_y3_pe { 0,0: tile_hydro_abutment_start_y; 0,1: tile_hydro_wall_y;     0,2: tile_hydro_spillway_y; 0,3: tile_hydro_wall_y; 0,4: tile_hydro_power_end_y; }
 tilelayout layout_tidal_station { 0,0: tile_tidal_barrage;  1,0: tile_tidal_hall; }
 /* Wind farm: turbines on alternating tiles joined by service tracks. */
 tilelayout layout_wind_farm_3x3 { 0,0: tile_wind_a;       1,0: tile_wind_track_x; 2,0: tile_wind_c;
@@ -435,15 +587,6 @@ tilelayout layout_substation    { 0,0: tile_sub_transformers; 1,0: tile_sub_swit
 /* ═══════════════════════════════════════════════════════════
    LOCATION CHECK CALLBACKS  (use configurable parameters)
    ═══════════════════════════════════════════════════════════ */
-
-/* Hydro: quick pre-check that water is close. water_distance is measured from
-   the site's north tile, and the sw/se layouts have their water two tiles from it.
-   The dam wall tiles then check for water directly on their water side
-   (sw_tile_check_hydro_*), so the dam always meets a river, lake or canal. */
-switch(FEAT_INDUSTRIES, SELF, sw_location_hydro, water_distance <= 2) {
-    1: CB_RESULT_LOCATION_ALLOW;
-    CB_RESULT_LOCATION_DISALLOW;
-}
 
 /* Tidal: directly coast-adjacent */
 switch(FEAT_INDUSTRIES, SELF, sw_location_tidal, water_distance <= 1) {
@@ -550,7 +693,9 @@ item(FEAT_INDUSTRIES, industry_hydro_dam, 2) {
     property {
         substitute: INDUSTRYTYPE_COAL_MINE;
         name: string(STR_IND_HYDRO_DAM); nearby_station_name: string(STR_STAT_HYDRO_DAM);
-        layouts: [layout_hydro_dam, layout_hydro_dam_nw, layout_hydro_dam_sw, layout_hydro_dam_se]; life_type: IND_LIFE_TYPE_BLACK_HOLE;
+        layouts: [layout_hydro_x1_ps, layout_hydro_x1_pe, layout_hydro_x2_ps, layout_hydro_x2_pe, layout_hydro_x3_ps, layout_hydro_x3_pe,
+                  layout_hydro_y1_ps, layout_hydro_y1_pe, layout_hydro_y2_ps, layout_hydro_y2_pe, layout_hydro_y3_ps, layout_hydro_y3_pe];
+        life_type: IND_LIFE_TYPE_BLACK_HOLE;
         map_colour: COLOUR_DARK_BLUE;
         cargo_types: [produce_cargo("POWR", 12)];
         fund_cost_multiplier: 80;
@@ -560,7 +705,7 @@ item(FEAT_INDUSTRIES, industry_hydro_dam, 2) {
     }
     graphics {
         construction_probability: sw_prob_hydro;
-        location_check: sw_location_hydro;
+        /* Placement is checked tile by tile: see sw_tile_check_hydro_*. */
     }
 }
 

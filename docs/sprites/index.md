@@ -54,6 +54,58 @@ Shown facing north-east. The turned copies (hydro_power_s_nw, _sw, _se) have the
 - powerhouse
 - ground (grass)
 
+### River dam wall
+
+[`hydro_wall_x.png`](hydro_wall_x.png) · tile `hydro_wall_x` · review [#84](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/84)
+
+hydro_wall_y is the same wall turned to cross a river running the other way.
+
+- parapets
+- downstream face
+- dam wall
+- ground (water)
+
+### River dam spillway
+
+[`hydro_spillway_x.png`](hydro_spillway_x.png) · tile `hydro_spillway_x` · review [#84](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/84)
+
+hydro_spillway_y is the same spillway turned to cross a river running the other way.
+
+- road bridge
+- dam wall
+- piers
+- spillway water
+- ground (water)
+- white water
+
+### River dam abutment
+
+[`hydro_abutment_start_x.png`](hydro_abutment_start_x.png) · tile `hydro_abutment_start_x` · review [#84](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/84)
+
+The bank at the start of a dam along x. The _end_x copy is mirrored; the _y copies are turned.
+
+- abutment
+- parapets
+- dam wall
+- downstream face
+- ground (grass)
+
+### River dam power house
+
+[`hydro_power_start_x.png`](hydro_power_start_x.png) · tile `hydro_power_start_x` · review [#84](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/84)
+
+The bank at the start of a dam along x. The _end_x copy is mirrored; the _y copies are turned.
+
+- penstocks
+- abutment
+- parapets
+- powerhouse roof
+- ground (grass)
+- dam wall
+- downstream face
+- powerhouse
+- transformer
+
 ## Uranium Mine
 
 ### Headframe

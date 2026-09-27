@@ -100,6 +100,9 @@ STR_PARAM_WIND_HEIGHT_DESC      :Minimum ground height for wind farm placement. 
 STR_PARAM_SUBSTATION_PROB_NAME  :Substation: spawn rate
 STR_PARAM_SUBSTATION_PROB_DESC  :How frequently electrical substations appear near towns. 1 = rare, 10 = very common. (default: 5)
 
+STR_PARAM_HYDRO_MIN_WATER_NAME  :Hydro Dam: minimum river size
+STR_PARAM_HYDRO_MIN_WATER_DESC  :How much river a new dam needs around it: the number of river or lake tiles within 7 tiles of the dam's spillway. Stops dams on small ponds and short stubs of river. A straight river 1 tile wide crossing the whole area counts 15. (default: 12)
+
 STR_PARAM_PROB_HYDRO_NAME       :Hydro Dam: spawn rate
 STR_PARAM_PROB_HYDRO_DESC       :How frequently hydroelectric dams appear. 0=never, 1=rare, 8=very common. (default: 1)
 
