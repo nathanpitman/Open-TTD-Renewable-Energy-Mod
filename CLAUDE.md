@@ -110,8 +110,10 @@ update the spec and its decision log in the same change. Put the rule
 in `tools/make_sprites.py` as shared code, not in one draw function.
 If a change only affects one sprite, leave the spec alone.
 
-Spec section 12 calls for an annotated reference for each sprite in
-`docs/sprites/`, with an index in `docs/sprites/index.md`. It is not
-built yet. Once it exists, use its part names to work out what a change
-request refers to, and regenerate the reference whenever the sprite
-changes.
+Each sprite has an annotated reference in `docs/sprites/`, and
+`docs/sprites/index.md` lists every sprite's part names (spec section
+12). Use those names to work out what a change request refers to. They
+come from `with cv.part("name"):` blocks in `tools/make_sprites.py`, so
+wrap any new drawing call in one. `python3 tools/make_sprites.py`
+regenerates the references with the sheets. Commit them in the same
+change.
