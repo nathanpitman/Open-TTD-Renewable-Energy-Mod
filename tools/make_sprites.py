@@ -530,10 +530,22 @@ def wind_turbine(cv, cx, cy, angle, h=34, rotor=20.0):
         _blades(cv, hub, angle, rotor, ux, uy, blade, edge)
 
 
+BLADE_CURVE = 0.8  # how far the normal turns across the blade's width
+
+
+def _unit(v):
+    l = math.sqrt(sum(c * c for c in v))
+    return tuple(c / l for c in v)
+
+
 def _blades(cv, hub, angle, rotor, ux, uy, blade, edge):
+    face = _unit((1, 1, 0.3))  # the rotor faces the viewer
     for b in range(3):
         th = math.radians(angle + b * 120)
         c, sn = math.cos(th), math.sin(th)
+        # world direction across the blade (towards +w), so the blade can be
+        # shaded as a rounded section: the edge facing LIGHT comes out lighter
+        across = _unit((-sn * ux, -sn * uy, c))
         n = cv._n(rotor)
         for i in range(n + 1):
             t = i / n
@@ -546,7 +558,9 @@ def _blades(cv, hub, angle, rotor, ux, uy, blade, edge):
                 px = r * c - w * sn
                 pz = r * sn + w * c
                 p = (hub[0] + px * ux + 0.3, hub[1] + px * uy + 0.3, hub[2] + pz)
-                cv.splat(p, (1, 1, 0.3), edge if abs(j) == m and t < 0.9 else blade)
+                k = BLADE_CURVE * j / m
+                normal = tuple(f + k * a for f, a in zip(face, across))
+                cv.splat(p, normal, edge if abs(j) == m and t < 0.9 else blade)
 
 
 def service_track(cv, along_x=True, x0=0.0, x1=16.0):
@@ -559,23 +573,23 @@ def service_track(cv, along_x=True, x0=0.0, x1=16.0):
 
 
 def solar_rows(cv, x0, x1, y0, y1, rows=3):
-    """Rows of tilted panels (facing SW / the light)."""
-    pitch = (x1 - x0) / rows
+    """Rows of tilted panels facing SE (+y, screen lower right), towards the light."""
+    pitch = (y1 - y0) / rows
     for k in range(rows):
-        xa = x0 + k * pitch + 0.8
+        ya = y0 + k * pitch + 0.8
         depth = pitch * 0.62
-        # supports
+        # supports: tall at the back (NW) edge, short at the front (SE) edge
         with cv.part("panel supports"):
-            for yy in (y0 + 0.5, (y0 + y1) / 2, y1 - 0.5):
-                cv.beam((xa + depth, yy, 0), (xa + depth, yy, 1.1), 0.3, M["steel_dark"])
-                cv.beam((xa, yy, 0), (xa, yy, 2.7), 0.3, M["steel_dark"])
+            for xx in (x0 + 0.5, (x0 + x1) / 2, x1 - 0.5):
+                cv.beam((xx, ya + depth, 0), (xx, ya + depth, 1.1), 0.3, M["steel_dark"])
+                cv.beam((xx, ya, 0), (xx, ya, 2.7), 0.3, M["steel_dark"])
         with cv.part("solar panels"):
-            cv.parallelogram((xa, y0, 3.0), (depth, 0, -1.9), (0, y1 - y0, 0), panel_mat)
+            cv.parallelogram((x0, ya, 3.0), (x1 - x0, 0, 0), (0, depth, -1.9), panel_mat)
 
 
 def _panel_pattern(p, n):
     # cell grid lines give the panels texture
-    if (p[1] % 2.0) < 0.22:
+    if (p[0] % 2.0) < 0.22:
         return 21
     if (p[2] % 1.0) < 0.12:
         return 131
@@ -1005,13 +1019,15 @@ def _in_poly(x, y, pts):
 
 
 def icon_power(u, v):
-    """Yellow lightning bolt, lit from the upper left.  Returns (index, part)."""
+    """Yellow lightning bolt, shaded lighter towards its upper left.  Returns
+    (index, part).  Cargo icons are flat menu art, not world sprites, so this
+    shading is part of the drawing and doesn't follow LIGHT."""
     if not _in_poly(u, v, _BOLT):
         return 0, None
     return YELLOW[min(6, max(3, int(7.5 - (u + v) * 0.3)))], "lightning bolt"
 
 
-_DRUM = [83, 85, 87, 209, 87, 86, 85, 84, 83, 82]  # left to right, lit from the left
+_DRUM = [83, 85, 87, 209, 87, 86, 85, 84, 83, 82]  # left to right, highlight left of centre (not LIGHT)
 
 
 def icon_uranium(u, v):

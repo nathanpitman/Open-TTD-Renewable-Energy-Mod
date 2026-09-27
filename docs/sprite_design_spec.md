@@ -51,11 +51,32 @@ Until this is decided, review every sprite at both 1x and 2x zoom in game.
 
 ## 4. Lighting and shading
 
-**Current:**
+**Decided.** From the OpenTTD wiki, [Recommended Standards](https://wiki.openttd.org/en/Development/NewGRF/Recommended%20Standards):
 
-- Light comes from the upper left of the screen. Roofs are brightest, walls facing lower-left are lit, and walls facing lower-right are in shade.
-- Brightness = `0.25 + 0.75 × max(0, N·L)`, mapped onto the material's ramp.
-- Unconfirmed: issue #3 says the OpenTTD wiki gives a different light direction. See section 13 before changing this.
+> Most original TTD graphics are drawn with the light source in the lower right of the screen (about "4.30 o'clock"). The light source is best imagined as 'high up in the sky'. Shadows fall towards the top-left of the screen. There are places which incorrectly state that light comes from the top-right. If you want your graphics to be compatible with original TTD style, don't be mistaken about the lighting.
+
+For our sprites, that means:
+
+- The light is high in the sky, towards the lower right of the screen. Roofs and other upward-facing surfaces are the brightest.
+- Walls facing the lower right (south-east, the +y faces in `tools/make_sprites.py`) face the light. They are the brightest walls.
+- Walls facing the lower left (south-west, the +x faces) are turned away from the light, so they are darker.
+- Shadows fall towards the upper left.
+
+**Current:** the generator follows this since #76. `LIGHT = (-0.15, 0.55, 0.82)` in `tools/make_sprites.py` gives:
+
+| Face | Brightness |
+|---|---|
+| Roof | 0.87 |
+| Walls facing lower-right (+y) | 0.66 |
+| Walls facing lower-left (+x) | 0.25 |
+
+Brightness = `0.25 + 0.75 × max(0, N·L)`, mapped onto the material's ramp. Windowed walls use the lighter glass colour on the lit, lower-right walls. `tools/compare_vanilla.py` draws our tiles next to OpenGFX buildings so the lighting can be checked against the base game.
+
+**Still to check after the light change:**
+
+- **Solar panels:** fixed. They now tilt to face the lower right (south-east), into the light. Because they are lit, they come out paler than before. Check that they still read as solar panels (#61–#63).
+- **Turbine blades:** fixed. Every blade pixel used to share one flat normal, `(1, 1, 0.3)`. That normal is symmetric in x and y, so the blades looked the same under the old light and the new, and showed no light direction at all. They are now shaded as a rounded section (`BLADE_CURVE` in `_blades`): the edge that faces the light (up and towards the lower right) is lighter and the far edge darker. This goes through `LIGHT`, so it will follow any later change to the light (#58).
+- **Cargo icons:** no change needed. They are flat menu icons with their own fixed shading, not world sprites, so they don't follow `LIGHT` (#76 left them unchanged). The `icon_power` docstring and the `_DRUM` comment now say this. Before, "lit from the upper left" read as if it contradicted this section (#73, #74).
 
 **Open question:** contrast. The base game has a bigger jump between the lit and shaded walls than our smooth shading gives. We still need to decide the minimum number of ramp steps between lit and shaded faces.
 
@@ -148,9 +169,9 @@ The references are in [`docs/sprites/`](sprites/), and [`docs/sprites/index.md`]
 
 ## 13. Reference material
 
-Existing OpenTTD guidance to read before drawing or changing sprites. These links were collected in #3. Their summaries below come from that issue and haven't been re-checked here: the wiki sites can't be reached from the environment this spec was written in.
+Existing OpenTTD guidance to read before drawing or changing sprites. These links were collected in #3. The lighting text from Recommended Standards is quoted in section 4. The other summaries come from #3 and haven't been re-checked, because the wiki sites can't be reached from the environment this spec was written in.
 
-- **[Recommended Standards](https://wiki.openttd.org/en/Development/NewGRF/Recommended%20Standards)** (OpenTTD wiki): light source direction and general drawing conventions. It also recommends drawing against consistent templates and keeping graphics sources in version control.
+- **[Recommended Standards](https://wiki.openttd.org/en/Development/NewGRF/Recommended%20Standards)** (OpenTTD wiki): light source direction, quoted in section 4, and general drawing conventions. Issue #3 also summarises it as recommending drawing against consistent templates and keeping graphics sources in version control.
 - **[Alignment](https://wiki.openttd.org/en/Development/NewGRF/Alignment)** and **[Debugging](https://wiki.openttd.org/en/Development/NewGRF/Debugging)** (OpenTTD wiki): standard sprite-offset templates, and the in-game sprite alignment tool for checking bounding boxes by eye.
 - **[PalettesAndCoordinates](https://newgrf-specs.tt-wiki.net/wiki/PalettesAndCoordinates)** (NewGRF Specs wiki): the authoritative spec for the DOS and Windows 8bpp palettes and for the coordinate and bounding-box system. It backs section 3.
 - **[NML: List of default colour translation palettes](https://newgrf-specs.tt-wiki.net/wiki/NML:List_of_default_colour_translation_palettes)** (NewGRF Specs wiki): recolour sprites, for if we ever add company-colour remapping.
@@ -159,7 +180,7 @@ Existing OpenTTD guidance to read before drawing or changing sprites. These link
 
 Read at least "Recommended Standards" (light and style) and "PalettesAndCoordinates" (palette) before starting.
 
-**Light direction needs checking.** Issue #3 summarises Recommended Standards as saying the light comes from the lower right (about 4:30), with shadows falling to the upper left. That contradicts section 4, where our generator lights from the upper left. The base-game Oil Refinery in #34 looks lit from the left, which fits section 4. Read the wiki page and settle this in section 4 before changing any lighting.
+**Light direction: settled.** Recommended Standards puts the light in the lower right of the screen, about 4:30 (see section 4). An earlier version of this spec said the base-game Oil Refinery looked lit from the left. That was a misreading, so disregard it.
 
 ## Review checklist (for each sprite issue)
 
@@ -177,3 +198,4 @@ Read at least "Recommended Standards" (light and style) and "PalettesAndCoordina
 | 2026-09-27 | Sprites must look at home next to base-game industries | 1 | #34 |
 | 2026-09-27 | Every sprite gets an annotated reference image, made by the build, naming its parts for use in change requests | 12 | #34 |
 | 2026-09-27 | Annotated references built (`tools/sprite_refs.py`, `docs/sprites/`); part names come from `cv.part()` tags in the drawing code | 12 | #34 |
+| 2026-09-27 | Light source is in the lower right of the screen (about 4:30), high in the sky, per the OpenTTD wiki Recommended Standards. The generator was changed to match in #76 | 4 | #34, #76 |
