@@ -74,7 +74,7 @@ Brightness = `0.25 + 0.75 × max(0, N·L)`, mapped onto the material's ramp. Win
 
 **Still to check after the light change:**
 
-- **Solar panels:** they are still tilted to face the lower left (south-west). The `solar_rows` docstring says that is "the light", which is no longer true. Decide whether they should face the new light (issues #61–#63).
+- **Solar panels:** fixed. They now tilt to face the lower right (south-east), into the light. Because they are lit, they come out paler than before. Check that they still read as solar panels (#61–#63).
 - **Turbine blades:** they use fixed colours (`blade` and `edge` in `wind_turbine`), not the light. Check that they sit well next to the newly lit tower (#58).
 - **Cargo icons:** these are flat menu icons and keep their own shading. The Power icon's docstring still says "lit from the upper left" (#73).
 

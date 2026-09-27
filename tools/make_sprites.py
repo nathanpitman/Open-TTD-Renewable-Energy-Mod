@@ -559,23 +559,23 @@ def service_track(cv, along_x=True, x0=0.0, x1=16.0):
 
 
 def solar_rows(cv, x0, x1, y0, y1, rows=3):
-    """Rows of tilted panels (facing SW / the light)."""
-    pitch = (x1 - x0) / rows
+    """Rows of tilted panels facing SE (+y, screen lower right), towards the light."""
+    pitch = (y1 - y0) / rows
     for k in range(rows):
-        xa = x0 + k * pitch + 0.8
+        ya = y0 + k * pitch + 0.8
         depth = pitch * 0.62
-        # supports
+        # supports: tall at the back (NW) edge, short at the front (SE) edge
         with cv.part("panel supports"):
-            for yy in (y0 + 0.5, (y0 + y1) / 2, y1 - 0.5):
-                cv.beam((xa + depth, yy, 0), (xa + depth, yy, 1.1), 0.3, M["steel_dark"])
-                cv.beam((xa, yy, 0), (xa, yy, 2.7), 0.3, M["steel_dark"])
+            for xx in (x0 + 0.5, (x0 + x1) / 2, x1 - 0.5):
+                cv.beam((xx, ya + depth, 0), (xx, ya + depth, 1.1), 0.3, M["steel_dark"])
+                cv.beam((xx, ya, 0), (xx, ya, 2.7), 0.3, M["steel_dark"])
         with cv.part("solar panels"):
-            cv.parallelogram((xa, y0, 3.0), (depth, 0, -1.9), (0, y1 - y0, 0), panel_mat)
+            cv.parallelogram((x0, ya, 3.0), (x1 - x0, 0, 0), (0, depth, -1.9), panel_mat)
 
 
 def _panel_pattern(p, n):
     # cell grid lines give the panels texture
-    if (p[1] % 2.0) < 0.22:
+    if (p[0] % 2.0) < 0.22:
         return 21
     if (p[2] % 1.0) < 0.12:
         return 131
