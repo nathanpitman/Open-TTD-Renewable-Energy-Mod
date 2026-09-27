@@ -4,6 +4,7 @@
 
 - **Cargo icons for Power and Uranium.** Both cargos now have their own icon in station and industry windows, the cargo payment graph and anywhere else OpenTTD shows cargo icons: a yellow lightning bolt for Power and a green drum with a radiation mark for Uranium. Previously they showed no icon.
 - **Wind turbines turn.** Each turbine's blades now rotate clockwise, about 12 turns a minute like a real turbine. Neighbouring turbines don't turn in step. Wind farms already on the map in existing games start turning too.
+- **Fixed: grass under wind farms, solar farms and hydro power stations didn't match the land around them.** These tiles drew their own brighter green grass, so the farm showed up as a lighter square. They now use the game's own ground, so they match whatever base graphics you use, and they show snow above the sub-arctic snowline and sand in sub-tropical desert. ([#29](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/29))
 
 ## v13
 
