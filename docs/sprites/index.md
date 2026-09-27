@@ -270,8 +270,8 @@ wind_track_y is the same track running the other way.
 - switchgear cabinets
 - radiators
 - transformer plinth
-- ground (concrete)
 - fence
+- ground (concrete)
 
 ### Switchgear and control building
 

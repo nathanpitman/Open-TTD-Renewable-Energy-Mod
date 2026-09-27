@@ -445,11 +445,16 @@ def fence(cv, x0, y0, x1, y1, mat=None, h=1.4):
 
 
 def _fence(cv, x0, y0, x1, y1, mat, h):
-    for z in sorted({h - 0.2, h / 2}) if h > 1.6 else (h - 0.2,):
+    # A tall fence gets a mid rail, but at 1x that and close posts fill in
+    # to a solid band, so there it keeps only the top rail and sparser posts.
+    tall = h > 1.6
+    thin = tall and cv.s == 1
+    for z in sorted({h - 0.2, h / 2}) if tall and not thin else (h - 0.2,):
         cv.beam((x0, y0, z), (x1, y1, z), 0.2, mat)
     L = max(abs(x1 - x0), abs(y1 - y0))
-    for k in range(int(L / 2) + 1):
-        t = k * 2 / L if L else 0
+    gap = 4 if thin else 2
+    for k in range(int(L / gap) + 1):
+        t = k * gap / L if L else 0
         cv.beam((x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, 0), (x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, h), 0.2, mat)
 
 
