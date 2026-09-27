@@ -1,13 +1,10 @@
 # Changelog
 
-## Unreleased
+## v13
 
 - **Cargo icons for Power and Uranium.** Both cargos now have their own icon in station and industry windows, the cargo payment graph and anywhere else OpenTTD shows cargo icons: a yellow lightning bolt for Power and a green drum with a radiation mark for Uranium. Previously they showed no icon.
 - **Wind turbines turn.** Each turbine's blades now rotate clockwise, about 12 turns a minute like a real turbine. Neighbouring turbines don't turn in step. Wind farms already on the map in existing games start turning too.
 - **Fixed: grass under wind farms, solar farms and hydro power stations didn't match the land around them.** These tiles drew their own brighter green grass, so the farm showed up as a lighter square. They now use the game's own ground, so they match whatever base graphics you use, and they show snow above the sub-arctic snowline and sand in sub-tropical desert. ([#29](https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/issues/29))
-
-## v13
-
 - **Fixed: the Game Script never changed town growth.** It looked for the Power cargo by comparing its label to a number, but OpenTTD gives the label as text, so it never found Power and did nothing. It also looked for generators by an exact name, but each industry's name starts with its town ("Smallbridge Wind Farm"), so it never found any. It now finds generators as the industries that produce Power, and substations as the ones that accept it, which also works in any language.
 - **Fixed: the power grid updated far too often.** The "update interval" setting is in game days, but the script treated it as ticks, so it recalculated about every half day instead of every 30 days. It now uses days.
 - **Added a debug override to bypass all start-year limits.** A new "Debug: ignore all start-year limits" NewGRF parameter (off by default) makes every generator and the uranium mine available from the start of the game, for testing without needing to relax or wait out the individual era-date settings.
