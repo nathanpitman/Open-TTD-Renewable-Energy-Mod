@@ -6,7 +6,7 @@ The technical side is in README.md → "Sprites": file layout, palette format, o
 
 ## How this document is used
 
-Sprites are reviewed one at a time, with one GitHub issue per sprite, all under issue #34. Refining a sprite gives one of two kinds of change:
+Sprites are reviewed one at a time, with one GitHub issue per sprite, all under issue #34. When you ask for a change, refer to parts by the names in that sprite's annotated reference (section 12). Refining a sprite gives one of two kinds of change:
 
 - **Specific to that sprite** (for example, "add a ladder to the intake tower"): make the change in that sprite's issue and draw function only.
 - **Global** (for example, "every building gets a dark outline", "walls use at least 4 shades"): it must apply to every sprite. In the same change:
@@ -106,11 +106,41 @@ Every animation frame must follow the same rules as the still frame.
 
 **Current:** 10 × 10 flat pixel art with a near-black outline, like the base game's cargo icons.
 
+## 12. Annotated references
+
+**Decided, not yet built.** Every sprite has an annotated reference image that names each visible part. We use those names when asking for changes ("make the turbine blades thicker", "add a ladder to the intake tower"), and Claude uses them to find the right part in the sprite and in the code.
+
+**What each reference shows:**
+
+- One PNG per sprite, at the same level as the review issues: one per distinct tile design, ground tile and cargo icon.
+  - The four hydro facings share the reference for their base tile.
+  - The wind turbine is annotated on frame 0 only.
+- The sprite drawn on its ground tile and enlarged with nearest-neighbour scaling (about 8× the 1x sprite), so each pixel stays sharp and visible. Add a smaller copy at true 1x scale for comparison.
+- A label for every visible part, with a leader line to that part. The labels sit outside the sprite so they don't cover the art.
+- A header with the sprite's name, its industry, its tile key and the draw function that makes it.
+
+**Part names:**
+
+- Plain words that a player would use, such as "solar panels", "turbine blades", "nacelle", "intake tower" or "car park". Don't use code names like `beam` or `box`.
+- Unique within a sprite. If there are several of the same part, number them from back to front ("tank 1", "tank 2"), or label the group once ("yellowcake drums").
+- The same name everywhere for parts drawn by a shared helper: "transformer", "gantry", "fence", "lattice pylon", "cooling tower".
+- Stable. Renaming a part changes the vocabulary we use in requests, so record the rename in the decision log.
+
+**How they're made:**
+
+- The build writes them. `python3 tools/make_sprites.py` regenerates the references whenever it regenerates the sheets, so they can't drift from the art.
+- The labels come from the geometry. Each drawing call is tagged with its part name, and the label is placed on pixels that part actually drew. The names are never typed separately from the art.
+- They are saved to `docs/sprites/<tile_key>.png` (for example `docs/sprites/solar_panels.png`) and committed with the sheets.
+- A text index, `docs/sprites/index.md`, lists every sprite with its part names. Claude can then look up a name without opening every image.
+
+**When a sprite changes:** regenerate its reference in the same change. A new part needs a name. A removed part's label must go.
+
 ## Review checklist (for each sprite issue)
 
 - [ ] Viewed in game next to base-game industries, at 1x and 2x zoom (or 1x only, if section 2 is decided that way).
 - [ ] Viewed as part of the whole industry, not just on its own.
 - [ ] Follows every **Decided** rule above.
+- [ ] Annotated reference in `docs/sprites/` is regenerated, and every visible part has a name (section 12).
 - [ ] Any global change found during the review is recorded here and added to the decision log.
 - [ ] `python3 tools/make_sprites.py` regenerated the sheets, the GRF was rebuilt, and `python3 tools/ingame_check.py` passes.
 
@@ -119,3 +149,4 @@ Every animation frame must follow the same rules as the still frame.
 | Date | Decision | Section | Issue |
 |---|---|---|---|
 | 2026-09-27 | Sprites must look at home next to base-game industries | 1 | #34 |
+| 2026-09-27 | Every sprite gets an annotated reference image, made by the build, naming its parts for use in change requests | 12 | #34 |
