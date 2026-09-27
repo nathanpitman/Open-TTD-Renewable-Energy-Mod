@@ -70,6 +70,7 @@ GRASS = [80, 81, 82, 83, 84, 85, 86, 87]
 DIRT = [104, 105, 106, 107, 108, 109, 110, 111]
 TAILINGS = [24, 25, 26, 27, 28, 29, 30]
 COAL = [1, 2, 3, 4, 5, 6]
+TOWER = [105, 32, 33, 34, 35, 36, 37]  # weathered cooling-tower concrete, as the base-game power station
 PANEL = [128, 129, 130, 131, 132, 133]
 GLASS = [198, 199, 200, 201, 202, 203, 204, 205]
 WATER = [245, 246, 247, 248, 249]
@@ -376,6 +377,7 @@ M = {
     "tailings": Material(TAILINGS, 0.25, grain=0.7),
     "ore": Material(DIRT, 0.35, grain=0.6, bias=-0.1),
     "coal": Material(COAL, 0.4, grain=0.5),
+    "tower": Material(TOWER, 0.12, grain=0.5),
     "panel": Material(PANEL, 0.0),
     "glass": Material(GLASS),
     "water": Material(WATER, 0.6, grain=1.0),
@@ -464,9 +466,35 @@ def cooling_tower(cv, cx, cy, h=52, rb=7.4):
     def r(t):
         # hyperboloid: wide base, waist at 70% height, slight flare at top
         return rb * (0.64 + 0.36 * ((t - 0.72) / 0.72) ** 2) if t < 0.72 else rb * (0.64 + 0.35 * ((t - 0.72) / 0.28) ** 2 * 0.4)
+    # Weathered tan concrete like the base-game coal power station's towers,
+    # a step lighter since no coal is burnt here.  The top is open: the far
+    # inside wall faces the other way from the outside, so its shading is
+    # mirrored (lit on the left, dark on the right), and it darkens with depth.
+    wall = 0.5
     with cv.part("cooling tower"):
-        cv.column(cx, cy, 0, h, r, M["concrete"], cap=M["dark"])
-        cv.disc(cx, cy, h - 0.1, r(1.0) - 0.8, M["dark"])
+        cv.column(cx, cy, 0, h, r, M["tower"], cap=False)
+    with cv.part("cooling tower inside"):
+        nz = cv._n(h)
+        na = max(12, int(2 * math.pi * rb * 2 / cv.step))
+        for k in range(nz + 1):
+            t = k / nz
+            ri = r(t) - wall
+            dr = (r(min(1, t + 0.01)) - r(max(0, t - 0.01))) / 0.02 / h
+            inside = Material(M["tower"].ramp, 0.12, grain=0.5, bias=-0.45 * (1 - t) ** 0.5)
+            for a in range(na):
+                th = 2 * math.pi * a / na
+                ca, sa = math.cos(th), math.sin(th)
+                if ca + sa > 0.3:  # front half, always behind the outer wall
+                    continue
+                cv.splat((cx + ri * ca, cy + ri * sa, h * t), (-ca, -sa, dr), inside)
+    with cv.part("cooling tower rim"):
+        ro = r(1.0)
+        n = cv._n(ro * 2)
+        for i in range(-n, n + 1):
+            for j in range(-n, n + 1):
+                dx, dy = ro * i / n, ro * j / n
+                if (ro - wall) ** 2 <= dx * dx + dy * dy <= ro * ro:
+                    cv.splat((cx + dx, cy + dy, h), (0, 0, 1), M["tower"])
 
 
 def reactor(cv, cx, cy, r=6.5, h=18):
