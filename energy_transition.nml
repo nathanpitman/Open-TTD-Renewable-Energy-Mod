@@ -394,12 +394,19 @@ switch(FEAT_INDUSTRIES, SELF, sw_prob_solar,    current_year >= param_solar_year
    All generators accept PASS. param_workers_required toggles this.
    ═══════════════════════════════════════════════════════════ */
 
+/* Decrementing at the minimum production level (4) closes the industry.
+   Missing workers should only reduce output, so hold at the minimum instead. */
+switch(FEAT_INDUSTRIES, SELF, sw_workers_decrement, production_level) {
+    0..4: CB_RESULT_IND_PROD_NO_CHANGE;
+    CB_RESULT_IND_PROD_DECREMENT_BY_1;
+}
+
 /* Days since workers last arrived → production change */
 switch(FEAT_INDUSTRIES, SELF, sw_workers_days_inner,
        current_date - last_cargo_accepted_at("PASS")) {
     0..60:   CB_RESULT_IND_PROD_INCREMENT_BY_1;
     61..180: CB_RESULT_IND_PROD_NO_CHANGE;
-    CB_RESULT_IND_PROD_DECREMENT_BY_1;
+    return sw_workers_decrement;
 }
 
 /* Toggle via parameter */
