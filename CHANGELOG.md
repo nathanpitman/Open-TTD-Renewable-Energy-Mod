@@ -1,5 +1,25 @@
 # Changelog
 
+## v12
+
+From this release on, each release is numbered with a single whole number: the NewGRF and the Game Script both report it as their version. v12 comes after the v0.1 and v0.2 pre-releases, which already shipped a NewGRF with version 11. Numbering carries on from there so OpenTTD always treats a new release as newer.
+
+This release contains everything from the v0.2 pre-release.
+
+### Changes since v0.1
+
+- **New industry art.** Every industry now has its own drawn tiles at normal and 2x zoom, replacing the placeholder graphics. The Coal Power Station has its own art instead of reusing the substation's.
+- **Wind farms spread out.** Turbines are smaller and never sit on neighbouring tiles, so their blades don't overlap. Wind farms use one of four layouts.
+- **Fixed: default cargos replaced.** Power and Uranium used the same cargo slots as Passengers and Coal and replaced them. They now use slots of their own (#1).
+- **Fixed: Uranium Mine overwritten.** The Coal Power Station change shared an industry ID with the Uranium Mine. It now has its own ID (#2).
+- **Fixed: industries closing without workers.** Generators and power stations that got no passengers were being closed. They now stay open at their lowest output.
+- **Game Script** now reports version 12 (it was 1).
+
+### Compatibility
+
+- Probably doesn't work with FIRS. See the README.
+- Industry tile IDs changed since v0.1, so start a new game rather than loading a v0.1 save.
+
 ## v0.1
 
 First public release of **Energy Transition Industries** for OpenTTD. It adds cleaner power generation, from hydro and nuclear through to wind and solar, and ties town growth to how much electricity reaches each town.
