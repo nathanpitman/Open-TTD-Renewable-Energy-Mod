@@ -18,8 +18,9 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import make_sprites as ms  # noqa: E402
 
-# industry → list of (x, y, tile_key, ground) in tilelayout coordinates.
-# Must mirror the tilelayouts in energy_transition.nml.
+# industry[/variant] → list of (x, y, tile_key) in tilelayout coordinates;
+# tile_key None is a ground-only tile.  Must mirror the tilelayouts in
+# energy_transition.nml.
 LAYOUTS = {
     "hydro_dam": [(0, 0, "hydro_dam_n"), (0, 1, "hydro_dam_s"), (1, 0, "hydro_power_n"), (1, 1, "hydro_power_s")],
     "uranium_mine": [(0, 0, "uranium_headframe"), (1, 0, "uranium_mill"), (0, 1, "uranium_tailings"),
@@ -28,7 +29,12 @@ LAYOUTS = {
                       (1, 0, "nuc_turbine2"), (1, 1, "nuc_reactor"), (1, 2, "nuc_turbine"),
                       (2, 0, "nuc_intake"), (2, 1, "nuc_admin"), (2, 2, "nuc_tanks")],
     "tidal_station": [(0, 0, "tidal_barrage"), (1, 0, "tidal_hall")],
-    "wind_farm": [(0, 0, "wind_a"), (1, 0, "wind_b"), (0, 1, "wind_c"), (1, 1, "wind_d")],
+    "wind_farm": [(0, 0, "wind_a"), (1, 0, "wind_track_x"), (2, 0, "wind_c"),
+                  (0, 1, "wind_track_y"), (1, 1, "wind_kiosk"), (2, 1, "wind_track_y"),
+                  (0, 2, "wind_b"), (1, 2, "wind_track_x"), (2, 2, "wind_d")],
+    "wind_farm/line_x": [(0, 0, "wind_a"), (1, 0, "wind_track_x"), (2, 0, "wind_d")],
+    "wind_farm/line_y": [(0, 0, "wind_c"), (0, 1, "wind_track_y"), (0, 2, "wind_b")],
+    "wind_farm/2x2": [(0, 0, None), (1, 0, "wind_b"), (0, 1, "wind_c"), (1, 1, "wind_kiosk")],
     "solar_farm": [(0, 0, "solar_panels"), (1, 0, "solar_panels"), (2, 0, "solar_inverter"),
                    (0, 1, "solar_control"), (1, 1, "solar_panels"), (2, 1, "solar_panels")],
     "substation": [(0, 0, "sub_transformers"), (1, 0, "sub_pylon")],
@@ -43,14 +49,15 @@ def rgb(im):
     return out
 
 
-def compose(name, s):
+def compose(variant, s):
+    name = variant.split("/")[0]
     _, H, tiles = ms.INDUSTRIES[name]
     keys = [k for k, _ in tiles]
     sheet = Image.open(os.path.join(ms.OUT, "%s%s.png" % (name, "_2x" if s == 2 else "")))
     ground = Image.open(os.path.join(ms.OUT, "ground%s.png" % ("_2x" if s == 2 else "")))
     cw, ch = ms.CELL_W * s, (32 + H) * s
     gh = ground.size[1]
-    layout = LAYOUTS[name]
+    layout = LAYOUTS[variant]
     span = max(x + y for x, y, _ in layout) + 1
     w = (64 * span + 64) * s
     h = (H + 16 * span + 40) * s
@@ -65,6 +72,8 @@ def compose(name, s):
         g = rgb(ground.crop((gi * cw, 0, gi * cw + cw, gh)))
         canvas.alpha_composite(g, (sx - 31 * s, sy))
     for x, y, key in sorted(layout, key=lambda t: t[0] + t[1]):
+        if key is None:
+            continue
         sx = ox + (y - x) * 32 * s
         sy = oy + (x + y) * 16 * s
         k = keys.index(key)
@@ -80,8 +89,9 @@ def main():
     ap.add_argument("--zoom", type=int, default=2)
     a = ap.parse_args()
     parts = [compose(n, a.scale) for n in LAYOUTS]
-    W = sum(p.size[0] for p in parts[:4])
-    rows = [parts[:4], parts[4:]]
+    per_row = 5
+    rows = [parts[i:i + per_row] for i in range(0, len(parts), per_row)]
+    W = max(sum(p.size[0] for p in r) for r in rows)
     H = sum(max(p.size[1] for p in r) for r in rows)
     out = Image.new("RGBA", (W, H), (60, 110, 60, 255))
     y = 0

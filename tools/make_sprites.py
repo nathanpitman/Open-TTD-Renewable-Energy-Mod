@@ -349,6 +349,7 @@ M = {
     "green_roof": Material(GREEN_ROOF),
     "blue_roof": Material(BLUE_ROOF),
     "dark": Material([1, 2, 3, 4]),
+    "gravel": Material([33, 34, 35, 36, 37], 0.5, grain=0.4),
 }
 
 
@@ -440,14 +441,19 @@ def reactor(cv, cx, cy, r=6.5, h=18):
     cv.dome(cx, cy, h, r, M["white"], squash=0.9)
 
 
-def wind_turbine(cv, cx, cy, angle, h=46):
-    cv.box(cx - 3.5, cy - 3.5, 0, cx + 3.5, cy + 3.5, 0.8, M["concrete"])  # foundation
-    cv.column(cx, cy, 0.8, h, lambda t: 1.3 - 0.6 * t, M["white"])
+def wind_turbine(cv, cx, cy, angle, h=34):
+    """Rotor is ~1.3 tiles across, so turbines need a free tile between them."""
+    cv.heightfield(cx - 4.5, cy - 4.5, cx + 4.5, cy + 4.5, lambda x, y: 0.05, M["gravel"])  # crane pad
+    # track stubs to every tile edge so the access tracks on neighbouring tiles join up
+    service_track(cv, along_x=True)
+    service_track(cv, along_x=False)
+    cv.box(cx - 2.5, cy - 2.5, 0, cx + 2.5, cy + 2.5, 0.6, M["concrete"])  # foundation
+    cv.column(cx, cy, 0.6, h, lambda t: 1.1 - 0.5 * t, M["white"])
     # nacelle points along -x (rotor faces the viewer's lower-left)
-    cv.box(cx - 2.0, cy - 0.9, h - 0.8, cx + 2.8, cy + 0.9, h + 1.4, M["white"])
-    hub = (cx + 3.2, cy, h + 0.3)
-    cv.column(hub[0] - 0.2, hub[1], hub[2] - 0.8, hub[2] + 0.8, 0.6, M["grey"])
-    blade_len = 17.0
+    cv.box(cx - 1.6, cy - 0.7, h - 0.6, cx + 2.2, cy + 0.7, h + 1.1, M["white"])
+    hub = (cx + 2.5, cy, h + 0.25)
+    cv.column(hub[0] - 0.2, hub[1], hub[2] - 0.6, hub[2] + 0.6, 0.5, M["grey"])
+    blade_len = 10.5
     for k in range(3):
         th = angle + k * 2 * math.pi / 3
         dy, dz = math.cos(th), math.sin(th)
@@ -455,11 +461,19 @@ def wind_turbine(cv, cx, cy, angle, h=46):
         n = cv._n(blade_len * 2)
         for i in range(n + 1):
             t = i / n
-            w = 1.0 * (1 - t) + 0.25
+            w = 0.8 * (1 - t) + 0.25
             for j in range(-2, 3):
                 off = w * j / 2 * 0.5
                 p = (hub[0] + 0.1, hub[1] + dy * blade_len * t - dz * off, hub[2] + dz * blade_len * t + dy * off)
                 cv.splat(p, (1, 0.1, 0.1), M["white"])
+
+
+def service_track(cv, along_x=True, x0=0.0, x1=16.0):
+    """Gravel access track between turbines, flat on the ground."""
+    if along_x:
+        cv.heightfield(x0, 6.5, x1, 9.5, lambda x, y: 0.05, M["gravel"])
+    else:
+        cv.heightfield(6.5, x0, 9.5, x1, lambda x, y: 0.05, M["gravel"])
 
 
 def solar_rows(cv, x0, x1, y0, y1, rows=3):
@@ -638,7 +652,22 @@ def t_tidal_hall(cv):
 
 
 def t_wind(angle, dx=0.0, dy=0.0):
-    return lambda cv: wind_turbine(cv, 7 + dx, 8 + dy, angle)
+    return lambda cv: wind_turbine(cv, 8 + dx, 8 + dy, angle)
+
+
+def t_wind_track_x(cv):
+    service_track(cv, along_x=True)
+
+
+def t_wind_track_y(cv):
+    service_track(cv, along_x=False)
+
+
+def t_wind_kiosk(cv):
+    service_track(cv, along_x=True)
+    service_track(cv, along_x=False)
+    cv.box(10.5, 10.5, 0, 14, 14.5, 3.2, M["white"], top=M["grey"])  # grid connection kiosk
+    cv.box(14, 11.2, 0.6, 14.3, 13.8, 2.4, M["steel_dark"])
 
 
 def t_solar_panels(cv):
@@ -715,11 +744,14 @@ INDUSTRIES = {
         ("tidal_barrage", t_tidal_barrage),
         ("tidal_hall", t_tidal_hall),
     ]),
-    "wind_farm": ("grass", 68, [
+    "wind_farm": ("grass", 48, [
         ("wind_a", t_wind(0.3)),
-        ("wind_b", t_wind(1.2, 1, -1)),
-        ("wind_c", t_wind(0.7, -1, 1)),
-        ("wind_d", t_wind(1.6, 1, 1)),
+        ("wind_b", t_wind(1.2, 0.5, -0.5)),
+        ("wind_c", t_wind(0.7, -0.5, 0.5)),
+        ("wind_d", t_wind(1.6, 0.5, 0.5)),
+        ("wind_track_x", t_wind_track_x),
+        ("wind_track_y", t_wind_track_y),
+        ("wind_kiosk", t_wind_kiosk),
     ]),
     "solar_farm": ("grass", 12, [
         ("solar_panels", t_solar_panels),

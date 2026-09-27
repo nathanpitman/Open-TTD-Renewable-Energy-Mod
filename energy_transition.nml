@@ -221,9 +221,9 @@ alternative_sprites(ss_nuclear_plant, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites
 /* tidal_station: 0=tidal_barrage, 1=tidal_hall */
 spriteset(ss_tidal_station, "sprites/tidal_station.png") { [0,0,64,52,-31,-20, ANIM] [64,0,64,52,-31,-20] }
 alternative_sprites(ss_tidal_station, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/tidal_station_2x.png") { [0,0,128,104,-62,-40, ANIM] [128,0,128,104,-62,-40] }
-/* wind_farm: 0=wind_a, 1=wind_b, 2=wind_c, 3=wind_d */
-spriteset(ss_wind_farm, "sprites/wind_farm.png") { [0,0,64,100,-31,-68] [64,0,64,100,-31,-68] [128,0,64,100,-31,-68] [192,0,64,100,-31,-68] }
-alternative_sprites(ss_wind_farm, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/wind_farm_2x.png") { [0,0,128,200,-62,-136] [128,0,128,200,-62,-136] [256,0,128,200,-62,-136] [384,0,128,200,-62,-136] }
+/* wind_farm: 0=wind_a, 1=wind_b, 2=wind_c, 3=wind_d, 4=wind_track_x, 5=wind_track_y, 6=wind_kiosk */
+spriteset(ss_wind_farm, "sprites/wind_farm.png") { [0,0,64,80,-31,-48] [64,0,64,80,-31,-48] [128,0,64,80,-31,-48] [192,0,64,80,-31,-48] [256,0,64,80,-31,-48] [320,0,64,80,-31,-48] [384,0,64,80,-31,-48] }
+alternative_sprites(ss_wind_farm, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/wind_farm_2x.png") { [0,0,128,160,-62,-96] [128,0,128,160,-62,-96] [256,0,128,160,-62,-96] [384,0,128,160,-62,-96] [512,0,128,160,-62,-96] [640,0,128,160,-62,-96] [768,0,128,160,-62,-96] }
 /* solar_farm: 0=solar_panels, 1=solar_inverter, 2=solar_control */
 spriteset(ss_solar_farm, "sprites/solar_farm.png") { [0,0,64,44,-31,-12] [64,0,64,44,-31,-12] [128,0,64,44,-31,-12] }
 alternative_sprites(ss_solar_farm, ZOOM_LEVEL_IN_2X, BIT_DEPTH_8BPP, "sprites/solar_farm_2x.png") { [0,0,128,88,-62,-24] [128,0,128,88,-62,-24] [256,0,128,88,-62,-24] }
@@ -256,7 +256,10 @@ spritelayout sl_tidal_station(tile) {
 }
 spritelayout sl_wind_farm(tile) {
     ground { sprite: ss_ground(0); }
-    building { sprite: ss_wind_farm(tile); xoffset:0; yoffset:0; zoffset:0; xextent:16; yextent:16; zextent:64; }
+    building { sprite: ss_wind_farm(tile); xoffset:0; yoffset:0; zoffset:0; xextent:16; yextent:16; zextent:45; }
+}
+spritelayout sl_wind_farm_grass {
+    ground { sprite: ss_ground(0); }
 }
 spritelayout sl_solar_farm(tile) {
     ground { sprite: ss_ground(0); }
@@ -303,6 +306,11 @@ item(FEAT_INDUSTRYTILES, tile_sub_transformers,  25) { property { substitute:0; 
 item(FEAT_INDUSTRYTILES, tile_sub_pylon,         26) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_substation(1); } }
 item(FEAT_INDUSTRYTILES, tile_coal_boiler,       27) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_coal_power_plant(0); } }
 item(FEAT_INDUSTRYTILES, tile_coal_yard,         28) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_coal_power_plant(1); } }
+/* Wind farm spacing tiles: turbines never sit on adjacent tiles, so rotors don't overlap. */
+item(FEAT_INDUSTRYTILES, tile_wind_track_x,      29) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_wind_farm(4); } }
+item(FEAT_INDUSTRYTILES, tile_wind_track_y,      30) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_wind_farm(5); } }
+item(FEAT_INDUSTRYTILES, tile_wind_kiosk,        31) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_wind_farm(6); } }
+item(FEAT_INDUSTRYTILES, tile_wind_grass,        32) { property { substitute:0; override:0; land_shape_flags:0; } graphics { default: sl_wind_farm_grass; } }
 
 /* ── TILE LAYOUTS ──────────────────────────────────────────────── */
 /* x runs to the lower-left of the screen, y to the lower-right; 0,0 is the back (north) tile. */
@@ -314,7 +322,14 @@ tilelayout layout_nuclear_plant { 0,0: tile_nuc_cooling;    0,1: tile_nuc_coolin
 tilelayout layout_hydro_dam     { 0,0: tile_hydro_dam_n;    0,1: tile_hydro_dam_s;
                                   1,0: tile_hydro_power_n;  1,1: tile_hydro_power_s; }
 tilelayout layout_tidal_station { 0,0: tile_tidal_barrage;  1,0: tile_tidal_hall; }
-tilelayout layout_wind_farm     { 0,0: tile_wind_a; 1,0: tile_wind_b; 0,1: tile_wind_c; 1,1: tile_wind_d; }
+/* Wind farm: turbines on alternating tiles joined by service tracks. */
+tilelayout layout_wind_farm_3x3 { 0,0: tile_wind_a;       1,0: tile_wind_track_x; 2,0: tile_wind_c;
+                                  0,1: tile_wind_track_y; 1,1: tile_wind_kiosk;   2,1: tile_wind_track_y;
+                                  0,2: tile_wind_b;       1,2: tile_wind_track_x; 2,2: tile_wind_d; }
+tilelayout layout_wind_farm_line_x { 0,0: tile_wind_a; 1,0: tile_wind_track_x; 2,0: tile_wind_d; }
+tilelayout layout_wind_farm_line_y { 0,0: tile_wind_c; 0,1: tile_wind_track_y; 0,2: tile_wind_b; }
+tilelayout layout_wind_farm_2x2 { 0,0: tile_wind_grass;   1,0: tile_wind_b;
+                                  0,1: tile_wind_c;       1,1: tile_wind_kiosk; }
 tilelayout layout_solar_farm    { 0,0: tile_solar_panels;   1,0: tile_solar_panels; 2,0: tile_solar_inverter;
                                   0,1: tile_solar_control;  1,1: tile_solar_panels; 2,1: tile_solar_panels; }
 tilelayout layout_substation    { 0,0: tile_sub_transformers; 1,0: tile_sub_pylon; }
@@ -513,7 +528,8 @@ item(FEAT_INDUSTRIES, industry_wind_farm, 4) {
     property {
         substitute: INDUSTRYTYPE_COAL_MINE;
         name: string(STR_IND_WIND_FARM); nearby_station_name: string(STR_STAT_WIND_FARM);
-        layouts: [layout_wind_farm]; life_type: IND_LIFE_TYPE_BLACK_HOLE;
+        layouts: [layout_wind_farm_3x3, layout_wind_farm_line_x, layout_wind_farm_line_y, layout_wind_farm_2x2];
+        life_type: IND_LIFE_TYPE_BLACK_HOLE;
         map_colour: COLOUR_PALE_GREEN;
         cargo_types: [accept_cargo("PASS"), produce_cargo("POWR", 4)];
         fund_cost_multiplier: 50;
