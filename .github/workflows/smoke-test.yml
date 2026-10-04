@@ -1,0 +1,44 @@
+name: Smoke test
+
+# Builds the GRF from the NML and runs the headless in-game check
+# (tools/ingame_check.py) in a real OpenTTD. It can't judge art or
+# animation; that still needs a person in a real game.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install OpenTTD and OpenGFX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openttd openttd-opengfx
+
+      - name: Install NML
+        run: pip install nml pillow
+
+      - name: Build the GRF from source
+        run: nmlc --grf=energy_transition.grf energy_transition.nml
+
+      - name: Headless in-game check
+        run: python3 tools/ingame_check.py --verbose | tee ingame_check.log
+
+      - name: Upload log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ingame-check-log
+          path: ingame_check.log
+          if-no-files-found: ignore
