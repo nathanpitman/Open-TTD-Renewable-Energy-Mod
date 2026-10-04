@@ -112,3 +112,7 @@ Configure in AI/Game Script Settings -> select script -> Configure.
                                           growth
     No power blocks growth    On         Towns with zero power cannot grow
     Update interval           30 days    How often the grid recalculates
+
+LICENCE
+
+Released under the GNU General Public License v2.0. See the LICENSE file.

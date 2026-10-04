@@ -1,6 +1,12 @@
 # Energy Transition Industries — OpenTTD Mod
 
 <p align="center">
+  <a href="https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/releases/latest"><img src="https://img.shields.io/github/v/release/nathanpitman/Open-TTD-Renewable-Energy-Mod" alt="Latest release"></a>
+  <a href="https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/actions/workflows/smoke-test.yml"><img src="https://github.com/nathanpitman/Open-TTD-Renewable-Energy-Mod/actions/workflows/smoke-test.yml/badge.svg" alt="Smoke test"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licence-GPL--2.0-blue" alt="Licence: GPL-2.0"></a>
+</p>
+
+<p align="center">
   <img src="docs/industries/hydro_dam.png" alt="Hydroelectric Dam" height="90">
   <img src="docs/industries/uranium_mine.png" alt="Uranium Mine" height="90">
   <img src="docs/industries/nuclear_plant.png" alt="Nuclear Power Plant" height="90">
@@ -142,3 +148,7 @@ How the sprites should look is set out in [docs/sprite_design_spec.md](docs/spri
 - **Offsets:** the script rewrites the block between `BEGIN/END GENERATED SPRITESETS` in `energy_transition.nml`, so sprite sizes and offsets always match the art.
 - **Preview:** `python3 tools/preview.py preview.png [--scale 2]` assembles every industry the way the game lays it out, so you can check the art without starting OpenTTD. `--scale 2` shows it as the game does at 2x zoom, with the 1x sprites enlarged. `python3 tools/preview.py --each docs/industries --scale 2 --zoom 1` writes the per-industry images used in this README. The single-turbine banner image (`docs/industries/wind_farm_single.png`) is the `wind_farm/single` layout in `tools/preview.py`, generated the same way via `compose("wind_farm/single", 2, bg=(0, 0, 0, 0))`.
 - **Compare with vanilla:** `python3 tools/compare_vanilla.py [out.png] [--opengfx PATH]` draws our tiles next to similar vanilla OpenGFX buildings (cooling tower, power station, headframe, office block and more) on their own ground at 1x zoom. Use it to check lighting, scale and colour against the base game without starting it. It reads OpenGFX from your OpenTTD install, or from the path you give (`ogfx1_base.grf`, a folder containing it, or an OpenGFX `.tar`). OpenGFX is GPL-2.0, so the output image isn't committed; `vanilla_compare.png` is git-ignored.
+
+## Licence
+
+Released under the [GNU General Public License v2.0](LICENSE).
